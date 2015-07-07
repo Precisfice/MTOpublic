@@ -1,0 +1,25 @@
+Independent variable,Beta,Label
+INTERCEPT,-1.515,Intercept
+AGE,0.0263,AGE
+SEXF,0.1105,"SEX is female(0 = No, 1 = Female)"
+RHISP,-0.0819,Race is hispanic
+RBLK,-0.5597,Race is black
+ROTH,-0.9751,Race is other
+PT41,-0.5603,"as child,ever badly beaten up by parents/caregivers"
+PT42,0.0504,ever badly beaten up by spouse/romantic partner
+PT43,-0.3877,ever badly beaten up by anyone else
+PT44,0.1148,ever mugged/held up/threatened withweapon
+PT45,-0.1614,were you ever raped(penetration occurred)
+PT46,0.5993,were you ever sexually assaulted or molested
+PT48,0.078,someone very close to you ever die unexpectedly
+PT50,0.4687,anyone very close to have extremely traumatic experience
+PT50_1,0.4591,"you were a child, did you ever witness serious physical fights"
+PT51,0.1683,ever see someone badly injured/killed/dead body
+PT55,-0.2237,ever experience other very traumatic event
+PT209,0.3664,purposely stay away things remind event
+PT211,-0.0581,lose interest in things used to enjoy
+PT212,0.2516,feel emotionally distant/cut-off from people
+PT213,0.1159,trouble feeling love/happiness toward others
+PT214,0.64,feel no reason to plan for the future
+PT233,0.8654,trouble falling asleep during random event
+PT237,0.1323,more easily startled by ordinary noises
