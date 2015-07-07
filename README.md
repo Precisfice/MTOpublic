@@ -12,15 +12,23 @@ support an initial appreciation of the repository contents; brief descriptions
 of individual files (or suitable groups thereof) should be given in the commit
 message accompanying each initial commits.  Thus, a useful brief description of
 any committed file should be available through the command:
- 'git log -1 --pretty=%s <filename>'
 
---- Reproduction ---
+ `git log -1 --pretty=%s <filename>`
 
---- Directory Overview ---
-MTO_for_DNorris.zip:
-  This is the original package of SAS code plus documentation provided by
-  Nancy A. Sampson on behalf of Ronald Kessler, in a 11/13/2014 email to
-  David Norris.
+## Reproduction
 
-/doc
-  This directory contains various documents relating to the re-analysis.
+1. Step one
+2. Step two
+3. Step three
+
+## Directory Overview
+
+`MTO_for_DNorris.zip`:
+
+This is the original package of SAS code plus documentation provided by Nancy
+A. Sampson on behalf of Ronald Kessler, in a 11/13/2014 email to David Norris.
+
+`/doc`:
+
+This directory contains various documents relating to the re-analysis, mainly
+from external sources.
