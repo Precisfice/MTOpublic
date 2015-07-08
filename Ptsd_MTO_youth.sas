@@ -5,23 +5,30 @@
 * MTO Youth                                                            *
 * Calculate MTO Youth PTSD diagnosis using NCSR and MTO data           *
 ************************************************************************;
-rsubmit;
-options ps = 65 nocenter mprint macrogen;
+/*rsubmit;*/
+/*options ps = 65 nocenter mprint macrogen;*/
 
-libname mto '/data/kessler/mto/youth/data';
-libname LIBRARY '/data/kessler/mto/youth/data';
+/*Updating file location*/
+%LET folder =E:\NSCR Replication study\MTO Data and codes;
+libname mto "&folder";
+
+
+/*libname mto '/data/kessler/mto/youth/data';*/
+/*libname LIBRARY '/data/kessler/mto/youth/data';*/
 
 %macro a;
 
-proc sort data = mto.mental_health_yt_20101004 out = mental_health_yt_20101004;
+/*proc sort data = mto.mental_health_yt_20101004 out = mental_health_yt_20101004;*/
+proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
+
 by ppid;
 run;
 
 data mental_health_yt_20101004;
 set mental_health_yt_20101004;
 format _numeric_;
-%include '/~/Datafix2-mto-youth.sas';
-%include '~/agefix-youth.sas';
+%include "&folder/Datafix2-mto-youth.sas";
+%include "&folder/agefix-youth.sas";
 run;
 
 %macro mtoptsd(datain, pfx, dataout);
@@ -130,7 +137,7 @@ run;
 
 
 data coef;
-       infile '~/PTSD_slopes_from_NCSR.csv' delimiter = ',' MISSOVER DSD  lrecl=32767 firstobs=2 ;
+       infile "&folder/PTSD_slopes_from_NCSR.csv" delimiter = ',' MISSOVER DSD  lrecl=32767 firstobs=2 ;
           informat Independent_variable $9. ;
           informat Beta best32. ;
           informat Label $64. ;
@@ -215,4 +222,10 @@ run;
 %mend a;
 
 %a;
-endrsubmit;
+/*endrsubmit;*/
+
+
+
+
+
+
