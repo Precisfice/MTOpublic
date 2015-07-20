@@ -37,10 +37,37 @@ run;
 ods csv close; 
 
 
-/*Modify data to reproduce PTSD coefficients*/
-/*data combined_mod;*/
-/*Set combined;*/
 
+/*Modify data to reproduce PTSD coefficients*/
+data combined_mod;
+Set combined;
+
+	/*Race is hispanic*/
+If RANCEST in(7, 8) then hispanic = 1; /*(7) MEXICAN, (8) ALL OTHER HISPANIC*/
+	                Else hispanic = 0;
+	/*Race is black*/
+If RANCEST in(9, 10) then black = 1; /*(9) AFRO-CARIBBEAN, (10) AFRICAN AMERICAN*/
+					 Else black = 0;
+	/*Race is other*/
+If RANCEST in(4, 11, 12) then other = 1; /*(4) ALL OTHER ASIAN, (11) NON-LATINO WHITES, (12) ALL OTHER*/
+                         Else other = 0;
+run;
+
+
+	/*Multiple imputation (n-impute = 5)*/
+	/* EM algorithm to find maximum */
+	/*likelihood estimates for a multivariate normal distribution*/
+
+proc mi data=combined_mod out=totali nimpute=5;
+class sex HISPANIC BLACK OTHER PT41 PT42 PT43 PT44
+PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 
+PT211 PT212 PT213 PT214 PT233
+PT237;
+var Age sex HISPANIC BLACK OTHER PT41 PT42 PT43 PT44
+PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+PT209 PT211 PT212 PT213 PT214 PT233
+PT237;  FCS;
+run;
 
 
 
@@ -50,16 +77,16 @@ ods csv close;
 	/*D_PTS12 (DSM-IV Posttraumatic Stress Disorder (12Mo))*/
 
 
-ods pdf file = "&folder\Gen1 Logistic.pdf";
-Proc logistic data = combined;
-class sex RANCEST PT41 PT42 PT43 PT44
+ods pdf file = "&folder\Gen1 Logistic MI.pdf";
+Proc logistic data = totali;
+class sex HISPANIC BLACK OTHER PT41 PT42 PT43 PT44
 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 
 PT211 PT212 PT213 PT214 PT233
 PT237
 ;
 
 model D_PTS12 = 
-Age sex RANCEST PT41 PT42 PT43 PT44
+Age sex HISPANIC BLACK OTHER PT41 PT42 PT43 PT44
 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
 PT209 PT211 PT212 PT213 PT214 PT233
 PT237
@@ -69,6 +96,3 @@ ods pdf close;
 
 
 
-proc freq data = combined;
-tables D_PTS12;
-run;
