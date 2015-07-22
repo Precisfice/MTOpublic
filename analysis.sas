@@ -1,3 +1,5 @@
+ options MEMSIZE = 4G ;run;
+
 %LET folder = E:\NSCR Replication study;
 Libname NCSR "&folder";
 /*First import transport files*/
@@ -49,13 +51,14 @@ If RANCEST in(7, 8) then hispanic = 1; /*(7) MEXICAN, (8) ALL OTHER HISPANIC*/
 If RANCEST in(9, 10) then black = 1; /*(9) AFRO-CARIBBEAN, (10) AFRICAN AMERICAN*/
 					 Else black = 0;
 	/*Race is other*/
-If RANCEST in(4, 11, 12) then other = 1; /*(4) ALL OTHER ASIAN, (11) NON-LATINO WHITES, (12) ALL OTHER*/
-                         Else other = 0;
+If RANCEST in(4, 12) then other = 1; /*(4) ALL OTHER ASIAN, (12) ALL OTHER*/
+                     Else other = 0;
+
 run;
 
 
 	/*Multiple imputation (n-impute = 5)*/
-	/* EM algorithm to find maximum */
+	/*EM algorithm to find maximum */
 	/*likelihood estimates for a multivariate normal distribution*/
 
 proc mi data=combined_mod out=totali nimpute=5;
