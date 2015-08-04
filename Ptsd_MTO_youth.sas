@@ -176,7 +176,9 @@ pred_prob = exp(&formula)/(1+exp(&formula));
 
 run;
 
-
+****
+* TODO 1: Add 'ptsd_random' and 'pred_prob' vars to the 'keep' list below
+****;
 data fnlpred_ptsd_youth(keep = ppid f_mh_pts_evr_yt f_mh_pts_aoo_yt f_mh_pts_rec_yt f_wt_totsvy);
 set pred_ptsd_youth;
 /* Calculate lifetime PTSD by comparing random # to predicted probability */
@@ -218,6 +220,26 @@ proc freq data = fnlpred_ptsd_youth;
 title 'Youth PTSD, new diagnosis lifetime, unweighted';
 tables f_mh_pts_evr_yt  / list missing;
 run;
+
+****
+* TODO 2: Uncomment the code below, and debug as necessary
+****;
+  /*
+  data fnlpred_ptsd_youth(keep = ppid mto_ptsd_sample pred_prob ptsd_random f_mh_pts_evr_yt );
+    set inputfor2x2;
+  run;
+  
+  proc export data=inputfor2x2
+    outfile='&folder\whereoutputgoes\inputfor2x2.txt'
+    dbms=tab;
+  run;
+
+  */
+  
+****
+* TODO 3: Inspect the txt file to ensure it poses no danger of subject identification,
+*         and check it in.
+****
 
 %mend a;
 
