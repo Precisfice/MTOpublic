@@ -29,18 +29,12 @@ any committed file should be available through the command:
 This is the original package of SAS code plus documentation provided by Nancy
 A. Sampson on behalf of Ronald Kessler, in a 11/13/2014 email to David Norris.
 
-`doc/`:
+`doc/`: Contains various documents relating to the re-analysis, mainly from external
+sources.
 
-This directory contains various documents relating to the re-analysis, mainly
-from external sources.
+`img/`: Contains images for inline use on the project wiki.
 
-`img/`:
-
-This directory contains images for inline use on the project wiki.
-
-`refs/`:
-
-This directory contains relevant literature cited on the project wiki.
+`refs/`: Contains relevant literature cited on the project wiki.
 
 #### SAS Scripts and Outputs
 
@@ -55,9 +49,9 @@ PTSD imputation model employed in [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA)
 [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA).
 
 `ptsd_imput_repro.sas`: Reproduces the original PTSD imputation itself; one important
-output is a table of (PPID, log-odds, rand01, imputedPTSD[Y/N]) that will be subjected to
-further analysis by David Norris (using R), with the intent to characterize the predictive
-performance of the imputation model.
+output is a table of (`PPID`, `log_odds`, `rand01`, `imputed_PTSD[y/n]`) that will be
+subjected to further analysis by David Norris (using R), with the intent to characterize
+the predictive performance of the imputation model.
 
 `voucher_ptsd_effects_repro.sas`: Reproduces the effects and confidence intervals reported
 in Table 5 of [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA).
