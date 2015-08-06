@@ -29,7 +29,31 @@ any committed file should be available through the command:
 This is the original package of SAS code plus documentation provided by Nancy
 A. Sampson on behalf of Ronald Kessler, in a 11/13/2014 email to David Norris.
 
-`/doc`:
+`doc/`:
 
 This directory contains various documents relating to the re-analysis, mainly
 from external sources.
+
+`img/`:
+
+This directory contains images for inline use on the project wiki.
+
+`refs/`:
+
+This directory contains relevant literature cited on the project wiki.
+
+#### SAS Scripts
+
+`reanalysis.sas`: Sitting at the top level of our hierarchical script cascade; this script
+invokes the 2nd-tier scripts in a 'Makefile'-like manner.
+
+`ptsd_imput_coefs.sas`: Reproduces the NCSR logistic regression analysis that yields the
+PTSD imputation model employed in [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA).
+
+`form_cohort.sas`: Reproduces the cohort described in the Study Flow diagram of
+[Kessler et al. 2014 JAMA](#Kessler-2014-JAMA).
+
+`ptsd_imput_repro.sas`: Reproduces the original PTSD imputation itself; one of the outputs
+is a table of (PPID, log-odds, rand01, imputedPTSD[Y/N]) that will be subjected to further
+analysis by David Norris, using R.
+
