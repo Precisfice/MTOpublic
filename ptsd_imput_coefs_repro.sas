@@ -7,7 +7,7 @@
 	20240-0005-Supplemental_syntax-REST.sas
 	PTSD_slopes_from_NCSR.csv
 	*/
-%Include "&folder\prep_NCSR_data.sas"
+%Include "&folder\prep_NCSR_data.sas";
 
 /*Logistic regression*/
 
