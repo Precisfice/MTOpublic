@@ -15,7 +15,7 @@
 	/*D_PTS12 (DSM-IV Posttraumatic Stress Disorder (12Mo))*/
 
 	/*For stand-alone full pdf & to output estimated probabilities*/
-ods pdf file = "&folder\Gen1 Logistic MI &sysdate..pdf";
+ods pdf file = "&folder\Logistic_MI.pdf";
 Proc logistic data = NCSR.totali multipass;
 class SEXF (ref="1") RHISP RBLK ROTH PT41 PT42 PT43 PT44
 	PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 
