@@ -1,17 +1,16 @@
-
-Libname NCSR "&folder";
+Libname NCSR "&ncsr";
 /*First import transport files*/
 
 		/*WORK.DA20240P2 contains the unrestricted NCSR data, */
-proc cimport infile="&folder\20240-0002-Data.stc" lib=WORK; run;
+proc cimport infile="&ncsr\20240-0002-Data.stc" lib=WORK; run;
 	/*Additional formatting code provided by NCSR*/
-%Include "&folder\20240-0002-Supplemental_syntax.sas";
+%Include "&ncsr\20240-0002-Supplemental_syntax.sas";
 	/*Takes Da20240p2 --> generates formatted S20240p2*/
 
 		/*WORK.DA20240P5 contains the restricted NCSR data.*/
-proc cimport infile="&folder\20240-0005-Data-REST.stc" lib=WORK; run;
+proc cimport infile="&ncsr\20240-0005-Data-REST.stc" lib=WORK; run;
 	/*Additional formatting code provided by NCSR*/
-%include "&folder\20240-0005-Supplemental_syntax-REST.sas";
+%include "&ncsr\20240-0005-Supplemental_syntax-REST.sas";
 	/*Takes da20240p5 --> generates formatted da20240p5_format*/
 
 	/*Merge by CPES Case Id*/
@@ -30,7 +29,7 @@ by CPESCASE;
 run; 
 
 	/*Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data*/
-		ods pdf file = "&folder\contents NCSR &sysdate..pdf";
+		ods pdf file = "&ncsr\contents NCSR &sysdate..pdf";
 		proc contents data = combined;
 		run;
 		ods pdf close;
