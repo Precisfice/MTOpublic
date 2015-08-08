@@ -9,4 +9,4 @@
 	20240-0005-Supplemental_syntax-REST.sas
 	PTSD_slopes_from_NCSR.csv
 	*/
-
+LIBNAME NCSR "&ncsr";

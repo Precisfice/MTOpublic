@@ -1,4 +1,3 @@
-Libname NCSR "&ncsr";
 /*First import transport files*/
 
 		/*WORK.DA20240P2 contains the unrestricted NCSR data, */
