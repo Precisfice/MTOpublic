@@ -36,6 +36,10 @@ sources.
 
 `refs/`: Contains relevant literature cited on the project wiki.
 
+`scripts/`: Contains SAS scripts developed for the reanalysis.
+
+`outputs/`: Contains strictly non-identifiable reanalysis output files.
+
 #### SAS Scripts and Outputs
 
 `reanalysis.sas`: Sitting at the top level of our hierarchical script cascade; this script
