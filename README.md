@@ -18,9 +18,9 @@ any committed file should be available through the command:
 
 ## Status of Reproduction &amp; Reanalysis
 
-- [ ] Obtain NCSR and MTO data
-- [ ] Reproduce PTSD imputation of N=328 cases
-- [ ] Reproduce analysis cohort counts: 1407 boys, 1465 girls
+- [x] Obtain NCSR and MTO data
+- [x] Reproduce PTSD imputation of N=328 cases
+- [x] Reproduce analysis cohort counts: 1407 boys, 1465 girls
 - [ ] Obtain original SAS code for estimating PTSD imputation model (on NCSR)
 - [ ] Reproduce logistic regression coefficients of PTSD imputation model
 - [ ] Obtain original SAS code for voucher effects on PTSD
