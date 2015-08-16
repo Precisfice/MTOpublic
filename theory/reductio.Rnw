@@ -248,6 +248,52 @@ $i$ who do not meet criteria for PTSD.
 
 \section{Simulation-based examination of effect estimates}
 
+To estimate the voucher effect in our simulated MTO data set, we require a treatment variable $V$.
+We simulate a binary treatment\footnote{The housing voucher treatment in MTO was actually more
+  complex, involving 2 distinct types of housing voucher.  As with the rest of our developments
+  here, we abstract away from such details.} consistent with a `null hypothesis' of {\it no effect}:
+<<Effects, results='asis'>>=
+mto$V <- rbinom(N.mto, 1, p=0.5)
+dd <- datadist(mto)
+fit <- lrm(Y.imp ~ V + X, data=mto)
+latex(summary(fit), file='', label="tbl:effects", where="htbp")
+@ 
+
+The first point we would like to make is that the standard errors reported in connection with this
+effect estimate merely describe the {\it noise} introduced by the RNG required for the imputation.
+That is, these standard errors (and the associated confidence intervals) are {\it purely artifactual}.
+To make this demonstration, we employ a loop that reifies the frequentist conceit of `multiple
+parallel universes' in which different random seeds are chosen for the imputation:
+<<InnerLoop>>=
+NU <- 500 # number of frequentist 'Universes' to simulate
+beta <- numeric(NU) # vector to hold NU effect estimates ..
+serr <- numeric(NU) # ... and standard errors
+for (U in 1:NU) { # 'U' for 'Universe'
+    # It is of course unnecessary to set the RNG seed explicitly within
+    # this kind of loop; we do this solely as an aid to the exposition.
+    set.seed(U)
+    # Re-impute the Y.imp values (note: the estimated P.hat remain fixed
+    # within this loop).
+    mto$Y.imp <- runif(N.mto) < mto$P.hat
+    # Estimate the effects model
+    dd <- datadist(mto)
+    fit <- lrm(Y.imp ~ V + X, data=mto)
+    # Extract the treatment effect coefficient and its standard error
+    beta[U] <- fit$coefficients['V']
+    serr[U] <- sqrt(fit$var['V','V'])
+}
+@ 
+<<ArtifactualStdErrors, fig.cap=paste("The distribution of",NU,"voucher effect estimates with different random seeds used for PTSD diagnosis imputation, compared with a normal density with standard deviation equal to the average standard error across these fits.  The close alignment of these two densities demonstrates that the standard errors reported in these procedures describes {\\it only} the noise introduced by the random number generation employed during the outcomes imputation.  That is, the reported standard errors of the effects estimates derived by the outcomes imputation procedure of Kessler et al are {\\it strictly artifactual}.")>>=
+# Now demonstrate that the estimated betas have nearly the normal distribution
+# implied by the reported standard errors:
+estimates <- data.frame(series="effect estimate", Beta=beta)
+normality <- data.frame(series="asymptotic theory",
+                        Beta=rnorm(50000, mean=mean(beta), sd=serr))
+demo <- rbind(estimates, normality)
+demo$series <- as.factor(demo$series)
+densityplot(~Beta, groups=series, data=demo, rug=FALSE, auto.key=TRUE, plot.points=FALSE)
+@ 
+
 \clearpage
 \appendix
 \section{Imputation model employed by Kessler et al}\label{sec:coefficients}
