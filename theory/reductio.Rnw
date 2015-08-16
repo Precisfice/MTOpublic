@@ -181,7 +181,7 @@ manifested in: failing to account for model selection and overfitting in step (A
 pseudorandom noise in step (D); presenting the CIs from the regression as a full account of the
 uncertainty in the effects estimates---i.e., step (G).
 
-\section{Simulations}
+\section{Simulation-based examination of imputation errors}
 
 We simulate the above model, as follows:
 
@@ -214,7 +214,7 @@ The first question one might ask is, how accurate was the single imputation?
 <<Imputation2x2, results='asis'>>=
 s <- summary(cbind(`Y.imp=Yes`=Y.imp, `Y.imp=No`=!Y.imp) ~ Y.actual, method='response', data=mto)
 attr(s,'ylabel') <- "Accuracy of imputation"
-latex(s, title="Accuracy of imputation", file=''
+latex(s, file=''
       , label="tbl:2x2"
       , where='htbp')
 @ 
@@ -222,11 +222,31 @@ Thus, we see that 3 out of every 4 true diagnoses are missed by the imputation. 
 of tabulation would be impossible in a forensic reproduction of the analysis of Kessler et al, since
 the $Y.actual$ is unobserved.  However, if the estimated probabilities of Kessler et al are taken at
 face value, then a {\it reductio ad absurdum} argument becomes readily available, such that the
-{\it expectation} of the false-negative rate is at least recoverable:
-<<reductio-ad-absurdum>>=
-# TODO: Compute the expected false-negative rate directly
-#       from the estimated probabilities mto$P.hat
+{\it expectation} of the error rate among imputed `yes' diagnoses is at least recoverable:
+<<reductio-ad-absurdum, echo=TRUE>>=
+# Assuming the estimated probabilities 'P.hat' are correct,
+# the expected number of true 'yes' diagnoses is given
+# straightforwardly by this calculation:
+expected.N.really.yes <- with(mto, sum(P.hat))
+# Assuming that the pseudorandom number generators used are
+# reasonably good, our expectation of the number of imputed
+# 'yes' diagnoses is the same:
+expected.N.imputed.yes <- expected.N.really.yes
+# The number of imputed 'yes' diagnoses that may be expected
+# to be incorrect is:
+expected.N.incorrect.yes <- with(mto, sum(P.hat * (1 - P.hat)))
+# The *fraction* of imputed 'yes' diagnoses expected to be wrong is:
+expected.N.incorrect.yes / expected.N.imputed.yes
+# This result can be computed more directly via:
+with(mto, mean((1-P.hat)*P.hat) / mean(P.hat))
 @ 
+
+The close agreement with the corresponding figure from Table~\ref{tbl:2x2} should be noted.  A
+similar calculation is immediately available from a reproduction of the Kessler et al analysis,
+provided that the probabilities corresponding to $\hat{P_i}$ are set to zero for those individuals
+$i$ who do not meet criteria for PTSD.
+
+\section{Simulation-based examination of effect estimates}
 
 \clearpage
 \appendix
