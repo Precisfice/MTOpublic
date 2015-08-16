@@ -1,0 +1,237 @@
+\documentclass{article}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+\usepackage{pdflscape}
+\usepackage{setspace}
+\usepackage{relsize}
+\usepackage{keyval}
+\usepackage{flafter}
+\usepackage{pdflscape}
+\usepackage{longtable}
+\usepackage{ctable}
+\usepackage{amsmath}
+\usepackage{enumerate}
+
+\begin{document}
+
+<<setup, echo=FALSE, include=FALSE, cache=FALSE>>=
+.First <- function() {
+    library(knitr)
+    library(rjags)
+    library(xtable)
+    library(rms)
+    library(ggplot2)
+}
+.First()
+## set global chunk options
+options(replace.assign=TRUE,width=90)
+options(datadist="dd")
+options(contrasts=c("contr.treatment","contr.treatment"))
+opts_chunk$set(include=TRUE, echo=TRUE, tidy=TRUE, tidy.opts=list(width.cutoff=70), cache=TRUE)
+mtime <- function(...){ # suggested by Jim Hester
+  lapply(list(...), function(x) file.info(Sys.glob(x))$mtime)
+}
+@
+
+\title{Outline of a Simulation Approach to a {\it reductio ad absurdum} for an Outcomes Imputation Procedure of Kessler et al}
+\author{
+  David C. Norris, MD\\
+  David Norris Consulting, LLC\\
+  {\tt david@dnc-llc.com}
+}
+
+% ------------------------------
+% David C. Norris, MD               
+% David Norris Consulting, LLC      
+% david@dnc-llc.com
+% ------------------------------
+
+\maketitle
+\date{}
+
+\newcommand{\NCSR}{National Comorbidity Survey Replication}
+\newcommand{\MTO}{Focal Segmental Glomerulosclerosis}
+\newcommand{\JAMA}{{\it JAMA}}
+
+\begin{abstract}
+  A simulation approach is motivated and developed, by which the outcomes imputation procedure of
+  Kessler et al ({\it JAMA}. 2014;311(9):937-947) may be criticized.  To provide a concrete basis
+  for understanding this otherwise opaque imputation procedure, we first develop a causal model that
+  appears to be at least consistent with the procedure, if not deducible from it.  This causal model
+  is then employed as a data-generating process (DGP) for simulating the underlying data, and thence
+  the Kessler et al analysis itself.  With the published analysis itself being simulable, we are
+  able to demonstrate a pattern of forensic re-analysis that can be used to abstract several layers
+  of arbitrariness from the published effect estimates in the Kessler et al paper.
+\end{abstract}
+
+\section{Introduction}
+
+In a March 2014 publication in \JAMA, Kessler et al reported that, at follow-up 10 to 15 years
+later, boys from households receiving housing vouchers in the Moving to Opportunity Demonstration
+experienced 12-month prevalence of posttraumatic stress disorder (PTSD) at several times the rate of
+boys from control households.  Because the DSM-IV PTSD criteria were not fully operationalized in
+the MTO Final Youth Survey questionnaire, the PTSD `outcomes' analyzed in this paper were in fact
+{\it imputed} using a logistic regression model estimated against the \NCSR (NCSR), which
+operationalized these criteria more completely.\footnote{Although the imputation of partially
+  missing {\it covariates} was described in some detail in the \JAMA article itself, this {\it
+    outcomes imputation} procedure was not.  It came to this author's attention through a footnote
+  on page 38 of \href{http://www.nber.org/mtopublic/instruments/final_mental_health.pdf}{this
+    document}, and confirmed through personal communication with Dr. Kessler.}
+
+There are many levels on which this imputation procedure can be criticized:
+\begin{enumerate}
+\item The opaqueness of this {\it outcomes imputation} to a reader of the research report is
+  problematic, especially since the report described in some detail the comparatively workaday
+  matter of imputing missing {\it covariates}.
+\item The choice of model form for the logistic regression appears to be of the desultory kind that
+  would be appropriate for imputing partially missing covariates, not a completely missing outcome.
+  The original analysis did not address how this imputation model was selected, whether the
+  possibility of interaction terms or nonlinearity were explored, nor address the question of
+  overfitting through bootstrap validation.
+\item The NCSR population on which the imputation model was estimated comprises adults in the
+  general population (TODO: verify this!), and generalizability to the MTO adolescent population
+  would seem questionable.
+\item The decision to analyze a {\it singly} imputed PTSD outcome introduces a superfluous,
+  information-destroying and noise-generating transformation of the predictive model's real-valued
+  outputs--logit probabilities on the continuous interval $(-\infty,\infty)$--to pseudorandom
+  `outcomes' in the set ${no,yes}$.  In order to defend the conclusions about these imputed outcomes
+  as conclusions about {\it genuine PTSD}, one would have to defend the outputs of the predictive
+  model as {\it genuine probabilities}.  But if these were real probabilities, then they could be
+  analyzed directly without interposing a noisy and information-destroying pseudorandom number
+  generation (RNG) step.  The reported confidence intervals around the reported effects estimates
+  are in fact a manifestation strictly of this RNG step, acting therefore almost like a decoy that
+  distracts attention from the the substantive sources of uncertainty in the reported findings,
+  which remain therefore as opaque as the fact that a completely missing outcome was imputed.
+\end{enumerate}
+
+The core challenge addressed in this paper is to show how a focused criticism {\it of a strictly
+  statistical kind} may be developed around points 4 and 2 above, avoiding the admixture of the
+questions of scientific judgement implicit in points 1 and 3.  To accomplish this, we develop a
+causal model under which the imputation procedure might be thought {\it scientifically} appropriate.
+This model then `motivates' the imputation procedure, and also provides a data-generating process
+(DGP) suitable for simulation experiments that address the statistical properties of the procedure
+in isolation from the larger scientific questions.
+
+Of course, having thus clarified what was actually done in the original analysis, and perhaps
+showing what the motivation for it might have been, a productive conversation about the larger
+scientific questions can ensue.
+
+\section{A model to motivate the imputation procedure}
+
+Let us suppose that there are two studies, called `MTO' and `NCSR', that they describe two largely
+identical populations, and that they administer questionnaires intended to diagnose a disease $Y$.
+The NCSR study administers a more comprehensive questionnaire that includes two sets of questions,
+$S_1$ and $S_2$, whereas for reasons of cost and burden on participants, the MTO study administers
+only the $S_1$ questions.  Suppose that the questions $S_1 \cup S_2$ suffice to deliver a highly
+accurate diagnosis $Y$ in the NCSR study--perhaps because $Y$ is {\it defined} as a deterministic
+function of the responses to $S_1 \cup S_2$.  Whereas NCSR is an observational study, MTO is an
+social experiment in which the treatment is a voucher, $V$.  It is desired to know how $V$ affected
+$Y$ in the MTO study, but because the $S_2$ questions were not asked, the $Y$ outcome is effectively
+missing.  Might there be a way to use the NCSR data to impute this missing outcome?
+
+Let us suppose that, in addition to the variables mentioned above, the MTO and NCSR studies also
+share observations on baseline characteristics $X$ of the study participants.  Then, from the
+perspective of the MTO investigators, the relevant variables might be thought to be connected
+causally as in Figure~\ref{fig:DAG}.
+
+\begin{figure}[!h] \label{fig:DAG}
+  \includegraphics{dag.pdf}
+  \caption{A view of the inferential problem for the MTO investigator.  The outcome of interest is
+    determined by ${S_1, S_2}$, but $S_2$ is unmeasured.}
+\end{figure}
+
+\clearpage
+
+Under these circumstances, it might be hoped that the deterministic relationship $Y = f(S_1, S_2)$
+could be replaced in the MTO study by a {\it statistical} relationship extracted from the NCSR study
+by the regression of $Y$ on $S_1$ in the latter.  Given the availability of additional measures $X$
+shared between the two studies, it might further be supposed that these should be included on the
+right-hand side of the regression.  Thus, the following procedure might suggest itself:
+%%[{I}1]
+\begin{enumerate}[(A)]
+  \item Estimate a logistic regression with the known NCSR $Y$ on the left-hand side, and regressors
+    ${S_1, X}$ on the right-hand side
+  \item Assume that the statistical relationship hereby discovered in NCSR will apply also in MTO
+  \item Use the model to estimate the probability $\hat{P_i}$ of $Y_i=1$ for each MTO study
+    participant $i$
+  \item In order to avoid modeling probabilities directly, use the estimated $\hat{P_i}$ to generate
+    a pseudorandom $\hat{Y_i}$ for each MTO participant
+  \item Regress $\hat{Y}$ on $V$ and other baseline characteristics, as if $\hat{Y}$ were a measured
+    outcome
+  \item Identify the estimated $V$ coefficient with $V$'s causal effect on the real, but unknown $Y$
+  \item Present the confidence interval (CI) around this logistic regression coefficient as a full
+    measure of the uncertainty about the inferential outcome of this procedure
+\end{enumerate}
+  
+Expressed in this way, this procedure appears vulnerable on numerous counts.  What we wish to
+accomplish here, however, is to single out the {\it purely statistical} flaws in the procedure, as
+manifested in: failing to account for model selection and overfitting in step (A); introducing
+pseudorandom noise in step (D); presenting the CIs from the regression as a full account of the
+uncertainty in the effects estimates---i.e., step (G).
+
+\section{Simulations}
+
+We simulate the above model, as follows:
+
+<<Sim>>=
+# Simulate 1400 MTO boys and 5000 NCSR males
+N.mto <- 1400; N.ncsr <- 5000; N <- N.mto + N.ncsr
+# Suppose S1, S2 and X are independent standard normal variates
+df <- data.frame(study = c(rep("NCSR",5000), rep("MTO",1400)),
+                 S1 = rnorm(N),
+                 S2 = rnorm(N),
+                 X = rnorm(N)
+                 )
+# Generate Y deterministically as a function of S1 and S2,
+# namely as the upper 6% tail of (S1+S2)
+df <- upData(df, Y = S1 + S2 > qnorm(0.94, sd=sqrt(2)))
+# Split the joint NCSR+MTO data into separate data sets,
+# dropping the now-unnecessary 'study' variable.
+ncsr <- subset(df, study=="NCSR", select = -study)
+mto <- subset(df, study=="MTO", select = -study)
+# Drop the unmeasured S2 data from 'mto' and rename Y
+mto <- upData(mto, drop="S2", rename=list(Y="Y.actual"))
+# Estimate an 'outcome imputation model' in the NCSR data
+dd <- datadist(ncsr)
+oim <- lrm(Y ~ S1 + X, data=ncsr)
+# Use the data to estimate P.hat in MTO, then singly impute Y.imp
+mto$P.hat <- predict(oim, newdata=mto, type="fitted.ind")
+mto$Y.imp <- runif(N.mto) < mto$P.hat
+@ 
+The first question one might ask is, how accurate was the single imputation?
+<<Imputation2x2, results='asis'>>=
+s <- summary(cbind(`Y.imp=Yes`=Y.imp, `Y.imp=No`=!Y.imp) ~ Y.actual, method='response', data=mto)
+attr(s,'ylabel') <- "Accuracy of imputation"
+latex(s, title="Accuracy of imputation", file=''
+      , label="tbl:2x2"
+      , where='htbp')
+@ 
+Thus, we see that 3 out of every 4 true diagnoses are missed by the imputation. Clearly, this kind
+of tabulation would be impossible in a forensic reproduction of the analysis of Kessler et al, since
+the $Y.actual$ is unobserved.  However, if the estimated probabilities of Kessler et al are taken at
+face value, then a {\it reductio ad absurdum} argument becomes readily available, such that the
+{\it expectation} of the false-negative rate is at least recoverable:
+<<reductio-ad-absurdum>>=
+# TODO: Compute the expected false-negative rate directly
+#       from the estimated probabilities mto$P.hat
+@ 
+
+\clearpage
+\appendix
+\section{Imputation model employed by Kessler et al}\label{sec:coefficients}
+
+TODO: Format the imputation model, with coefficients as provided by Ronald Kessler.
+
+\end{document}

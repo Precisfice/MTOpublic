@@ -1,0 +1,11 @@
+digraph g {
+  node [fontname="Helvetica"]
+  S1 [label=<S<SUB>1</SUB>>]
+  S2 [label=<S<SUB>2</SUB>> style=dotted]
+  V -> S1 
+  V -> S2 [style=dotted] 
+  X -> S1 
+  X -> S2 [style=dotted]
+  S1 -> Y
+  S2 -> Y [style=dotted]
+}
