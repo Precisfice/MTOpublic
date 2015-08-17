@@ -21,9 +21,9 @@ any committed file should be available through the command:
 - [x] Obtain NCSR and MTO data
 - [x] Reproduce PTSD imputation of N=328 cases
 - [x] Reproduce analysis cohort counts: 1407 boys, 1465 girls
-- [ ] Obtain original SAS code for estimating PTSD imputation model (on NCSR)
+- [x] Obtain original SAS code for estimating PTSD imputation model (on NCSR)
 - [ ] Reproduce logistic regression coefficients of PTSD imputation model
-- [ ] Obtain original SAS code for voucher effects on PTSD
+- [x] Obtain original SAS code for voucher effects on PTSD
 - [ ] Reproduce PTSD effect estimates of [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA) Table 5
 - [ ] Implement `inner_loop.sas` to abstract away arbitrariness of RNG seed
 - [ ] Compare CIs from `inner_loop.sas` against the CIs reported in Table 5; these should be close
