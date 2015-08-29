@@ -187,7 +187,7 @@ We simulate the above model, as follows:
 
 <<Sim, cache=FALSE>>=
 # Simulate 1400 MTO boys and 5000 NCSR males
-N.mto <- 1400; N.ncsr <- 5000; N <- N.mto + N.ncsr
+N.mto <- 140; N.ncsr <- 500; N <- N.mto + N.ncsr
 # Suppose S1, S2 and X are independent standard normal variates
 df <- data.frame(study = c(rep("NCSR",5000), rep("MTO",1400)),
                  S1 = rnorm(N),
