@@ -1,20 +1,31 @@
 /* Top-level script for reanalysis of reported PTSD findings of Kessler et al [1] */
 
-%include folder_defs.sas; /* Misc. definitions likely specific to your directory setup */
+%LET scripts = /folders/myfolders/scripts;
 
-%include prep_NCSR_data.sas; /* Merge public & restricted NCSR data; impute missing values */
+* Load misc. definitions specific to your directory setup ;
+%include "&scripts./folder_defs.sas";
 
-*%include ptsd_imput_coefs_repro.sas; /* Reproduce the coefficients used in [1] to impute PTSD outcome */
+* Merge public + restricted NCSR data, impute missing values ;
+%include "&scripts./prep_NCSR_data.sas";
 
-/* THE FOLLOWING LINES, NOT YET IMPLEMENTED, ARE COMMENTED OUT */
+/***** THE FOLLOWING LINES, NOT YET IMPLEMENTED, ARE COMMENTED OUT
 
-*%include cohort_repro.sas; /* Reproduce the cohort analyzed in [1] */
+* Reproduce the coefficients used in [1] to impute PTSD outcome ;
+%include "&scripts./ptsd_imput_coefs_repro.sas";
 
-*%include voucher_ptsd_effects_repro.sas; /* Reproduce the effects estimates reported in [1] */
+* Reproduce the cohort analyzed in [1] ;
+%include "&scripts./cohort_repro.sas";
 
-*%include inner_loop.sas; /* Abstract away arbitrariness due to random-seed choice for PTSD imputation */
+* Reproduce the effects estimates reported in [1] ;
+%include "&scripts./voucher_ptsd_effects_repro.sas";
 
-*%include outer_loop.sas; /* Abstract away arbitrariness due to overfitting of PTSD imputation model */
+* Abstract away arbitrariness due to random-seed choice for PTSD imputation ;
+%include "&scripts./inner_loop.sas";
+
+* Abstract away arbitrariness due to overfitting of PTSD imputation model ;
+%include "&scripts./outer_loop.sas";
+
+**********/
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions

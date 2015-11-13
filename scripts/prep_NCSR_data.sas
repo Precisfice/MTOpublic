@@ -22,7 +22,7 @@ run;
 proc sort data = S20240P5;
 by CPESCASE;
 run; 
-data NCSR.full;
+data NCSR.ncsr;
 merge S20240P2 S20240P5;
 by CPESCASE;
 run; 
@@ -32,7 +32,7 @@ run;
 
 *Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data;
 ods pdf file = "&myfolders/outputs/contents_NCSR_&sysdate..pdf";
-proc contents data = NCSR.full;
+proc contents data = NCSR.ncsr;
 run;
 ods pdf close;
 

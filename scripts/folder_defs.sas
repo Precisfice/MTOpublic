@@ -1,7 +1,7 @@
 /* Set folder definitions local to this SAS workstation */
 
 %LET myfolders = /folders/myfolders;
-%LET ncsr = &myfolders/protected/ICPSR_20240/data;
+%LET ncsr = &myfolders./protected/ICPSR_20240/data;
 	/*Modify location to match home folder:
 	Needs: 
 	20240-0002-Data.stc
