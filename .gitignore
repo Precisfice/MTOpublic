@@ -1,6 +1,0 @@
-# Ignore emacs temp files
-*~
-# Mac-specific hidden Finder file
-.DS_Store
-# Ignore the FDR code, since p-values are the problem, not the solution
-Calc_FDR.sas
