@@ -1,3 +1,38 @@
+/*
+ * Here are a few notes entered on 11/12/15 by DCN:
+ * 1. The approach to this step may take the form
+ *    of a call to SUDAAN, either using PROC RLOGIST
+ *    (as in the 'Ptsd-mtoncsr-youth.sas' program
+ *    shared by Nancy Simpson) or more directly by
+ *    a script that invokes the command-line version
+ *    of SUDAAN.  For ease of reference, the original
+ *    code is as follows:
+ *
+ *    /* Predict NCSR PTSD using PTSD data */
+ *    proc rlogist data = ncsr_mto design = wr filetype = sas;
+ *    model dsm_pts = age sexf rhisp rblk roth PT41 PT42 PT43
+ *                    PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+ *                    PT209 PT211 PT212 PT213 PT214 PT233 PT237;
+ *    nest _one_;
+ *    weight finalp2wt;
+ *    subpopn ncsr_pts_sample = 1;
+ *    test waldchi;
+ *    idvar age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46
+ *          PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214
+ *          PT233 PT237 sampleid_num ppid_num f_svy_age_iw f_wt_totsvy 
+ *          mto_ptsd_sample mto_youth YCV13_PT62 YCV14_PT64 YCV14a
+ *          YCV14b_PT64a YCV14c YCV22_PT261;
+ *    output beta / filetype = sas filename = beta1 replace;
+ *    output idvar subpopn expected / filetype = sas filename = pred1 replace;
+ *    run;
+ *
+ *
+ * 2. The LHS variable used in the above program is 'dsm_pts',
+ *    which is LIFETIME PTSD -- not the 12-MONTH diagnosis.
+ *    The model is apparently used to predict lifetime PTSD,
+ *    and then 'pts_rec' ("recency") is calculated separately.
+ */
+
 /*Logistic regression*/
 
 	/*DSM_PTS (Lifetime)*/

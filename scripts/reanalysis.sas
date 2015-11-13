@@ -4,7 +4,7 @@
 
 %include prep_NCSR_data.sas; /* Merge public & restricted NCSR data; impute missing values */
 
-%include ptsd_imput_coefs_repro.sas; /* Reproduce the coefficients used in [1] to impute PTSD outcome */
+*%include ptsd_imput_coefs_repro.sas; /* Reproduce the coefficients used in [1] to impute PTSD outcome */
 
 /* THE FOLLOWING LINES, NOT YET IMPLEMENTED, ARE COMMENTED OUT */
 
