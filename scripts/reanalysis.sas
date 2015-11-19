@@ -8,6 +8,9 @@
 * Merge public + restricted NCSR data, impute missing values ;
 %include "&scripts./prep_NCSR_data.sas";
 
+* Export NCSR data + formats to XPORT files readable by SUDAAN ;
+%include "&scripts./xport-ncsr.sas";
+
 /***** THE FOLLOWING LINES, NOT YET IMPLEMENTED, ARE COMMENTED OUT
 
 * Reproduce the coefficients used in [1] to impute PTSD outcome ;
