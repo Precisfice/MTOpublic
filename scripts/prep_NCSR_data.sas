@@ -27,20 +27,13 @@ merge S20240P2 S20240P5;
 by CPESCASE;
 run; 
 
+/*
+ * TODO: Add FORMATs to these variables?
+ */
 
-* STEP 3: Run a PROC CONTENTS on the file ;
-
-*Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data;
-ods pdf file = "&myfolders/outputs/contents_NCSR_&sysdate..pdf";
-proc contents data = NCSR.ncsr;
-run;
-ods pdf close;
-
-/* ---
-
-* Encode race with dummy variables data to reproduce PTSD coefficients ;
-data combined_mod;
-Set combined;
+* STEP 3: Encode race, sex, PTSD as used in the imputation model of [1] ;
+data NCSR.ncsr;
+set NCSR.ncsr;
 
 * Race is hispanic ;
 If RANCEST in(7, 8) then RHISP = 1;
@@ -52,9 +45,23 @@ If RANCEST in(9, 10) then RBLK = 1; *(9) AFRO-CARIBBEAN, (10) AFRICAN AMERICAN ;
 If RANCEST in(4, 12) then ROTH = 1; *(4) ALL OTHER ASIAN, (12) ALL OTHER ;
                      Else ROTH = 0;
 	SEXF = sex;
-	drop sex;
+	*drop sex;
+
+* Encode a 0/1 version of DSM_PTS ;
+if DSM_PTS = 5 then PTSD_01 = 0; * (5)=NOT ENDORSED ;
+               else PTSD_01 = 1; * (1)=ENDORSED ;
+
 run;
 
+* STEP 4: Run a PROC CONTENTS on the file ;
+
+*Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data;
+ods pdf file = "&myfolders/outputs/contents_NCSR_&sysdate..pdf";
+proc contents data = NCSR.ncsr;
+run;
+ods pdf close;
+
+/* ---
 
 	* Multiple imputation (n-impute = 20) ;
 	* EM algorithm to find maximum ;
