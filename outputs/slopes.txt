@@ -1,0 +1,145 @@
+
+
+                                  S U D A A N
+            Software for the Statistical Analysis of Correlated Data
+          Copyright       Research Triangle Institute       June 2013
+                                 Release 11.0.1
+
+    /*                                                                       
+     *  Estimate the PTSD imputation model used in MTO research.             
+     *                                                                       
+     *  (This code is based on SAS-callable SUDAAN from the file             
+     *  'Ptsd-mtoncsr-youth.sas' provided by Ronald Kessler.)                
+     */                                                                      
+                                                                             
+    /* Predict NCSR PTSD using PTSD data */                                  
+
+************************************************************
+SUDAAN Release 11.0.1, Build 326
+Command Prompt, RHEL, 64 bit version
+Serial Number D0002286 for 1 user(s) is licensed to
+David Norris Consulting, LLC (David C. Norris).
+This license expires on March 25, 2016.
+************************************************************
+
+
+1   PROC LOGISTIC                                                            
+      DATA =                                                                  
+"/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/data/ncsr" 
+      FILETYPE = SASXPORT                                                    
+                                                                              
+LEVFILE="/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/da- 
+ta/ncsrlev"                                                                  
+      DESIGN = WR;                                                           
+                                                                             
+2   MODEL DSM_PTS = AGE SEXF RHISP RBLK ROTH PT41 PT42 PT43 PT44 PT45 PT46    
+PT48                                                                         
+      PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237;       
+                                                                             
+3   NEST _ONE_;                                                              
+                                                                             
+4   WEIGHT NCSRWTLG;                                                         
+                                                                             
+5   SUBPOPN PTS_SMPL = 1;                                                    
+                                                                             
+6   SETENV DECWIDTH=6 LABWIDTH=40 LINESIZE=70;                               
+                                                                             
+7   PRINT BETA SEBETA;                                                       
+                                                                              
+                                                                              
+DESIGN SUMMARY: Variances will be computed using the Taylor Linearization     
+Method, Assuming a With Replacement (WR) Design                              
+    Sample Weight: NCSRWTLG                                                  
+    Stratification Variables(s): _ONE_                                       
+    Primary Sampling Unit: Observation Number                                                                             
+                                                                              
+Opened SASXPORT data file                                                     
+/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/data/ncsr.x- 
+pt for reading.                                                              
+                                                                              
+Number of zero responses     :   152                                         
+Number of non-zero responses :   593                                         
+                                                                              
+Independence parameters have converged in 6 iterations.                      
+                                                                              
+Number of observations read       :   5692    Weighted count:     5692       
+Number of observations skipped    :   3590                                    
+(WEIGHT variable nonpositive)                                                
+Observations in subpopulation     :    745    Weighted count:      489       
+Observations used in the analysis :    745    Weighted count:      489       
+Denominator degrees of freedom    :   5691                                    
+                                                                             
+                                                                              
+Maximum number of estimable parameters for the model is 24                   
+                                                                              
+File                                                                          
+/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/data/ncsr.x- 
+pt contains 5692 Clusters                                                    
+ 745 clusters were used to fit the model                                     
+Maximum cluster size is   1 records                                          
+Minimum cluster size is   1 records                                           
+                                                                             
+                                                                              
+Sample and Population Counts for Response Variable DSM_PTS                    
+Based on observations used in the analysis                                    
+0:  Sample Count      152    Population Count       103                      
+1:  Sample Count      593    Population Count       386                      
+                                                                              
+R-Square for dependent variable DSM_PTS (Cox & Snell, 1989): 0.087696        
+                                                                              
+-2 * Normalized Log-Likelihood with Intercepts Only :   766.63               
+-2 * Normalized Log-Likelihood Full Model           :   698.25               
+Approximate Chi-Square (-2 * Log-L Ratio)           :    68.38               
+Degrees of Freedom                                  :       23               
+                                                                              
+Note: The approximate Chi-Square is not adjusted for clustering.             
+      Refer to hypothesis test table for adjusted test.                      
+                                                                      
+                                                                      
+                                                                      
+Date: 11-20-2015                SUDAAN                     Page:  1   
+Time: 17:39:50                                             Table: 1   
+                                                                      
+Variance Estimation Method: Taylor Series (WR)                        
+SE Method: Robust (Binder, 1983)                                      
+Working Correlations: Independent                                     
+Link Function: Logit                                                  
+Response variable DSM_PTS: DSM-IV Posttraumatic Stress Disorder (Li   
+For Subpopulation: PTS_SMPL = 1                                       
+by: Independent Variables and Effects.                                
+                                                                      
+------------------------------------------------------------------    
+Independent Variables and Effects          Beta                       
+                                           Coeff.          SE Beta    
+------------------------------------------------------------------    
+Intercept                                   -1.494339     0.771785    
+Age                                          0.025006     0.009031    
+SEXF                                         0.087745     0.297202    
+RHISP                                       -0.035864     0.418084    
+RBLK                                        -0.660398     0.292971    
+ROTH                                        -0.956254     0.529407    
+Ever badly beaten up by parents             -0.570581     0.368028    
+Ever beaten by spouse/partner                0.040065     0.286387    
+Ever beaten by anyone else                  -0.355509     0.300642    
+Ever mugged, held up, or threatened with     0.109505     0.266102    
+Ever raped                                  -0.121588     0.277731    
+Ever sexually assaulted other than rape      0.585348     0.256485    
+Someone very close ever die unexpectedly     0.073555     0.239391    
+Anyone close ever have traumatic experie     0.380942     0.293977    
+Ever witness serious physical fights at      0.432485     0.279622    
+Ever see someone badly injured or killed     0.200188     0.245519    
+Ever experience any other extremely trau    -0.245179     0.301671    
+Purposely avoid reminders of random even     0.369352     0.247305    
+Lost interest in things previously enjoy    -0.109041     0.260487    
+Felt emotionally distant from others aft     0.255824     0.280070    
+Trouble feeling normal feelings for othe     0.088902     0.270952    
+No future plan after random event            0.610215     0.242047    
+Trouble sleeping during most affected ti     0.907266     0.305502    
+Jumpy during most affected time after ra     0.088817     0.255719    
+------------------------------------------------------------------    
+                                                                              
+LOGISTIC used                                                                 
+  CPU time       : 0.0 seconds                                                
+  Elapsed time   : 0 seconds                                                  
+  Virtual memory : 2.89 MB                                                   
+
