@@ -18,3 +18,4 @@ proc logistic
   subpopn pts_smpl = 1;
   setenv decwidth=6 labwidth=40 linesize=70;
   print beta sebeta;
+  output covar / filename="covmat" filetype=ASCII REPLACE;
