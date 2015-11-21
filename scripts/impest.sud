@@ -1,0 +1,20 @@
+/*
+ *  Estimate the PTSD imputation model used in MTO research.
+ *
+ *  (This code is based on SAS-callable SUDAAN from the file
+ *  'Ptsd-mtoncsr-youth.sas' provided by Ronald Kessler.)
+ */
+
+/* Predict NCSR PTSD using PTSD data */
+proc logistic
+  data = "/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/data/ncsr"
+  filetype = SASXPORT
+  levfile="/home/david/SASUniversityEdition/myfolders/protected/ICPSR_20240/data/ncsrlev"
+  design = wr;
+  model dsm_pts = age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48
+                  PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237;
+  nest _one_;
+  weight ncsrwtlg;
+  subpopn pts_smpl = 1;
+  setenv decwidth=6 labwidth=40 linesize=70;
+  print beta sebeta;
