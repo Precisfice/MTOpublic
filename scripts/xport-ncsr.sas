@@ -2,10 +2,10 @@
 libname OUT XPORT "&ncsr./ncsr.xpt";
 * TODO: Ensure that only the needed variables are output ;
 data OUT.ncsr;
-  set NCSR.ncsr(keep=PTSD_01 age sexf rhisp rblk roth PT41 PT42 PT43
+  set NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
                      PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
                      PT209 PT211 PT212 PT213 PT214 PT233 PT237
-                     NCSRWTSH NCSRWTLG);
+                     NCSRWTSH NCSRWTLG PTS_SMPL);
 run;
 
 * Now also create the format catalog in XPORT format ;
