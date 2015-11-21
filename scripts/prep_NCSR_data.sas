@@ -1,6 +1,8 @@
 /*First import transport files*/
 
 * STEP 1: Generate formatted unrestricted and restricted data sets ;
+* We'll put formats into 'NCSR' library ;
+options fmtsearch = ( NCSR );
 
 * WORK.DA20240P2 contains the unrestricted NCSR data ;
 proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
@@ -45,15 +47,39 @@ If RANCEST in(9, 10) then RBLK = 1; *(9) AFRO-CARIBBEAN, (10) AFRICAN AMERICAN ;
 If RANCEST in(4, 12) then ROTH = 1; *(4) ALL OTHER ASIAN, (12) ALL OTHER ;
                      Else ROTH = 0;
 	SEXF = sex;
-	*drop sex;
+	
+* STEP 4: Var tweaks copied verbatim from 'Ptsd-mtoncsr-youth.sas'
 
-* Encode a 0/1 version of DSM_PTS ;
-if DSM_PTS = 5 then PTSD_01 = 0; * (5)=NOT ENDORSED ;
-               else PTSD_01 = 1; * (1)=ENDORSED ;
+/* Calculate PTSD diagnosis and sub-criteria variables */
+*%include '/home/jin/WMH/NSHS/REPLICATION/DIAGNOSIS/Ptsd.sas';
+%include "&myfolders./Ptsd.sas";
+
+/* Cases to use in NCSR have Worst Event A1,C1,D1 criteria or Random Event A1,C1,D1 criteria  */
+/* NB: The var name 'pts_smpl' is used instead of 'ncsr_pts_sample'
+       to maintain v6 compatibility for XPORT */
+if (dsmptsa1 = 1 and dwptsc1 = 1 and dwptsd1 = 1) or (dsmptsa1 = 1 and drptsc1 = 1 and drptsd1 = 1) 
+   then pts_smpl = 1;
+else pts_smpl = 0;
+
+/* Use worst event for PTSD data, otherwise use random event PTSD data */
+if PT69 ^= . then PT209 = PT69;
+if PT71 ^= . then PT211 = PT71;
+if PT72 ^= . then PT212 = PT72;
+if PT73 ^= . then PT213 = PT73;
+if PT74 ^= . then PT214 = PT74;
+if PT102 ^= . then PT233 = PT102;
+if PT106 ^= . then PT237 = PT106;
+
+array PTVAR PT41-PT46 PT48 PT50 PT50_1 PT51 PT55 PT209-PT214 PT233 PT237;
+do over PTVAR;
+   if PTVAR ^= 1 then PTVAR = 0;
+end;
+
+if dsm_pts ^= 1 then dsm_pts = 0;
 
 run;
 
-* STEP 4: Run a PROC CONTENTS on the file ;
+* STEP 5: Run a PROC CONTENTS on the file ;
 
 *Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data;
 ods pdf file = "&myfolders/outputs/contents_NCSR_&sysdate..pdf";
