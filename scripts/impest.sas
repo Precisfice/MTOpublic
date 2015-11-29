@@ -12,7 +12,8 @@ proc surveylogistic
                       PT209 PT211 PT212 PT213 PT214 PT233 PT237
                       NCSRWTSH NCSRWTLG PTS_SMPL
                  where=(pts_smpl=1));
-  model dsm_pts = age sexf rhisp rblk roth PT41 PT42 PT43
+  model dsm_pts(event='(1) ENDORSED')
+                = age sexf rhisp rblk roth PT41 PT42 PT43
                   PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
                   PT209 PT211 PT212 PT213 PT214 PT233 PT237;
   weight ncsrwtlg;
