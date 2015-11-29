@@ -2,8 +2,8 @@
  * using SAS PROC SURVEYLOGISTIC instead of SUDAAN.
  * I find that the coefficients themselves match to
  * the 4th decimal place (roughly 1 part in 10^5),
- * and that the variances match to within about 1%
- * in relative terms.
+ * and that the standard errors match to within about
+ * 1% in relative terms.
  */
 proc surveylogistic
   varmethod=taylor
