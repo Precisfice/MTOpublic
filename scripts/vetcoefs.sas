@@ -1,6 +1,6 @@
 * Read covariance matrix for imputation model ;
 data covar;
-  infile "/folders/myfolders/covmat01.dbs"; * TODO: abstract to FILENAME stmt;
+  infile "/folders/myfolders/outputs/covmat01.dbs"; * TODO: abstract to FILENAME stmt;
   input @25 Intercept
   		+1 Age
   		+1 SEXF
@@ -35,7 +35,7 @@ run;
 * Read coefficients from my replication attempt, along with std errs ;
 * TODO: read lines 115-138 of "slopes.txt", starting at column #44;
 data coef_rep;
-  infile "/folders/myfolders/slopes.txt" firstobs=115;
+  infile "/folders/myfolders/outputs/slopes.txt" firstobs=115;
   if _N_<=24;
   input @44 coef
   		+1 stderr
