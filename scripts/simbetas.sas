@@ -98,3 +98,28 @@ proc iml;
   store betas_posterior_samples;
 run;
 
+/* TODO: Write a vector of _formulas_ built from the coefficients,
+ *       and loop over this vector setting the &formula macro to
+ *       each element in turn.
+ */
+proc iml;
+  title1 "Constructing PTSD imputation model formulas";
+  title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
+  load betas_posterior_samples CovarNames;
+  CovarNames[loc(CovarNames='Intercept')] = "1";
+  do i = 1 to 10;
+    coefs = betas_posterior_samples[i,];
+    * convert coefs to explicitly (+/-) signed strings ;
+    signs = repeat(" ",1,ncol(coefs));
+    signs[loc(coefs>=0)] = "+";
+    coefs = catx("", signs, coefs);
+    * generate formula terms, then concatenate them ;
+    terms = catx("*",coefs,CovarNames);
+    formula = rowcatc(terms);
+    print formula;
+    /* TODO: Invoke the Ptsd_MTO_youth.sas script, providing 'formula'
+     *       as a macro variable, instead of allowing that script to
+     *       build 'formula' using the PTSD_slopes_from_NCSR.csv file.
+     */
+  end;
+run;
