@@ -98,16 +98,18 @@ proc iml;
   store betas_posterior_samples;
 run;
 
-/* TODO: Write a vector of _formulas_ built from the coefficients,
- *       and loop over this vector setting the &formula macro to
- *       each element in turn.
+/* Iterate over the betas_posterior_samples, constructing a model
+ * formula for each one and passing it to the 'impdata20x.sas'.
+ * Collect the resulting voucher effect estimates with their CIs.
  */
 proc iml;
   title1 "Constructing PTSD imputation model formulas";
   title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-  do i = 1 to 10;
+  reps = 10;
+  or_ci = repeat(., reps, 3); * Allocate reps x 3 matrix for ORs, CI ;
+  do i = 1 to reps;
     coefs = betas_posterior_samples[i,];
     * convert coefs to explicitly (+/-) signed strings ;
     signs = repeat(" ",1,ncol(coefs));
@@ -116,10 +118,42 @@ proc iml;
     * generate formula terms, then concatenate them ;
     terms = catx("*",coefs,CovarNames);
     formula = rowcatc(terms);
+    title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     print formula;
-    /* TODO: Invoke the Ptsd_MTO_youth.sas script, providing 'formula'
-     *       as a macro variable, instead of allowing that script to
-     *       build 'formula' using the PTSD_slopes_from_NCSR.csv file.
+    title1;
+    /* Demonstrate the SAS idioms by which this would be done.
+     * That is, show how a SAS script may be invoked by PROC IML
+     * code (using a SUBMIT..ENDSUBMIT block), with our 'formula'
+     * being passed to that script and used for some calculation
+     * to be made available for further processing by IML.
+     *
+     * A dummy calculation will suffice for demonstration purposes,
+     * but of course it might be helpful to conjure up some data to
+     * allow a call to PROC SURVEYLOGISTIC, thereby demonstrating
+     * exactly how the voucher effect is to be captured and passed
+     * back to IML.
+     *
+     * Let me just write an impdata20x_stuntdouble.sas script
+     * that demonstrates it has received the 'formula' string,
+     * and then proceeds to estimate a PROC SURVEYLOGISTIC against
+     * some sample data that I hope comes with SAS.
      */
+     submit formula; * the 'formula' parameter allows substitution below;
+       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+       %include "/folders/myfolders/impdata20x_stuntdouble.sas";
+     endsubmit;
+     * Extract the desired effect estimate and its CI ;
+     use ORs;
+     read all var {Effect Response OddsRatioEst LowerCL UpperCL};
+     close ORs;
+     effrow = loc(compbl(Effect)='SEX FEMALE vs MALE'
+                      & Response='PUBLIC ONLY');
+     or_ci[i,1] = OddsRatioEst[effrow];
+     or_ci[i,2] = LowerCL[effrow];
+     or_ci[i,3] = UpperCL[effrow];
   end;
+  rownames = ("Rep1":"Rep1000")[1:reps];
+  title1 "Collected effect estimates";
+  print or_ci[colname={'Odds Ratio' 'Lower CL' 'Upper CL'}
+              rowname=rownames];
 run;
