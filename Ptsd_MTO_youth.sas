@@ -214,9 +214,9 @@ title 'Youth PTSD, new diagnosis lifetime, unweighted';
 tables f_mh_pts_evr_yt  / list missing;
 run;
 
-****
+/****
 * TODO 2: Uncomment the code below, and debug as necessary
-****;
+****/
   /*
   data fnlpred_ptsd_youth(keep = ppid mto_ptsd_sample pred_prob ptsd_random f_mh_pts_evr_yt );
     set inputfor2x2;
@@ -229,10 +229,10 @@ run;
 
   */
   
-****
+/****
 * TODO 3: Inspect the txt file to ensure it poses no danger of subject identification,
 *         and check it in.
-****
+****/
 
 %mend a;
 
