@@ -1,9 +1,11 @@
+%LET folder = E:/NSCR Replication study/MTO Data and codes; /* for Andy's workstation */
+
 /* Read coefficients from our replication attempt, along with std errs.
  * These are found starting at column #44 on lines 115-138 of "slopes.txt",
  * which is the output log from a SUDAAN run.
  */
 data coef_rep;
-  infile "/folders/myfolders/slopes.txt" firstobs=115;
+  infile "&folder/slopes.txt" firstobs=115;
   if _N_<=24;
   input @44 coef
   		+1 stderr
@@ -12,7 +14,7 @@ run;
 
 * Read the covariance matrix for our estimated imputation coefficients ;
 data covar;
-  infile "/folders/myfolders/covmat01.dbs";
+  infile "&folder/covmat01.dbs";
   input Intercept 25-38 Age SEXF RHISP RBLK ROTH
   		PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
   		PT209 PT211 PT212 PT213 PT214 PT233 PT237 
@@ -23,7 +25,7 @@ run;
 /* Read the coefficients of the PTSD imputation model
  * used in the 2014 JAMA paper.
  */ 
-proc import datafile="/folders/myfolders/PTSD_slopes_from_NCSR.csv"
+proc import datafile="&folder/PTSD_slopes_from_NCSR.csv"
      out=coef_ori
      dbms=csv
      replace;
@@ -140,14 +142,14 @@ proc iml;
      */
      submit formula; * the 'formula' parameter allows substitution below;
        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-       %include "/folders/myfolders/impdata20x_stuntdouble.sas";
+       %include "&folders/impdata20x.sas";
      endsubmit;
      * Extract the desired effect estimate and its CI ;
      use ORs;
-     read all var {Effect Response OddsRatioEst LowerCL UpperCL};
+     read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
      close ORs;
-     effrow = loc(compbl(Effect)='SEX FEMALE vs MALE'
-                      & Response='PUBLIC ONLY');
+     effrow = loc(compbl(Effect)='ra_Grp_Exp'
+                      & _Imputation=.);
      or_ci[i,1] = OddsRatioEst[effrow];
      or_ci[i,2] = LowerCL[effrow];
      or_ci[i,3] = UpperCL[effrow];
