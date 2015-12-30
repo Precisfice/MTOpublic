@@ -71,7 +71,7 @@ PROC SURVEYLOGISTIC DATA = impdata ;
    WEIGHT f_wt_totsvy ;
    *OUTPUT OUT=preddata PREDICTED=pp;
    ODS OUTPUT parameterestimates=parmest  
-              OddsRatios = or;   
+              OddsRatios = ors;   
               *covb=covm  ;
 RUN;
 ods pdf close;
