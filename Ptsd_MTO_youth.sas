@@ -35,14 +35,7 @@ run;
 
    /* MTO Adult questionnaire PTSD data */
    data &dataout;
-   set &datain(keep = ppid &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
-                      &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
-                      &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV14_PT64 &pfx.CV14a &pfx.CV14b_PT64a
-                      &pfx.CV14c &pfx.CV22_PT261 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271 
-                      &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
-                      &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272 
-                      &pfx.CV28_PT273 &pfx.CV29_PT274 &pfx.CV30_PT275 
-                      f_svy_age_iw f_svy_ethnic f_svy_race f_svy_gender f_wt_totsvy);
+   set &datain;
 
    /* Criteria A1 */
    if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or &pfx.CV5_PT17 = 1 or
