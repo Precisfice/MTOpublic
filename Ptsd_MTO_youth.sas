@@ -135,7 +135,7 @@ run;
 
 %mtoptsd(mental_health_yt_20101004,Y, mental_health_yt);
 
-
+/*
 data coef;
        infile "&folder/PTSD_slopes_from_NCSR.csv" delimiter = ',' MISSOVER DSD  lrecl=32767 firstobs=2 ;
           informat Independent_variable $9. ;
@@ -149,7 +149,7 @@ data coef;
                    Beta
                    Label $
        ;
-       if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+       if _ERROR_ then call symputx('_EFIERR_',1);  * set ERROR detection macro variable ;
 run;
 
 proc print data = coef;
@@ -169,7 +169,7 @@ if done then do;
 end;
 run;
 %put &formula;
-
+*/
 data pred_ptsd_youth;
 set mental_health_yt;
 pred_prob = exp(&formula)/(1+exp(&formula));
