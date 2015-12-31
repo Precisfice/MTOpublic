@@ -15,7 +15,7 @@
 /*%INCLUDE '&folder/sas_adytobs_fmts_20120406.sas';*/
 /*%INCLUDE '&folder/sas_wgt_formats.sas';*/
 
-%Include "&folder\Ptsd_MTO_youth.sas"
+%Include "&folder\Ptsd_MTO_youth.sas";
 
 /* Let us impute only those vars we actually need for our later work,
    which I identify starting from a keep= option in Ptsd_MTO_youth.sas
@@ -60,10 +60,10 @@ RUN;
 * Obtain a voucher effect on PTSD (sans clustering of stderrs since we lack -tract-) ;
 
 
-%LET dep = f_mh_pts_evr_yt;
+%LET dep = f_mh_pts_rec_yt;
 %LET controls = ra_grp_exp ra_grp_s8; * modnum=1 ;
 
-ods pdf file = "&folder\surveyselect.pdf";
+/*ods pdf file = "&folder\surveyselect.pdf";*/
 PROC SURVEYLOGISTIC DATA = impdata ;
    STRATA ra_site; *CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
@@ -74,4 +74,4 @@ PROC SURVEYLOGISTIC DATA = impdata ;
               OddsRatios = ors;   
               *covb=covm  ;
 RUN;
-ods pdf close;
+/*ods pdf close;*/
