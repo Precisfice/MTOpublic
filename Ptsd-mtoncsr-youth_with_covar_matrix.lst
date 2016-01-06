@@ -1,0 +1,301 @@
+The SAS System                                                                                  14:20 Wednesday, January 6, 2016   1
+
+ 
+ 
+                                  S U D A A N
+            Software for the Statistical Analysis of Correlated Data
+          Copyright       Research Triangle Institute       June 2013
+                                 Release 11.0.1
+ 
+ 
+DESIGN SUMMARY: Variances will be computed using the Taylor Linearization Method, Assuming a With Replacement (WR) Design
+    Sample Weight: FINALP2WT
+    Stratification Variables(s): _ONE_
+    Primary Sampling Unit: Observation Number
+ 
+ 
+Number of zero responses     :   149
+Number of non-zero responses :   602
+ 
+Independence parameters have converged in 6 iterations.
+ 
+Number of observations read       :  10793    Weighted count:    11529
+Observations in subpopulation     :    751    Weighted count:      491
+Observations used in the analysis :    751    Weighted count:      491
+Denominator degrees of freedom    :  10792
+ 
+ 
+Maximum number of estimable parameters for the model is 24
+ 
+File NCSR_MTO contains 10793 Clusters
+ 751 clusters were used to fit the model
+Maximum cluster size is   1 records
+Minimum cluster size is   1 records
+ 
+ 
+Sample and Population Counts for Response Variable DSM_PTS
+Based on observations used in the analysis
+0:  Sample Count      149    Population Count       101
+1:  Sample Count      602    Population Count       390
+ 
+R-Square for dependent variable DSM_PTS (Cox & Snell, 1989): 0.089476
+ 
+-2 * Normalized Log-Likelihood with Intercepts Only :   762.54
+-2 * Normalized Log-Likelihood Full Model           :   692.14
+Approximate Chi-Square (-2 * Log-L Ratio)           :    70.40
+Degrees of Freedom                                  :       23
+ 
+Note: The approximate Chi-Square is not adjusted for clustering.
+      Refer to hypothesis test table for adjusted test.
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+Date: 01-06-2016                                               SUDAAN                                                    Page:  1   
+Time: 14:20:51                                                                                                           Table: 1   
+                                                                                                                                    
+Variance Estimation Method: Taylor Series (WR)                                                                                      
+SE Method: Robust (Binder, 1983)                                                                                                    
+Working Correlations: Independent                                                                                                   
+Link Function: Logit                                                                                                                
+Response variable DSM_PTS: DSM_PTS                                                                                                  
+For Subpopulation: NCSR_PTS_SAMPLE = 1                                                                                              
+by: Independent Variables and Effects.                                                                                              
+                                                                                                                                    
+------------------------------------------------------------------------------------------------                                    
+Independent                                                                             P-value                                     
+  Variables and        Beta                      Lower 95%    Upper 95%                 T-Test                                      
+  Effects              Coeff.          SE Beta   Limit Beta   Limit Beta   T-Test B=0   B=0                                         
+------------------------------------------------------------------------------------------------                                    
+Intercept                   -1.51         0.62        -2.74        -0.29        -2.43     0.0150                                    
+AGE                          0.03         0.01         0.01         0.04         2.86     0.0042                                    
+SEX is female(0 =                                                                                                                   
+  No, 1 = Female)            0.11         0.30        -0.48         0.70         0.37     0.7141                                    
+Race is hispanic            -0.08         0.42        -0.90         0.73        -0.20     0.8437                                    
+Race is black               -0.56         0.29        -1.14         0.02        -1.90     0.0570                                    
+Race is other               -0.98         0.53        -2.01         0.06        -1.85     0.0646                                    
+as child,ever badly                                                                                                                 
+  beaten up by                                                                                                                      
+  parents/caregivers        -0.56         0.37        -1.29         0.17        -1.51     0.1318                                    
+ever badly beaten up                                                                                                                
+  by spouse/romantic                                                                                                                
+  partner                    0.05         0.29        -0.52         0.62         0.17     0.8624                                    
+ever badly beaten up                                                                                                                
+  by anyone else            -0.39         0.30        -0.98         0.21        -1.28     0.2004                                    
+ever mugged/held up/                                                                                                                
+  threatened with                                                                                                                   
+  weapon                     0.11         0.27        -0.42         0.65         0.42     0.6740                                    
+were you ever                                                                                                                       
+  raped(penetration                                                                                                                 
+  occurred)                 -0.16         0.28        -0.71         0.39        -0.57     0.5665                                    
+were you ever                                                                                                                       
+  sexually assaulted                                                                                                                
+  or molested                0.60         0.26         0.09         1.11         2.32     0.0205                                    
+someone very close                                                                                                                  
+  to you ever die                                                                                                                   
+  unexpectedly               0.08         0.24        -0.40         0.55         0.32     0.7484                                    
+anyone very close to                                                                                                                
+  have extremely                                                                                                                    
+  traumatic                                                                                                                         
+  experience                 0.47         0.30        -0.12         1.06         1.55     0.1209                                    
+you were a child,                                                                                                                   
+  did you ever                                                                                                                      
+  witness serious                                                                                                                   
+  physical fights            0.46         0.29        -0.10         1.02         1.61     0.1072                                    
+ever see someone                                                                                                                    
+  badly                                                                                                                             
+  injured/killed/de-                                                                                                                
+  ad body                    0.17         0.25        -0.32         0.66         0.68     0.4984                                    
+ever experience                                                                                                                     
+  other very                                                                                                                        
+  traumatic event           -0.22         0.31        -0.82         0.38        -0.73     0.4652                                    
+------------------------------------------------------------------------------------------------                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+Date: 01-06-2016                                               SUDAAN                                                    Page:  2   
+Time: 14:20:51                                                                                                           Table: 1   
+                                                                                                                                    
+Variance Estimation Method: Taylor Series (WR)                                                                                      
+SE Method: Robust (Binder, 1983)                                                                                                    
+Working Correlations: Independent                                                                                                   
+Link Function: Logit                                                                                                                
+Response variable DSM_PTS: DSM_PTS                                                                                                  
+For Subpopulation: NCSR_PTS_SAMPLE = 1                                                                                              
+by: Independent Variables and Effects.                                                                                              
+                                                                                                                                    
+------------------------------------------------------------------------------------------------                                    
+Independent                                                                             P-value                                     
+  Variables and        Beta                      Lower 95%    Upper 95%                 T-Test                                      
+  Effects              Coeff.          SE Beta   Limit Beta   Limit Beta   T-Test B=0   B=0                                         
+------------------------------------------------------------------------------------------------                                    
+purposely stay away                                                                                                                 
+  things remind                                                                                                                     
+  event                      0.37         0.25        -0.12         0.86         1.47     0.1420                                    
+lose interest in                                                                                                                    
+  things used to                                                                                                                    
+  enjoy                     -0.06         0.26        -0.57         0.45        -0.22     0.8239                                    
+feel emotionally                                                                                                                    
+  distant/cut-off                                                                                                                   
+  from people                0.25         0.28        -0.30         0.81         0.89     0.3751                                    
+trouble feeling                                                                                                                     
+  love/happiness                                                                                                                    
+  toward others              0.12         0.27        -0.42         0.65         0.42     0.6716                                    
+feel no reason to                                                                                                                   
+  plan for the                                                                                                                      
+  future                     0.64         0.24         0.16         1.12         2.61     0.0090                                    
+trouble falling                                                                                                                     
+  asleep during                                                                                                                     
+  random event               0.87         0.31         0.26         1.47         2.80     0.0051                                    
+more easily startled                                                                                                                
+  by ordinary noises         0.13         0.26        -0.37         0.64         0.51     0.6068                                    
+------------------------------------------------------------------------------------------------                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+Date: 01-06-2016                                               SUDAAN                                                    Page:  3   
+Time: 14:20:51                                                                                                           Table: 1   
+                                                                                                                                    
+Variance Estimation Method: Taylor Series (WR)                                                                                      
+SE Method: Robust (Binder, 1983)                                                                                                    
+Working Correlations: Independent                                                                                                   
+Link Function: Logit                                                                                                                
+Response variable DSM_PTS: DSM_PTS                                                                                                  
+For Subpopulation: NCSR_PTS_SAMPLE = 1                                                                                              
+by: Contrast.                                                                                                                       
+                                                                                                                                    
+-------------------------------------------------------                                                                             
+                                                                                                                                    
+Contrast               Degrees                 P-value                                                                              
+                       of                      Wald                                                                                 
+                       Freedom    Wald ChiSq   ChiSq                                                                                
+-------------------------------------------------------                                                                             
+OVERALL MODEL                24       193.21     0.0000                                                                             
+MODEL MINUS                                                                                                                         
+  INTERCEPT                  23        46.34     0.0027                                                                             
+INTERCEPT                     1         5.92     0.0150                                                                             
+AGE                           1         8.20     0.0042                                                                             
+SEXF                          1         0.13     0.7141                                                                             
+RHISP                         1         0.04     0.8437                                                                             
+RBLK                          1         3.62     0.0570                                                                             
+ROTH                          1         3.42     0.0645                                                                             
+PT41                          1         2.27     0.1317                                                                             
+PT42                          1         0.03     0.8624                                                                             
+PT43                          1         1.64     0.2003                                                                             
+PT44                          1         0.18     0.6740                                                                             
+PT45                          1         0.33     0.5665                                                                             
+PT46                          1         5.37     0.0205                                                                             
+PT48                          1         0.10     0.7484                                                                             
+PT50                          1         2.41     0.1209                                                                             
+PT50_1                        1         2.60     0.1072                                                                             
+PT51                          1         0.46     0.4983                                                                             
+PT55                          1         0.53     0.4652                                                                             
+PT209                         1         2.16     0.1420                                                                             
+PT211                         1         0.05     0.8239                                                                             
+PT212                         1         0.79     0.3751                                                                             
+PT213                         1         0.18     0.6716                                                                             
+PT214                         1         6.83     0.0090                                                                             
+PT233                         1         7.85     0.0051                                                                             
+PT237                         1         0.26     0.6068                                                                             
+-------------------------------------------------------                                                                             
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+Date: 01-06-2016                                               SUDAAN                                                    Page:  4   
+Time: 14:20:51                                                                                                           Table: 1   
+                                                                                                                                    
+Variance Estimation Method: Taylor Series (WR)                                                                                      
+SE Method: Robust (Binder, 1983)                                                                                                    
+Working Correlations: Independent                                                                                                   
+Link Function: Logit                                                                                                                
+Response variable DSM_PTS: DSM_PTS                                                                                                  
+For Subpopulation: NCSR_PTS_SAMPLE = 1                                                                                              
+by: Independent Variables and Effects.                                                                                              
+                                                                                                                                    
+-----------------------------------------------------------                                                                         
+Independent                                                                                                                         
+  Variables and                     Lower 95%    Upper 95%                                                                          
+  Effects              Odds Ratio   Limit OR     Limit OR                                                                           
+-----------------------------------------------------------                                                                         
+Intercept                    0.22         0.06         0.75                                                                         
+AGE                          1.03         1.01         1.05                                                                         
+SEX is female(0 =                                                                                                                   
+  No, 1 = Female)            1.12         0.62         2.02                                                                         
+Race is hispanic             0.92         0.41         2.08                                                                         
+Race is black                0.57         0.32         1.02                                                                         
+Race is other                0.38         0.13         1.06                                                                         
+as child,ever badly                                                                                                                 
+  beaten up by                                                                                                                      
+  parents/caregivers         0.57         0.28         1.18                                                                         
+ever badly beaten up                                                                                                                
+  by spouse/romantic                                                                                                                
+  partner                    1.05         0.59         1.86                                                                         
+ever badly beaten up                                                                                                                
+  by anyone else             0.68         0.37         1.23                                                                         
+ever mugged/held up/                                                                                                                
+  threatened with                                                                                                                   
+  weapon                     1.12         0.66         1.91                                                                         
+were you ever                                                                                                                       
+  raped(penetration                                                                                                                 
+  occurred)                  0.85         0.49         1.48                                                                         
+were you ever                                                                                                                       
+  sexually assaulted                                                                                                                
+  or molested                1.82         1.10         3.02                                                                         
+someone very close                                                                                                                  
+  to you ever die                                                                                                                   
+  unexpectedly               1.08         0.67         1.74                                                                         
+anyone very close to                                                                                                                
+  have extremely                                                                                                                    
+  traumatic                                                                                                                         
+  experience                 1.60         0.88         2.89                                                                         
+you were a child,                                                                                                                   
+  did you ever                                                                                                                      
+  witness serious                                                                                                                   
+  physical fights            1.58         0.91         2.77                                                                         
+ever see someone                                                                                                                    
+  badly                                                                                                                             
+  injured/killed/de-                                                                                                                
+  ad body                    1.18         0.73         1.93                                                                         
+ever experience                                                                                                                     
+  other very                                                                                                                        
+  traumatic event            0.80         0.44         1.46                                                                         
+-----------------------------------------------------------                                                                         
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+Date: 01-06-2016                                               SUDAAN                                                    Page:  5   
+Time: 14:20:51                                                                                                           Table: 1   
+                                                                                                                                    
+Variance Estimation Method: Taylor Series (WR)                                                                                      
+SE Method: Robust (Binder, 1983)                                                                                                    
+Working Correlations: Independent                                                                                                   
+Link Function: Logit                                                                                                                
+Response variable DSM_PTS: DSM_PTS                                                                                                  
+For Subpopulation: NCSR_PTS_SAMPLE = 1                                                                                              
+by: Independent Variables and Effects.                                                                                              
+                                                                                                                                    
+-----------------------------------------------------------                                                                         
+Independent                                                                                                                         
+  Variables and                     Lower 95%    Upper 95%                                                                          
+  Effects              Odds Ratio   Limit OR     Limit OR                                                                           
+-----------------------------------------------------------                                                                         
+purposely stay away                                                                                                                 
+  things remind                                                                                                                     
+  event                      1.44         0.88         2.35                                                                         
+lose interest in                                                                                                                    
+  things used to                                                                                                                    
+  enjoy                      0.94         0.57         1.57                                                                         
+feel emotionally                                                                                                                    
+  distant/cut-off                                                                                                                   
+  from people                1.29         0.74         2.24                                                                         
+trouble feeling                                                                                                                     
+  love/happiness                                                                                                                    
+  toward others              1.12         0.66         1.92                                                                         
+feel no reason to                                                                                                                   
+  plan for the                                                                                                                      
+  future                     1.90         1.17         3.06                                                                         
+trouble falling                                                                                                                     
+  asleep during                                                                                                                     
+  random event               2.38         1.30         4.35                                                                         
+more easily startled                                                                                                                
+  by ordinary noises         1.14         0.69         1.89                                                                         
+-----------------------------------------------------------                                                                         
