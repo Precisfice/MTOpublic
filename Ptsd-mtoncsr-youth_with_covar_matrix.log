@@ -1,0 +1,1451 @@
+1                                                          The SAS System                           14:20 Wednesday, January 6, 2016
+
+NOTE: Unable to open SASUSER.PROFILE. WORK.PROFILE will be opened instead.
+NOTE: All profile changes will be lost at the end of the session.
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to HARVARD UNIVERSITY - SFA T&R, Site 70106881.
+NOTE: This session is executing on the Linux 3.8.13-118.2.2.el6uek.x86_64 (LIN X64) platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/ETS 14.1
+      SAS/OR 14.1
+      SAS/IML 14.1
+      SAS/QC 14.1
+
+NOTE: Additional host information:
+
+ Linux LIN X64 3.8.13-118.2.2.el6uek.x86_64 #2 SMP Thu Dec 10 11:06:02 PST 2015 x86_64 Oracle Linux Server release 6.7 
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.03 seconds
+      cpu time            0.01 seconds
+      
+1          ************************************************************************
+2          * PROGRAM: Ptsd-mtoncsr-youth-060510.sas                               *
+3          * DATE: 6/5/10                                                         *
+4          *                                                                      *
+5          * MTO Youth                                                            *
+6          * Calculate MTO Youth PTSD diagnosis using NCSR and MTO data           *
+7          ************************************************************************;
+8          options ps = 65 nocenter mprint macrogen;
+9          
+10         libname ncsr '/data/kessler/ncsr/data';
+NOTE: Libref NCSR was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /data/kessler/ncsr/data
+11         libname mto '/data/kessler/mto/youth/data';
+NOTE: Libref MTO was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /data/kessler/mto/youth/data
+12         libname LIBRARY '/home/sampson/MTO100410/youth';
+NOTE: Library LIBRARY does not exist.
+13         libname mtomp '/home/petukhov/MTO/MTO_for_DNorris';
+2 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+NOTE: Libref MTOMP was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /home/petukhov/MTO/MTO_for_DNorris
+14         
+15         %macro a;
+16         
+17         /* NCSR Main questionnaire PTSD data */
+18         data ncsr_main;
+19         set ncsr.ncsr_main(keep = sampleid SC1 PT:);
+20         format _numeric_;
+21         run;
+22         
+23         proc sort data = ncsr_main; by sampleid; run;
+24         
+25         /* NCSR demographics data */
+26         data ncsr_dem;
+27         set ncsr.ncsr_dem(keep = sampleid age str15 secu sexf rhisp rblk rwh roth finalp2wt);
+28         if finalp2wt ^= .;
+29         format _numeric_;
+30         run;
+31         
+32         proc sort data = ncsr_dem; by sampleid; run;
+33         
+34         /* Combine NCSR data */
+35         data ncsr;
+36         merge ncsr_main(in = a) ncsr_dem(in = b);
+37         by sampleid;
+38         length sampleid_num 8;
+39         if a & b;
+40         sampleid_num = put(sampleid, 15.0);
+41         
+42         /* Calculate PTSD diagnosis and sub-criteria variables */
+43         %include '/home/jin/WMH/NSHS/REPLICATION/DIAGNOSIS/Ptsd.sas';
+44         
+45         /* Cases to use in NCSR have Worst Event A1,C1,D1 criteria or Random Event A1,C1,D1 criteria  */
+46         if (dsmptsa1 = 1 and dwptsc1 = 1 and dwptsd1 = 1) or (dsmptsa1 = 1 and drptsc1 = 1 and drptsd1 = 1)
+47            then ncsr_pts_sample = 1;
+48         else ncsr_pts_sample = 0;
+49         
+50         /* Use worst event for PTSD data, otherwise use random event PTSD data */
+51         if PT69 ^= . then PT209 = PT69;
+52         if PT71 ^= . then PT211 = PT71;
+53         if PT72 ^= . then PT212 = PT72;
+54         if PT73 ^= . then PT213 = PT73;
+55         if PT74 ^= . then PT214 = PT74;
+56         if PT102 ^= . then PT233 = PT102;
+57         if PT106 ^= . then PT237 = PT106;
+58         
+59         array PTVAR PT41-PT46 PT48 PT50 PT50_1 PT51 PT55 PT209-PT214 PT233 PT237;
+60         do over PTVAR;
+61            if PTVAR ^= 1 then PTVAR = 0;
+62         end;
+63         
+64         if dsm_pts ^= 1 then dsm_pts = 0;
+65         
+66         run;
+67         
+68         data mental_health_yt_20101004;
+69         set mto.mental_health_yt_20101004;
+70         format _numeric_;
+71         %include '/home/jin/MTO/YOUTH/DIAGNOSIS/Datafix2-mto-youth.sas';
+72         %include '/home/jin/MTO/YOUTH/DIAGNOSIS/agefix-youth.sas';
+73         run;
+3 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+74         
+75         %macro mtoptsd(datain, pfx, dataout);
+76         
+77            /* MTO Adult questionnaire PTSD data */
+78            data &dataout;
+79            set &datain(keep = ppid &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
+80                               &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
+81                               &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV14_PT64 &pfx.CV14a &pfx.CV14b_PT64a
+82                               &pfx.CV14c &pfx.CV22_PT261 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271
+83                               &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
+84                               &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272
+85                               &pfx.CV28_PT273 &pfx.CV29_PT274 &pfx.CV30_PT275
+86                               f_svy_age_iw f_svy_ethnic f_svy_race f_svy_gender f_wt_totsvy);
+87         
+88            /* Criteria A1 */
+89            if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or &pfx.CV5_PT17 = 1 or
+90               &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or &pfx.CV10_PT23 = 1 or
+91               &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
+92            else f_mh_pts_a1 = 0;
+93         
+94            /* Criteria C1 */
+95            if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1,
+96                   &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1,
+97                   &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;              /* Yes */
+98            else f_mh_pts_c1 = 0;
+99         
+100           /* Criteria D1 */
+101           if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1)
+102               then f_mh_pts_d1 = 1;  /* Yes */
+103           else f_mh_pts_d1 = 0;
+104        
+105           if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
+106           else mto_ptsd_sample = 0;
+107        
+108           array PTVAR &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
+109                       &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
+110                       &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271
+111                       &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
+112                       &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272 &pfx.CV28_PT273
+113                       &pfx.CV29_PT274 &pfx.CV30_PT275;
+114           do over PTVAR;
+115              if PTVAR ^= 1 then PTVAR = 0;
+116           end;
+117        
+118           /* Gender */
+119           if f_svy_gender = 'F' then sexf = 1;
+120           else sexf = 0;
+121        
+122           /* Race */
+123           rhisp = 0;
+124           rwh = 0;
+125           rblk = 0;
+126           roth = 0;
+127           if f_svy_ethnic = 1 then rhisp = 1;
+128           else do;
+129              if f_svy_race = 1 then rblk = 1;
+130              else if f_svy_race = 2 then rwh = 1;
+131              else if f_svy_race IN(3,4,5) then roth = 1;
+132           end;
+133        
+134           in_mto = 1;
+135        
+136           if 0 <= f_svy_age_iw <= 18 then age = 18;
+4 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+137           else age = f_svy_age_iw;
+138        
+139           /* Create corresponding NCSR variables */
+140           if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
+141           else PT211 = 0;
+142        
+143           if &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1 then PT212 = 1;
+144           else PT212 = 0;
+145        
+146           if &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1 then PT213 = 1;
+147           else PT213 = 0;
+148        
+149           if &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1 then PT214 = 1;
+150           else PT214 = 0;
+151        
+152           if &pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1 then PT233 = 1;
+153           else PT233 = 0;
+154        
+155           if &pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1 then PT237 = 1;
+156           else PT237 = 0;
+157        
+158           if &pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1 then PT209 = 1;
+159           else PT209 = 0;
+160        
+161           format _numeric_;
+162           rename &pfx.CV1_PT13 = PT41
+163                  &pfx.CV2_PT14 = PT42
+164                  &pfx.CV3_PT15 = PT43
+165                  &pfx.CV4_PT16 = PT44
+166                  &pfx.CV5_PT17 = PT45
+167                  &pfx.CV6_PT18 = PT46
+168                  &pfx.CV7_PT20 = PT48
+169                  &pfx.CV8_PT22 = PT50
+170                  &pfx.CV9_PT22_1 = PT50_1
+171                  &pfx.CV10_PT23 = PT51
+172                  &pfx.CV11_PT27 = PT55;
+173           run;
+174        
+175        %mend mtoptsd;
+176        
+177        %mtoptsd(mental_health_yt_20101004,Y, mental_health_yt);
+178        
+179        /* Combine NCSR, MTO Adult, youth data */
+180        data ncsr_mto;
+181        set ncsr mental_health_yt(in = yt);
+182        length ppid_num 8;
+183        ppid_num = put(ppid, 15.0);
+184        if in_mto = 1 then finalp2wt = f_wt_totsvy;
+185        if yt = 1 then mto_youth = 1;
+186        _one_ = 1;
+187        run;
+188        
+189        proc sort data = ncsr_mto; by str15 secu; run;
+190        
+191        %let indvar = age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+192                        PT209 PT211 PT212 PT213 PT214 PT233 PT237;
+193        
+194        /* Predict NCSR PTSD using PTSD data */
+195        proc rlogist data = ncsr_mto design = wr filetype = sas;
+196        model dsm_pts = age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+197                        PT209 PT211 PT212 PT213 PT214 PT233 PT237;
+198        nest _one_;
+199        weight finalp2wt;
+5 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+200        subpopn ncsr_pts_sample = 1;
+201        test waldchi;
+202        idvar age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+203              PT209 PT211 PT212 PT213 PT214 PT233 PT237 sampleid_num ppid_num f_svy_age_iw f_wt_totsvy
+204              mto_ptsd_sample mto_youth YCV13_PT62 YCV14_PT64 YCV14a YCV14b_PT64a YCV14c
+205              YCV22_PT261;
+206        output beta / filetype = sas filename = beta1 replace;
+207        output idvar subpopn expected / filetype = sas filename = pred1 replace;
+208        output covar / filetype = sas filename = covarmatrix; /* cf. SUDAAN 11 manual p. 637 */
+209        run;
+210        
+211        data mtomp.youth_covmatrix;
+212        set covarmatrix01;
+213        run;
+214        
+215        /*
+216        data pred_ptsd_youth;
+217        set pred1(where = (mto_youth = 1));
+218        length ppid $10.;
+219        ppid = input(ppid_num, 15.);
+220        if mto_youth = 1 then output pred_ptsd_youth;
+221        run;
+222        
+223        data mtomp.fnlpred_ptsd_youth(keep = ppid f_mh_pts_evr_yt f_mh_pts_aoo_yt f_mh_pts_rec_yt);
+224        set pred_ptsd_youth;
+225        * Calculate lifetime PTSD by comparing random # to predicted probability *
+226        ptsd_random = ranuni(1234567);
+227        if mto_ptsd_sample = 1 and 0 < ptsd_random <= expected then f_mh_pts_evr_yt = 1;
+228        else f_mh_pts_evr_yt = 0;
+229        
+230        ******************************************************************************************
+231        * Calculate Recency of PTSD for DSM                                                      *
+232        ******************************************************************************************;
+233        
+234        if YCV14b_PT64a <= f_svy_age_iw then pts_ons = YCV14b_PT64a;
+235        else pts_ons = YCV14c;
+236        
+237        if pts_ons IN(.D, .R) then pts_ons = .;
+238        if pts_ons > f_svy_age_iw then pts_ons = .;
+239        
+240        if YCV22_PT261 = 1 or pts_ons = f_svy_age_iw then pts_rec = f_svy_age_iw;
+241        
+242        if pts_rec IN(.D, .R) then pts_rec = .;
+243        
+244        if 0 <= pts_ons < 4 then pts_ons = 4;
+245        if 0 <= pts_rec < 4 then pts_rec = 4;
+246        
+247        if f_mh_pts_evr_yt = 1 then do;
+248            f_mh_pts_aoo_yt = pts_ons;
+249            f_mh_pts_rec_yt = pts_rec;
+250        end;
+251        
+252        run;
+253        
+254        proc freq data = mtomp.fnlpred_ptsd_youth;
+255        title 'Youth PTSD, new diagnosis lifetime and 12 month';
+256        tables f_mh_pts_evr_yt  / list missing;
+257        run;
+258        */
+259        %mend a;
+260        
+261        %a;
+MPRINT(A):   data ncsr_main;
+6 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+MPRINT(A):   set ncsr.ncsr_main(keep = sampleid SC1 PT:);
+NOTE: Data file NCSR.NCSR_MAIN.DATA is in a format that is native to another host, or the file encoding does not match the session 
+      encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce 
+      performance.
+MPRINT(A):   format _numeric_;
+MPRINT(A):   run;
+
+NOTE: There were 9836 observations read from the data set NCSR.NCSR_MAIN.
+NOTE: The data set WORK.NCSR_MAIN has 9836 observations and 570 variables.
+NOTE: DATA statement used (Total process time):
+      real time           1.27 seconds
+      cpu time            1.27 seconds
+      
+
+MPRINT(A):   proc sort data = ncsr_main;
+MPRINT(A):   by sampleid;
+MPRINT(A):   run;
+
+NOTE: There were 9836 observations read from the data set WORK.NCSR_MAIN.
+NOTE: The data set WORK.NCSR_MAIN has 9836 observations and 570 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.10 seconds
+      cpu time            0.10 seconds
+      
+
+MPRINT(A):   data ncsr_dem;
+MPRINT(A):   set ncsr.ncsr_dem(keep = sampleid age str15 secu sexf rhisp rblk rwh roth finalp2wt);
+NOTE: Data file NCSR.NCSR_DEM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+      encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce 
+      performance.
+MPRINT(A):   if finalp2wt ^= .;
+MPRINT(A):   format _numeric_;
+MPRINT(A):   run;
+
+NOTE: There were 9836 observations read from the data set NCSR.NCSR_DEM.
+NOTE: The data set WORK.NCSR_DEM has 5692 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+MPRINT(A):   proc sort data = ncsr_dem;
+MPRINT(A):   by sampleid;
+MPRINT(A):   run;
+
+NOTE: There were 5692 observations read from the data set WORK.NCSR_DEM.
+NOTE: The data set WORK.NCSR_DEM has 5692 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(A):   data ncsr;
+MPRINT(A):   merge ncsr_main(in = a) ncsr_dem(in = b);
+MPRINT(A):   by sampleid;
+MPRINT(A):   length sampleid_num 8;
+MPRINT(A):   if a & b;
+MPRINT(A):   sampleid_num = put(sampleid, 15.0);
+MPRINT(A):   ***************************************************************************************** * PROGRAM: Ptsd.sas * * 
+DATE: 4/21/08 * * * * NSHS Replication * * Check whether Criteria are met for Posttraumatic Disorder * * Note: 10/31/03 Added 5 new 
+PTSD diagnoses * * Note: 2/25/04 Added worst event onset, recency calculations(Use PT64a as onset) * * Note: 4/30/04 DSM-IV 
+Criteria F Add PT278a-d >= 4 and (PT268 = PT64 or PT268 = PT58b) * * Note: 4/14/05 Reset variables used for onset and recency to 
+missing if 998,999 * * Note: 4/14/05 Reset onset, recency to 4 if less than 4 * * Note: 5/24/06 Revise calculations for PT110y, 
+7 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+PT218y, PT229y, PT240y, include part c * * probe * * Note: 6/26/06 Random and worst event PTSD variables added * * Note: 11/3/06 
+ICD Criteria C Random Event revised * * Note: 8/14/07 DSM-IV Criteria F revised * * Note: 4/21/08 Onset, recency set to integer 
+values * *****************************************************************************************;
+MPRINT(A):   ************************************************************************************* * Posttraumatic Disorder -- 
+DSM-IV criteria * *************************************************************************************;
+MPRINT(PTSD):   ************************************************************************************************** * Criteria A: 
+Part 1. The person has been exposed to a traumatic event in which the * * person experienced, witnessed, or was confronted with an 
+* * event or events that involved actual or threatened death or * * serious injury, or a threat to the physical integrity of self 
+or others. * * * * Combat Experience/Relief Worker in War Zone/Civilian in War Zone/ * * Civilian in region of Terror/Refugee: * * 
+* * PT29 is Yes(1) OR PT30 is Yes(1) OR PT31 is Yes(1) OR PT32 is Yes(1) OR PT33 is Yes(1) * * * * Kidnapped: * * * * PT34 is 
+Yes(1) * * * * Toxic Exposure: * * * * PT35 is Yes(1) * * * * Automobile Accident: * * * * PT36 is Yes(1) * * * * Other Life 
+Threatening Accident: * * * * PT37 is Yes(1) * * * * Natural Disaster: * * * * PT38 is Yes(1) * * * * Man-made Disaster: * * * * 
+PT39 is Yes(1) * * * * Life Threatening Illness: * * * * PT40 is Yes(1) * * * * Beaten up as Child by Caregiver: * * * * PT41 is 
+Yes(1) * * * * Beaten by Spouse or Romantic Partner: * * * * PT42 is Yes(1) * * * * Beaten by Other: * * * * PT43 is Yes(1) * * * * 
+Raped: * * * * PT45 is Yes(1) * * * * Sexually Assaulted: * * * * PT46 is Yes(1) * * * * Mugged or Threatened with a Weapon: * * * 
+* PT44 is Yes(1) * * * * Stalked: * * * * PT47 is Yes(1) * * * * Unexpected Death of a Loved One: * * * * PT48 is Yes(1) * * * * 
+Child with Serious Illness: * * * * PT49 is Yes(1) * * * * Traumatic Event to Loved One: * * * * PT50 is Yes(1) OR PT50_1 is Yes(1) 
+* * * * Note: PT50_1 added to NSHS Replication version * * * * Witnessed Death or Dead Body, or Saw Someone Seriously Hurt: * * * * 
+PT51 is Yes(1) * * * * Accidentally Caused Serious Injury or Death * * * * PT52 is Yes(1) * * * * Purposely Injured, Tortured, or 
+Killed Someone. * * * * PT53 is Yes(1) * * * * Saw Atrocities: * * * * PT54 is Yes(1) * * * * Some Other Event: * * * * PT55 is 
+Yes(1) * * * * Private Event: * * * * PT57 is Yes(1) * 
+**************************************************************************************************;
+MPRINT(PTSD):   if PT29 = 1 or PT30 = 1 or PT31 = 1 or PT32 = 1 or PT33 = 1 or PT34 = 1 or PT35 = 1 or PT36 = 1 or PT37 = 1 or PT38 
+= 1 or PT39 = 1 or PT40 = 1 or PT41 = 1 or PT42 = 1 or PT43 = 1 or PT44 = 1 or PT45 = 1 or PT46 = 1 or PT47 = 1 or PT48 = 1 or PT49 
+= 1 or PT50 = 1 or PT51 = 1 or PT52 = 1 or PT53 = 1 or PT54 = 1 or PT50_1 = 1 or PT55 = 1 or PT57 = 1 then dsmptsa1 = 1;
+MPRINT(PTSD):   else if PT1 = 5 and PT2 = 5 and PT3 = 5 and PT4 = 5 and PT5 = 5 and PT6 = 5 and PT7 = 5 and PT8 = 5 and PT9 = 5 and 
+PT10 = 5 and PT11 = 5 and PT12 = 5 and PT13 = 5 and PT14 = 5 and PT15 = 5 and PT16 = 5 and PT17 = 5 and PT18 = 5 and PT19 = 5 and 
+PT20 = 5 and PT21 = 5 and PT22 = 5 and PT23 = 5 and PT24 = 5 and PT25 = 5 and PT26 = 5 and PT27 = 5 and PT22_1 = 5 and PT28 = 5 and 
+PT55 = 5 then dsmptsa1 = 5;
+MPRINT(PTSD):   else if PT1 = 9 or PT2 = 9 or PT3 = 9 or PT4 = 9 or PT5 = 9 or PT6 = 9 or PT7 = 9 or PT8 = 9 or PT9 = 9 or PT10 = 9 
+or PT11 = 9 or PT12 = 9 or PT13 = 9 or PT14 = 9 or PT15 = 9 or PT16 = 9 or PT17 = 9 or PT18 = 9 or PT19 = 9 or PT20 = 9 or PT21 = 9 
+or PT22 = 9 or PT23 = 9 or PT24 = 9 or PT25 = 9 or PT26 = 9 or PT27 = 9 or PT28 = 9 or PT29 = 9 or PT30 = 9 or PT31 = 9 or PT32 = 9 
+or PT33 = 9 or PT34 = 9 or PT35 = 9 or PT36 = 9 or PT37 = 9 or PT38 = 9 or PT39 = 9 or PT40 = 9 or PT41 = 9 or PT42 = 9 or PT43 = 9 
+or PT44 = 9 or PT45 = 9 or PT46 = 9 or PT47 = 9 or PT48 = 9 or PT49 = 9 or PT50 = 9 or PT51 = 9 or PT52 = 9 or PT53 = 9 or PT54 = 9 
+or PT50_1 = 9 or PT55 = 9 then dsmptsa1 = 9;
+MPRINT(PTSD):   else if PT1 = 8 or PT2 = 8 or PT3 = 8 or PT4 = 8 or PT5 = 8 or PT6 = 8 or PT7 = 8 or PT8 = 8 or PT9 = 8 or PT10 = 8 
+or PT11 = 8 or PT12 = 8 or PT13 = 8 or PT14 = 8 or PT15 = 8 or PT16 = 8 or PT17 = 8 or PT18 = 8 or PT19 = 8 or PT20 = 8 or PT21 = 8 
+or PT22 = 8 or PT23 = 8 or PT24 = 8 or PT25 = 8 or PT26 = 8 or PT27 = 8 or PT28 = 8 or PT29 = 8 or PT30 = 8 or PT31 = 8 or PT32 = 8 
+or PT33 = 8 or PT34 = 8 or PT35 = 8 or PT36 = 8 or PT37 = 8 or PT38 = 8 or PT39 = 8 or PT40 = 8 or PT41 = 8 or PT42 = 8 or PT43 = 8 
+or PT44 = 8 or PT45 = 8 or PT46 = 8 or PT47 = 8 or PT48 = 8 or PT49 = 8 or PT50 = 8 or PT51 = 8 or PT52 = 8 or PT53 = 8 or PT54 = 8 
+or PT50_1 = 8 or PT55 = 8 then dsmptsa1 = 8;
+MPRINT(PTSD):   ******************************************************************************************************** * Criteria 
+A Part 2: The person has been exposed to a traumatic event in which the persons response * * involved intense fear, helplessness, 
+or horror. * * * * Worst Event: PT67 is Yes(1) OR PT67a is Yes(1) OR PT67b is Yes(1) OR PT67c is Yes(1) * * Random Event: PT207 is 
+Yes(1) OR PT207a is Yes(1) OR PT207b is Yes(1) OR PT207c is Yes(1) * 
+********************************************************************************************************;
+MPRINT(PTSD):   * Worst Event;
+MPRINT(PTSD):   if PT67 = 1 or PT67a = 1 or PT67b = 1 or PT67c = 1 then dwptsa2 = 1;
+MPRINT(PTSD):   else if PT67 = 5 and PT67a = 5 and PT67b = 5 and PT67c = 5 then dwptsa2 = 5;
+MPRINT(PTSD):   else if PT67 = 9 or PT67a = 9 or PT67b = 9 or PT67c = 9 then dwptsa2 = 9;
+MPRINT(PTSD):   else if PT67 = 8 or PT67a = 8 or PT67b = 8 or PT67c = 8 then dwptsa2 = 8;
+MPRINT(PTSD):   * Random Event;
+MPRINT(PTSD):   if PT207 = 1 or PT207a = 1 or PT207b = 1 or PT207c = 1 then drptsa2 = 1;
+MPRINT(PTSD):   else if PT207 = 5 and PT207a = 5 and PT207b = 5 and PT207c = 5 then drptsa2 = 5;
+MPRINT(PTSD):   else if PT207 = 9 or PT207a = 9 or PT207b = 9 or PT207c = 9 then drptsa2 = 9;
+MPRINT(PTSD):   else if PT207 = 8 or PT207a = 8 or PT207b = 8 or PT207c = 8 then drptsa2 = 8;
+MPRINT(PTSD):   ***************************************************************************************************** * Criteria A: 
+Combine Parts 1, 2 * *****************************************************************************************************;
+MPRINT(PTSD):   * Worst event;
+MPRINT(PTSD):   if dsmptsa1 = 1 and dwptsa2 = 1 then dwptsa = 1;
+MPRINT(PTSD):   else if dsmptsa1 = 5 or dwptsa2 = 5 then dwptsa = 5;
+MPRINT(PTSD):   else if dsmptsa1 = 9 or dwptsa2 = 9 then dwptsa = 9;
+MPRINT(PTSD):   else if dsmptsa1 = 8 or dwptsa2 = 8 then dwptsa = 8;
+8 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   if dsmptsa1 = 1 and drptsa2 = 1 then drptsa = 1;
+MPRINT(PTSD):   else if dsmptsa1 = 5 or drptsa2 = 5 then drptsa = 5;
+MPRINT(PTSD):   else if dsmptsa1 = 9 or drptsa2 = 9 then drptsa = 9;
+MPRINT(PTSD):   else if dsmptsa1 = 8 or drptsa2 = 8 then drptsa = 8;
+MPRINT(PTSD):   ************************************************************************************************************** * 
+Criteria B Part 1: The traumatic event is experienced in one (or more) of the following ways: * * * * 1. recurrent and intrusive 
+distressing recollections of the event, including images, thoughts, or * * perceptions. * * * * Worst Event: PT86 is Yes(1) * * 
+Random Event: PT222 is Yes(1) * * * * 2. recurrent distressing dreams of the event. * * * * Worst Event: PT87 is Yes(1) * * Random 
+Event: PT223 is Yes(1) * * * * 3. acting or feeling as if the traumatic event were recurring (includes a sense of reliving * * the 
+experience, illusions, hallucinations, and dissociative flashback episodes, including those * * that occur on awakening or when 
+intoxicated). * * * * Worst Event: PT88 is Yes(1) * * Random Event: PT224 is Yes(1) * * * * 4. intense psychological distress at 
+exposure to internal or external cues that symbolize or resemble * * an aspect of the traumatic event. * * * * Worst Event: PT89 is 
+Yes(1) * * Random Event: PT225 is Yes(1) * * * * 5. physiological reactivity on exposure to internal or external cues that 
+symbolize or resemble an * * aspect of the traumatic event. * * * * Worst Event: PT90 is Yes(1) * * Random Event: PT226 is Yes(1) * 
+**************************************************************************************************************;
+MPRINT(PTSD):   *Worst event;
+MPRINT(PTSD):   if PT86 = 1 or PT87 = 1 or PT88 = 1 or PT89 = 1 or PT90 = 1 then dwptsb1 = 1;
+MPRINT(PTSD):   else if PT86 = 5 and PT87 = 5 and PT88 = 5 and PT89 = 5 and PT90 = 5 then dwptsb1 = 5;
+MPRINT(PTSD):   else if PT86 = 9 or PT87 = 9 or PT88 = 9 or PT89 = 9 or PT90 = 9 then dwptsb1 = 9;
+MPRINT(PTSD):   else if PT86 = 8 or PT87 = 8 or PT88 = 8 or PT89 = 8 or PT90 = 8 then dwptsb1 = 8;
+MPRINT(PTSD):   *Random event;
+MPRINT(PTSD):   if PT222 = 1 or PT223 = 1 or PT224 = 1 or PT225 = 1 or PT226 = 1 then drptsb1 = 1;
+MPRINT(PTSD):   else if PT222 = 5 and PT223 = 5 and PT224 = 5 and PT225 = 5 and PT226 = 5 then drptsb1 = 5;
+MPRINT(PTSD):   else if PT222 = 9 or PT223 = 9 or PT224 = 9 or PT225 = 9 or PT226 = 9 then drptsb1 = 9;
+MPRINT(PTSD):   else if PT222 = 8 or PT223 = 8 or PT224 = 8 or PT225 = 8 or PT226 = 8 then drptsb1 = 8;
+MPRINT(PTSD):   ******************************************************************************************* * Criteria B Part 2: 
+The traumatic event is persistently reexperienced. * * * * Worst Event: PT113 is (2,3,4,5) * * Random Event: PT230 is (2,3,4,5) * * 
+* * Note: PT81 is deleted, use PT113 as replacement * 
+*******************************************************************************************;
+MPRINT(PTSD):   if PT113 IN(2,3,4,5) then dwptsb2 = 1;
+MPRINT(PTSD):   else if PT113 = 1 then dwptsb2 = 5;
+MPRINT(PTSD):   else dwptsb2 = PT113;
+MPRINT(PTSD):   if PT230 IN(2,3,4,5) then drptsb2 = 1;
+MPRINT(PTSD):   else if PT230 = 1 then drptsb2 = 5;
+MPRINT(PTSD):   else drptsb2 = PT230;
+MPRINT(PTSD):   ********************************************************************* * Combine B Parts 1,2 for worst and random 
+event * * * *********************************************************************;
+MPRINT(PTSD):   if dwptsb1 = 1 and dwptsb2 = 1 then dwptsb = 1;
+MPRINT(PTSD):   else if dwptsb1 = 5 or dwptsb2 = 5 then dwptsb = 5;
+MPRINT(PTSD):   else if dwptsb1 = 9 or dwptsb2 = 9 then dwptsb = 9;
+MPRINT(PTSD):   else if dwptsb1 = 8 or dwptsb2 = 8 then dwptsb = 8;
+MPRINT(PTSD):   if drptsb1 = 1 and drptsb2 = 1 then drptsb = 1;
+MPRINT(PTSD):   else if drptsb1 = 5 or drptsb2 = 5 then drptsb = 5;
+MPRINT(PTSD):   else if drptsb1 = 9 or drptsb2 = 9 then drptsb = 9;
+MPRINT(PTSD):   else if drptsb1 = 8 or drptsb2 = 8 then drptsb = 8;
+MPRINT(PTSD):   **************************************************************************************************************** * 
+Criteria C Part 1: Persistent avoidance of stimuli associated with the trauma and numbing of * * general responsiveness(not present 
+before the trauma), as indicated by three(or more) * * of the following: * * * * 1. efforts to avoid thoughts, feelings, or 
+conversations associated with the trauma * * * * Worst Event: PT68 is Yes(1) * * Random Event: PT208 is Yes(1) * * * * 2. efforts 
+to avoid activities, places, or people that arouse recollections of the trauma * * * * Worst Event: PT69 is Yes(1) * * Random 
+Event: PT209 is Yes(1) * * * * 3. inability to recall an important aspect of the trauma * * * * Worst Event: PT70 is Yes(1) * * 
+Random Event: PT210 is Yes(1) * * * * 4. markedly diminished interest or participation in significant activities * * * * Worst 
+Event: PT71 is Yes(1) * * Random Event: PT211 is Yes(1) * * * * 5. feeling of detachment or estrangement from others * * * * Worst 
+Event: PT72 is Yes(1) * * Random Event: PT212 is Yes(1) * * * * 6. restricted range of affect (e.g., unable to have loving 
+feelings) * * * * Worst Event: PT73 is Yes(1) * * Random Event: PT213 is Yes(1) * * * * 7. sense of a foreshortened future(e.g., 
+does not expect to have a career, marriage, children, * * or a normal life span) * * * * Worst Event: PT74 is Yes(1) * * Random 
+Event: PT214 is Yes(1) * 
+****************************************************************************************************************;
+MPRINT(PTSD):   *********************************************************************************************** * Check if 3 out of 
+7 Parts of C were met for Worst and Random Event * 
+***********************************************************************************************;
+MPRINT(PTSD):   if sum(PT68 = 1, PT69 = 1, PT70 = 1, PT71 = 1, PT72 = 1, PT73 = 1, PT74 = 1) >= 3 then dwptsc1 = 1;
+MPRINT(PTSD):   else if sum(PT68 = 5, PT69 = 5, PT70 = 5, PT71 = 5, PT72 = 5, PT73 = 5, PT74 = 5) >= 5 then dwptsc1 = 5;
+9 The SAS System                                                                                    14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   else if PT68 = 9 or PT69 = 9 or PT70 = 9 or PT71 = 9 or PT72 = 9 or PT73 = 9 or PT74 = 9 then dwptsc1 = 9;
+MPRINT(PTSD):   else if PT68 = 8 or PT69 = 8 or PT70 = 8 or PT71 = 8 or PT72 = 8 or PT73 = 8 or PT74 = 8 then dwptsc1 = 8;
+MPRINT(PTSD):   if sum(PT208 = 1, PT209 = 1, PT210 = 1, PT211 = 1, PT212 = 1, PT213 = 1, PT214 = 1) >= 3 then drptsc1 = 1;
+MPRINT(PTSD):   else if sum(PT208 = 5, PT209 = 5, PT210 = 5, PT211 = 5, PT212 = 5, PT213 = 5, PT214 = 5) >= 5 then drptsc1 = 5;
+MPRINT(PTSD):   else if PT208 = 9 or PT209 = 9 or PT210 = 9 or PT211 = 9 or PT212 = 9 or PT213 = 9 or PT214 = 9 then drptsc1 = 9;
+MPRINT(PTSD):   else if PT208 = 8 or PT209 = 8 or PT210 = 8 or PT211 = 8 or PT212 = 8 or PT213 = 8 or PT214 = 8 then drptsc1 = 8;
+MPRINT(PTSD):   **************************************************************************************************** * Criteria C 
+Part 2: Persistence avoidance of stimuli associated with the trauma and numbing of * * general responsiveness (not present before 
+the trauma). * * * * Worst Event: PT113 is (2,3,4,5) * * Random Event: PT219 is (2,3,4,5) * * * * Note: PT97 is deleted, replaced 
+with PT113 * ****************************************************************************************************;
+MPRINT(PTSD):   if PT113 IN(2,3,4,5) then dwptsc2 = 1;
+MPRINT(PTSD):   else if PT113 = 1 then dwptsc2 = 5;
+MPRINT(PTSD):   else dwptsc2 = PT113;
+MPRINT(PTSD):   if PT219 IN(2,3,4,5) then drptsc2 = 1;
+MPRINT(PTSD):   else if PT219 = 1 then drptsc2 = 5;
+MPRINT(PTSD):   else drptsc2 = PT219;
+MPRINT(PTSD):   *************************************************************************************************** * Combine 
+Criteria C Parts 1 and 2 * * * * Note: For Worst Event Criteria C Part 2 Not Operationalized * 
+***************************************************************************************************;
+MPRINT(PTSD):   if dwptsc1 = 1 and dwptsc2 = 1 then dwptsc = 1;
+MPRINT(PTSD):   else if dwptsc1 = 5 or dwptsc2 = 5 then dwptsc = 5;
+MPRINT(PTSD):   else if dwptsc1 = 9 or dwptsc2 = 9 then dwptsc = 9;
+MPRINT(PTSD):   else if dwptsc1 = 8 or dwptsc2 = 8 then dwptsc = 8;
+MPRINT(PTSD):   if drptsc1 = 1 and drptsc2 = 1 then drptsc = 1;
+MPRINT(PTSD):   else if drptsc1 = 5 or drptsc2 = 5 then drptsc = 5;
+MPRINT(PTSD):   else if drptsc1 = 9 or drptsc2 = 9 then drptsc = 9;
+MPRINT(PTSD):   else if drptsc1 = 8 or drptsc2 = 8 then drptsc = 8;
+MPRINT(PTSD):   **************************************************************************************************** * Criteria D 
+Part 1: Persistent symptoms of increased arousal (not present before the trauma), * * as indicated by two (or more) of the 
+following: * * * * 1. difficulty falling or staying asleep. * * * * Worst Event: PT102 is Yes(1) * * Random Event: PT233 is Yes(1) 
+* * * * 2. irritability or outbursts of anger. * * * * Worst Event: PT103 is Yes(1) * * Random Event: PT234 is Yes(1) * * * * 3. 
+difficulty concentrating. * * * * Worst Event: PT104 is Yes(1) * * Random Event: PT235 is Yes(1) * * * * 4. hypervigilance. * * * * 
+Worst Event: PT105 is Yes(1) * * Random Event: PT236 is Yes(1) * * * * 5. exaggerated startle response. * * * * Worst Event: PT106 
+is Yes(1) * * Random Event: PT237 is Yes(1) * 
+****************************************************************************************************;
+MPRINT(PTSD):   * Check if 2 out of 5 Parts of D were met for Worst and Random Event;
+MPRINT(PTSD):   if sum(PT102 = 1, PT103 = 1, PT104 = 1, PT105 = 1, PT106 = 1) > = 2 then dwptsd1 = 1;
+MPRINT(PTSD):   else if sum(PT102 = 5, PT103 = 5, PT104 = 5, PT105 = 5, PT106 = 5) > = 4 then dwptsd1 = 5;
+MPRINT(PTSD):   else if PT102 = 9 or PT103 = 9 or PT104 = 9 or PT105 = 9 or PT106 = 9 then dwptsd1 = 9;
+MPRINT(PTSD):   else if PT102 = 8 or PT103 = 8 or PT104 = 8 or PT105 = 8 or PT106 = 8 then dwptsd1 = 8;
+MPRINT(PTSD):   if sum(PT233 = 1, PT234 = 1, PT235 = 1, PT236 = 1, PT237 = 1) > = 2 then drptsd1 = 1;
+MPRINT(PTSD):   else if sum(PT233 = 5, PT234 = 5, PT235 = 5, PT236 = 5, PT237 = 5) > = 4 then drptsd1 = 5;
+MPRINT(PTSD):   else if PT233 = 9 or PT234 = 9 or PT235 = 9 or PT236 = 9 or PT237 = 9 then drptsd1 = 9;
+MPRINT(PTSD):   else if PT233 = 8 or PT234 = 8 or PT235 = 8 or PT236 = 8 or PT237 = 8 then drptsd1 = 8;
+MPRINT(PTSD):   ************************************************************************************************* * Criteria D Part 
+2: Persistent symptoms of increased arousal (not present before the trauma) * * * * Worst Event: PT113 is (2,3,4,5) * * Random 
+Event: PT241 is (2,3,4,5) * *************************************************************************************************;
+MPRINT(PTSD):   if PT113 IN(2,3,4,5) then dwptsd2 = 1;
+MPRINT(PTSD):   else if PT113 = 1 then dwptsd2 = 5;
+MPRINT(PTSD):   else dwptsd2 = PT113;
+MPRINT(PTSD):   if PT241 IN(2,3,4,5) then drptsd2 = 1;
+MPRINT(PTSD):   else if PT241 = 1 then drptsd2 = 5;
+MPRINT(PTSD):   else drptsd2 = PT241;
+MPRINT(PTSD):   *********************************************************************************************** * Combine Criteria 
+D Parts 1 and 2 * ***********************************************************************************************;
+MPRINT(PTSD):   if dwptsd1 = 1 and dwptsd2 = 1 then dwptsd = 1;
+MPRINT(PTSD):   else if dwptsd1 = 5 or dwptsd2 = 5 then dwptsd = 5;
+MPRINT(PTSD):   else if dwptsd1 = 9 or dwptsd2 = 9 then dwptsd = 9;
+MPRINT(PTSD):   else if dwptsd1 = 8 or dwptsd2 = 8 then dwptsd = 8;
+MPRINT(PTSD):   if drptsd1 = 1 and drptsd2 = 1 then drptsd = 1;
+MPRINT(PTSD):   else if drptsd1 = 5 or drptsd2 = 5 then drptsd = 5;
+MPRINT(PTSD):   else if drptsd1 = 9 or drptsd2 = 9 then drptsd = 9;
+MPRINT(PTSD):   else if drptsd1 = 8 or drptsd2 = 8 then drptsd = 8;
+10 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   ***************************************************************************************************** * Criteria E: 
+Duration of the disturbance (symptoms in Criteria B, C, and D) is more than 1 month. * * * * Worst Event: (PT78 > 1 month) AND 
+(PT94 > 1 month) AND (PT110 > 1 month) * * Random Event: (PT218 > 1 month) AND (PT229 > 1 month) AND (PT240 > 1 month) * * * * 
+Note: PT78, PT94 are deleted * 
+*****************************************************************************************************;
+MPRINT(TDY_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS2):   if PT110a < 998 then do;
+MPRINT(TDY_PTS2):   select (PT110b);
+MPRINT(TDY_PTS2):   when(1) PT110 = PT110a;
+MPRINT(TDY_PTS2):   when(2) PT110 = 7*PT110a;
+MPRINT(TDY_PTS2):   when(3) PT110 = 30*PT110a;
+MPRINT(TDY_PTS2):   when(4) PT110 = 365*PT110a;
+MPRINT(TDY_PTS2):   otherwise;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   if PT110 >= 99995 then PT110 = 99995;
+MPRINT(TDY_PTS2):   if PT110a = 997 then PT110 = 31;
+MPRINT(TDY_PTS2):   if PT110a = 998 then PT110 = 99998;
+MPRINT(TDY_PTS2):   if PT110a = 999 then PT110 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT110c = 1 and (PT110 <= 30 or PT110a IN(998,999)) then PT110 = 31;
+MPRINT(TDY_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS2):   if PT218a < 998 then do;
+MPRINT(TDY_PTS2):   select (PT218b);
+MPRINT(TDY_PTS2):   when(1) PT218 = PT218a;
+MPRINT(TDY_PTS2):   when(2) PT218 = 7*PT218a;
+MPRINT(TDY_PTS2):   when(3) PT218 = 30*PT218a;
+MPRINT(TDY_PTS2):   when(4) PT218 = 365*PT218a;
+MPRINT(TDY_PTS2):   otherwise;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   if PT218 >= 99995 then PT218 = 99995;
+MPRINT(TDY_PTS2):   if PT218a = 997 then PT218 = 31;
+MPRINT(TDY_PTS2):   if PT218a = 998 then PT218 = 99998;
+MPRINT(TDY_PTS2):   if PT218a = 999 then PT218 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT218c = 1 and (PT218 <= 30 or PT218a IN(998,999)) then PT218 = 31;
+MPRINT(TDY_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS2):   if PT229a < 998 then do;
+MPRINT(TDY_PTS2):   select (PT229b);
+MPRINT(TDY_PTS2):   when(1) PT229 = PT229a;
+MPRINT(TDY_PTS2):   when(2) PT229 = 7*PT229a;
+MPRINT(TDY_PTS2):   when(3) PT229 = 30*PT229a;
+MPRINT(TDY_PTS2):   when(4) PT229 = 365*PT229a;
+MPRINT(TDY_PTS2):   otherwise;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   if PT229 >= 99995 then PT229 = 99995;
+MPRINT(TDY_PTS2):   if PT229a = 997 then PT229 = 31;
+MPRINT(TDY_PTS2):   if PT229a = 998 then PT229 = 99998;
+MPRINT(TDY_PTS2):   if PT229a = 999 then PT229 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT229c = 1 and (PT229 <= 30 or PT229a IN(998,999)) then PT229 = 31;
+MPRINT(TDY_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS2):   if PT240a < 998 then do;
+MPRINT(TDY_PTS2):   select (PT240b);
+MPRINT(TDY_PTS2):   when(1) PT240 = PT240a;
+MPRINT(TDY_PTS2):   when(2) PT240 = 7*PT240a;
+MPRINT(TDY_PTS2):   when(3) PT240 = 30*PT240a;
+MPRINT(TDY_PTS2):   when(4) PT240 = 365*PT240a;
+MPRINT(TDY_PTS2):   otherwise;
+MPRINT(TDY_PTS2):   end;
+MPRINT(TDY_PTS2):   end;
+11 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(TDY_PTS2):   if PT240 >= 99995 then PT240 = 99995;
+MPRINT(TDY_PTS2):   if PT240a = 997 then PT240 = 31;
+MPRINT(TDY_PTS2):   if PT240a = 998 then PT240 = 99998;
+MPRINT(TDY_PTS2):   if PT240a = 999 then PT240 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT240c = 1 and (PT240 <= 30 or PT240a IN(998,999)) then PT240 = 31;
+MPRINT(PTSD):   if 30 < PT110 < 99998 then dwptse = 1;
+MPRINT(PTSD):   else if 0 <= PT110 <= 30 then dwptse = 5;
+MPRINT(PTSD):   else if PT110 = 99999 then dwptse = 9;
+MPRINT(PTSD):   else if PT110 = 99998 then dwptse = 8;
+MPRINT(PTSD):   if 30 < PT218 < 99998 and 30 < PT229 < 99998 and 30 < PT240 < 99998 then drptse = 1;
+MPRINT(PTSD):   else if 0 <= PT218 <= 30 or 0 <= PT229 <= 30 or 0 <= PT240 <= 30 then drptse = 5;
+MPRINT(PTSD):   else if PT218 = 99999 or PT229 = 99999 or PT240 = 99999 then drptse = 9;
+MPRINT(PTSD):   else if PT218 = 99998 or PT229 = 99998 or PT240 = 99998 then drptse = 8;
+MPRINT(PTSD):   ******************************************************************************************************* * Criteria 
+F: The disturbance causes clinically significant distress or impairment in social, * * occupational, or other important areas of 
+functioning. * * * * Worst Event Group 1: PT82 is (3,4,5) OR PT83 is (3,4,5) * * Worst Event Group 2: PT98 is (3,4,5) OR PT99 is 
+(3,4,5) * * Worst Event Group 3: PT114 is (3,4,5) OR PT115 is (3,4,5) * * Worst Event Groups 1,2,3: PT64 = PT268 and at least one 
+of PT278a-d >= 4 * * Random Event Group 1: PT220 is (3,4,5) OR PT221 is (3,4,5) * * Random Event Group 2: PT231 is (3,4,5) OR PT232 
+is (3,4,5) * * Random Event Group 3: PT242 is (3,4,5) OR PT243 is (3,4,5) * * Random Event: PT246 is Yes(1) OR PT249 is Yes(1) OR 
+PT253 is Yes(1) OR PT254 is Yes(1) * * Worst Event Groups 1,2,3: PT58b = PT268 and at least one of PT278a-d >= 4 * * * * Note: 
+PT82, PT83, PT98, PT99, PT249, PT253, PT254 are deleted * * Note 4/30/04: Add condition PT64 = PT268 and PT278a-d >= 4 for worst 
+event * * Note 4/30/04: Add condition PT58b = PT268 and PT278a-d >= 4 for random event * * Note 8/14/07: Assign PT268 value of 
+PT26501 when only 1 event in PT265 series * 
+*******************************************************************************************************;
+MPRINT(PTSD):   * Check if there are responses in PT278 series in acceptable range;
+MPRINT(PTSD):   if (4 <= PT278a <= 10) or (4 <= PT278b <= 10) or (4 <= PT278c <= 10) or (4 <= PT278d <= 10) then PT278NUM = 1;
+MPRINT(PTSD):   else if ((0 <= PT278a <= 3) or PT278a = 97) and ((0 <= PT278b <= 3) or PT278b = 97) and ((0 <= PT278c <= 3) or 
+PT278c = 97) and ((0 <= PT278d <= 3) or PT278d = 97) then PT278NUM = 5;
+MPRINT(PTSD):   else if PT278a = 99 or PT278b = 99 or PT278c = 99 or PT278d = 99 then PT278NUM = 9;
+MPRINT(PTSD):   else if PT278a = 98 or PT278b = 98 or PT278c = 98 or PT278d = 98 then PT278NUM = 8;
+MPRINT(PTSD):   * Worst event;
+MPRINT(PTSD):   * If PT75 = 1 or PT91 = 1 or PT107 = 1 or PT111 = 1 or PT113 = 1 then PT114, PT115 skipped;
+MPRINT(PTSD):   *If only 1 event in PT265 series PT268 skipped, assign PT268 value of PT26501 if only 1 event;
+MPRINT(PTSD):   if N(of PT26501-PT26528) = 1 and PT268 = . then PT268 = PT26501;
+MPRINT(PTSD):   if PT114 IN(3,4,5) or PT115 IN(3,4,5) or (PT64 = PT268 and N(PT64,PT268) > 0 and PT278NUM = 1) then dwptsf = 1;
+MPRINT(PTSD):   else if (PT75 = 1 or PT91 = 1 or PT107 = 1 or PT111 = 1 or PT113 = 1 or (PT114 IN(1,2) and PT115 IN(1,2))) and 
+(PT64 = . or PT64 ^= PT268 or PT278NUM IN(.,5)) then dwptsf = 5;
+MPRINT(PTSD):   else if PT114 = 9 or PT115 = 9 or PT278NUM = 9 then dwptsf = 9;
+MPRINT(PTSD):   else if PT114 = 8 or PT115 = 8 or PT278NUM = 8 then dwptsf = 8;
+MPRINT(PTSD):   * Random event;
+MPRINT(PTSD):   * If PT215 = 1 then PT220, PT221 skipped;
+MPRINT(PTSD):   * If PT216 = 1 then PT220,PT221,PT231,PT232, PT242,PT243,PT246,PT249,PT253,PT254 skipped;
+MPRINT(PTSD):   * If PT227 = 1 then PT231, PT232 skipped;
+MPRINT(PTSD):   * If PT238 = 1 then PT242, PT243 skipped;
+MPRINT(PTSD):   * If PT244 = 2 then PT246,PT249,PT253, PT254 skipped;
+MPRINT(PTSD):   * Either PT246 or PT249,PT253,PT254 answered;
+MPRINT(PTSD):   if PT220 IN(3,4,5) or PT221 IN(3,4,5) or PT231 IN(3,4,5) or PT232 IN(3,4,5) or PT242 IN(3,4,5) or PT243 IN(3,4,5) 
+or PT246 = 1 or (PT58b = PT268 and N(PT58b,PT268) > 0 and PT278NUM = 1) then drptsf = 1;
+MPRINT(PTSD):   else if (PT215 = 1 or PT216 = 1 or (PT220 IN(1,2) and PT221 IN(1,2))) and (PT216 = 1 or PT227 = 1 or (PT231 IN(1,2) 
+and PT232 IN(1,2))) and (PT216 = 1 or PT238 = 1 or (PT242 IN(1,2) and PT243 IN(1,2))) and (PT216 = 1 or PT244 = 2 or PT246 = 5) and 
+(PT58b = . or PT58b ^= PT268 or PT278NUM IN(.,5)) then drptsf = 5;
+MPRINT(PTSD):   else if PT220 = 9 or PT221 = 9 or PT231 = 9 or PT232 = 9 or PT242 = 9 or PT243 = 9 or PT246 = 9 or PT278NUM = 9 
+then drptsf = 9;
+MPRINT(PTSD):   else if PT220 = 8 or PT221 = 8 or PT231 = 8 or PT232 = 8 or PT242 = 8 or PT243 = 8 or PT246 = 8 or PT278NUM = 8 
+then drptsf = 8;
+MPRINT(PTSD):   ************************************************************************************ * Combine Criteria A,B,C,D,E,F 
+for Worst Event and Random Event * ************************************************************************************;
+MPRINT(PTSD):   if dwptsa = 1 and dwptsb = 1 and dwptsc = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts = 1;
+MPRINT(PTSD):   *All criteria are met;
+MPRINT(PTSD):   else dwpts = 5;
+MPRINT(PTSD):   *Criteria are not met;
+MPRINT(PTSD):   if drptsa = 1 and drptsb = 1 and drptsc = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts = 1;
+12 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   *All criteria are met;
+MPRINT(PTSD):   else drpts = 5;
+MPRINT(PTSD):   *Criteria are not met;
+MPRINT(PTSD):   if dwpts = 1 or drpts = 1 then dsm_pts = 1;
+MPRINT(PTSD):   else dsm_pts = 5;
+MPRINT(PTSD):   dsm_pts_random = drpts;
+MPRINT(PTSD):   dsm_pts_worst = dwpts;
+MPRINT(PTSD):   **************************************************************************************** * Create 5 new definitions 
+of PTSD * * 1. ignore criterion A Part 2 * * 2. reduce the number of symptoms needed in Criterion C Part 1 from 3 to 2 * * 3. 
+reduce the number of symptoms needed in Criterion C Part 1 from 3 to 1 * * 4. do both 1 and 2 * * 5. do both 1 and 3 * 
+****************************************************************************************;
+MPRINT(PTSD):   if dsmptsa1 = 1 and dwptsb = 1 and dwptsc = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts1 = 1;
+MPRINT(PTSD):   *All criteria are met for definition 1;
+MPRINT(PTSD):   else dwpts1 = 5;
+MPRINT(PTSD):   *Criteria are not met for definition 1;
+MPRINT(PTSD):   if dsmptsa1 = 1 and drptsb = 1 and drptsc = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts1 = 1;
+MPRINT(PTSD):   *All criteria are met for definition 1;
+MPRINT(PTSD):   else drpts1 = 5;
+MPRINT(PTSD):   *Criteria are not met for definition 1;
+MPRINT(PTSD):   if dwptsa = 1 and dwptsb = 1 and sum(PT68 = 1, PT69 = 1, PT70 = 1, PT71 = 1, PT72 = 1, PT73 = 1, PT74 = 1) >= 2 and 
+dwptsc2 = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts2 = 1;
+MPRINT(PTSD):   else dwpts2 = 5;
+MPRINT(PTSD):   if drptsa = 1 and drptsb = 1 and sum(PT208 = 1, PT209 = 1, PT210 = 1, PT211 = 1, PT212 = 1, PT213 = 1, PT214 = 1) 
+>= 2 and drptsc2 = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts2 = 1;
+MPRINT(PTSD):   else drpts2 = 5;
+MPRINT(PTSD):   if dwptsa = 1 and dwptsb = 1 and sum(PT68 = 1, PT69 = 1, PT70 = 1, PT71 = 1, PT72 = 1, PT73 = 1, PT74 = 1) >= 1 and 
+dwptsc2 = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts3 = 1;
+MPRINT(PTSD):   else dwpts3 = 5;
+MPRINT(PTSD):   if drptsa = 1 and drptsb = 1 and sum(PT208 = 1, PT209 = 1, PT210 = 1, PT211 = 1, PT212 = 1, PT213 = 1, PT214 = 1) 
+>= 1 and drptsc2 = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts3 = 1;
+MPRINT(PTSD):   else drpts3 = 5;
+MPRINT(PTSD):   if dsmptsa1 = 1 and dwptsb = 1 and sum(PT68 = 1, PT69 = 1, PT70 = 1, PT71 = 1, PT72 = 1, PT73 = 1, PT74 = 1) >= 2 
+and dwptsc2 = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts4 = 1;
+MPRINT(PTSD):   else dwpts4 = 5;
+MPRINT(PTSD):   if dsmptsa1 = 1 and drptsb = 1 and sum(PT208 = 1, PT209 = 1, PT210 = 1, PT211 = 1, PT212 = 1, PT213 = 1, PT214 = 1) 
+>= 2 and drptsc2 = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts4 = 1;
+MPRINT(PTSD):   else drpts4 = 5;
+MPRINT(PTSD):   if dsmptsa1 = 1 and dwptsb = 1 and sum(PT68 = 1, PT69 = 1, PT70 = 1, PT71 = 1, PT72 = 1, PT73 = 1, PT74 = 1) >= 1 
+and dwptsc2 = 1 and dwptsd = 1 and dwptse = 1 and dwptsf = 1 then dwpts5 = 1;
+MPRINT(PTSD):   else dwpts5 = 5;
+MPRINT(PTSD):   if dsmptsa1 = 1 and drptsb = 1 and sum(PT208 = 1, PT209 = 1, PT210 = 1, PT211 = 1, PT212 = 1, PT213 = 1, PT214 = 1) 
+>= 1 and drptsc2 = 1 and drptsd = 1 and drptse = 1 and drptsf = 1 then drpts5 = 1;
+MPRINT(PTSD):   else drpts5 = 5;
+MPRINT(PTSD):   *Combine worst and random event diagnosis;
+MPRINT(PTSD):   if dwpts1 = 1 or drpts1 = 1 then dsm_pts1 = 1;
+MPRINT(PTSD):   else dsm_pts1 = 5;
+MPRINT(PTSD):   *Combine worst and random event diagnosis;
+MPRINT(PTSD):   if dwpts2 = 1 or drpts2 = 1 then dsm_pts2 = 1;
+MPRINT(PTSD):   else dsm_pts2 = 5;
+MPRINT(PTSD):   *Combine worst and random event diagnosis;
+MPRINT(PTSD):   if dwpts3 = 1 or drpts3 = 1 then dsm_pts3 = 1;
+MPRINT(PTSD):   else dsm_pts3 = 5;
+MPRINT(PTSD):   *Combine worst and random event diagnosis;
+MPRINT(PTSD):   if dwpts4 = 1 or drpts4 = 1 then dsm_pts4 = 1;
+MPRINT(PTSD):   else dsm_pts4 = 5;
+MPRINT(PTSD):   *Combine worst and random event diagnosis;
+MPRINT(PTSD):   if dwpts5 = 1 or drpts5 = 1 then dsm_pts5 = 1;
+MPRINT(PTSD):   else dsm_pts5 = 5;
+MPRINT(PTSD):   ************************************************************************************* * Posttraumatic Disorder -- 
+ICD criteria * *************************************************************************************;
+MPRINT(PTSD):   
+******************************************************************************************************************** * Criteria A: 
+The patient must have been exposed to a stressful event or situation (either short- or long-lasting) * * of exceptionally 
+13 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+threatening or catastrophic nurture, which would be likely to cause pervasive * * distress in almost everyone. * * * * Combat 
+Experience/Relief Worker in War Zone/Civilian in War Zone/ * * Civilian in region of Terror/Refugee: * * * * PT29 is Yes(1) OR PT30 
+is Yes(1) OR PT31 is Yes(1) OR PT32 is Yes(1) OR PT33 is Yes(1) * * * * Kidnapped: * * * * PT34 is Yes(1) * * * * Toxic Exposure: * 
+* * * PT35 is Yes(1) * * * * Automobile Accident: * * * * PT36 is Yes(1) * * * * Other Life Threatening Accident: * * * * PT37 is 
+Yes(1) * * * * Natural Disaster: * * * * PT38 is Yes(1) * * * * Man-made Disaster: * * * * PT39 is Yes(1) * * * * Life Threatening 
+Illness: * * * * PT40 is Yes(1) * * * * Beaten up as Child by Caregiver: * * * * PT41 is Yes(1) * * * * Beaten by Spouse or 
+Romantic Partner: * * * * PT42 is Yes(1) * * * * Beaten by Other: * * * * PT43 is Yes(1) * * * * Raped: * * * * PT45 is Yes(1) * * 
+* * Sexually Assaulted: * * * * PT46 is Yes(1) * * * * Mugged or Threatened with a Weapon: * * * * PT44 is Yes(1) * * * * Stalked: 
+* * * * PT47 is Yes(1) * * * * Unexpected Death of a Loved One: * * * * PT48 is Yes(1) * * * * Child with Serious Illness: * * * * 
+PT49 is Yes(1) * * * * Traumatic Event to Loved One: * * * * PT50 is Yes(1) OR PT50_1 is Yes(1) * * * * Note: PT50_1 added to NSHS 
+Replication version * * * * Witnessed Death or Dead Body, or Saw Someone Seriously Hurt: * * * * PT51 is Yes(1) * * * * 
+Accidentally Caused Serious Injury or Death * * * * PT52 is Yes(1) * * * * Purposely Injured, Tortured, or Killed Someone. * * * * 
+PT53 is Yes(1) * * * * Saw Atrocities: * * * * PT54 is Yes(1) * * * * Some Other Event: * * * * PT55 is Yes(1) * * * * Private 
+Event: * * * * PT57 is Yes(1) * 
+********************************************************************************************************************;
+MPRINT(PTSD):   * Use DSM-IV Criteria A Part 1;
+MPRINT(PTSD):   icdptsa = dsmptsa1;
+MPRINT(PTSD):   ***************************************************************************************************************** * 
+Criteria B Part 1: There must be persistent remembering or reliving of the stressor in intrusive flashbacks, * * vivid memories, or 
+recurring dreams. * * * * Worst Event: PT86 is Yes(1) OR PT87 is Yes(1) OR PT88 is Yes(1) * * Random Event: PT222 is Yes(1) OR 
+PT223 is Yes(1) OR PT224 is Yes(1) * 
+*****************************************************************************************************************;
+MPRINT(PTSD):   *Worst event;
+MPRINT(PTSD):   if PT86 = 1 or PT87 = 1 or PT88 = 1 then iwptsb1 = 1;
+MPRINT(PTSD):   else if PT86 = 5 and PT87 = 5 and PT88 = 5 then iwptsb1 = 5;
+MPRINT(PTSD):   else if PT86 = 9 or PT87 = 9 or PT88 = 9 then iwptsb1 = 9;
+MPRINT(PTSD):   else if PT86 = 8 or PT87 = 8 or PT88 = 8 then iwptsb1 = 8;
+MPRINT(PTSD):   *Random event;
+MPRINT(PTSD):   if PT222 = 1 or PT223 = 1 or PT224 = 1 then irptsb1 = 1;
+MPRINT(PTSD):   else if PT222 = 5 and PT223 = 5 and PT224 = 5 then irptsb1 = 5;
+MPRINT(PTSD):   else if PT222 = 9 or PT223 = 9 or PT224 = 9 then irptsb1 = 9;
+MPRINT(PTSD):   else if PT222 = 8 or PT223 = 8 or PT224 = 8 then irptsb1 = 8;
+MPRINT(PTSD):   ****************************************************************************************************************** 
+* Criteria B Part 2: There must be distress experienced when exposed to circumstances resembling or associated * * with the 
+stressor * * * * Worst Event: PT89 is Yes(1) OR PT90 is Yes(1) OR PT98 is (3,4,5) OR PT99 is (3,4,5) OR * * PT114 is (3,4,5) OR 
+PT115 is (3,4,5) * * Random Event: PT225 is Yes(1) OR PT226 is Yes(1) OR PT231 is (3,4,5) OR PT232 is (3,4,5) * * * * Note: PT98, 
+PT99 are deleted, use PT114, PT115 as replacement * 
+******************************************************************************************************************;
+MPRINT(PTSD):   *Worst event;
+MPRINT(PTSD):   * If PT91= 1 or PT107 = 1 or PT111 = 1 or PT113 = 1 then PT114,PT115 are skipped;
+MPRINT(PTSD):   if PT89 = 1 or PT90 = 1 or PT114 IN(3,4,5) or PT115 IN (3,4,5) then iwptsb2 = 1;
+MPRINT(PTSD):   else if PT89 = 5 and PT90 = 5 and ((PT91 = 1 or PT107 = 1 or PT111 = 1 or PT113 = 1) or (PT114 IN(1,2) and PT115 IN 
+(1,2))) then iwptsb2 = 5;
+MPRINT(PTSD):   else if PT89 = 9 or PT90 = 9 or PT114 = 9 or PT115 = 9 then iwptsb2 = 9;
+MPRINT(PTSD):   else if PT89 = 8 or PT90 = 8 or PT114 = 8 or PT115 = 8 then iwptsb2 = 8;
+MPRINT(PTSD):   *Random event;
+MPRINT(PTSD):   * If PT227 = 1 then PT231,PT232 skipped;
+MPRINT(PTSD):   if PT225 = 1 or PT226 = 1 or PT231 IN(3,4,5) or PT232 IN (3,4,5) then irptsb2 = 1;
+MPRINT(PTSD):   else if PT225 = 5 and PT226 = 5 and (PT227 = 1 or (PT231 IN(1,2) and PT232 IN (1,2))) then irptsb2 = 5;
+MPRINT(PTSD):   else if PT225 = 9 or PT226 = 9 or PT231 = 9 or PT232 = 9 then irptsb2 = 9;
+MPRINT(PTSD):   else if PT225 = 8 or PT226 = 8 or PT231 = 8 or PT232 = 8 then irptsb2 = 8;
+MPRINT(PTSD):   ****************************************************************************************** * Combine ICD Criteria B 
+Parts 1 and 2 for Random and Worst event * 
+******************************************************************************************;
+MPRINT(PTSD):   if iwptsb1 = 1 or iwptsb2 = 1 then iwptsb = 1;
+MPRINT(PTSD):   else if iwptsb1 = 5 and iwptsb2 = 5 then iwptsb = 5;
+MPRINT(PTSD):   else if iwptsb1 = 9 or iwptsb2 = 9 then iwptsb = 9;
+MPRINT(PTSD):   else if iwptsb1 = 8 or iwptsb2 = 8 then iwptsb = 8;
+MPRINT(PTSD):   if irptsb1 = 1 or irptsb2 = 1 then irptsb = 1;
+MPRINT(PTSD):   else if irptsb1 = 5 and irptsb2 = 5 then irptsb = 5;
+MPRINT(PTSD):   else if irptsb1 = 9 or irptsb2 = 9 then irptsb = 9;
+MPRINT(PTSD):   else if irptsb1 = 8 or irptsb2 = 8 then irptsb = 8;
+MPRINT(PTSD):   ******************************************************************************************** * Criteria C: The 
+14 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+patient must exhibit an actual or preferred avoidance of circumstances * * resembling or associated with the stressor, which was 
+not present before * * exposure to the stressor * * * * Worst Event: PT68 is Yes(1) OR PT69 is Yes(1) * * Random Event: PT208 is 
+Yes(1) OR PT209 is Yes(1) * * * * Note: 11/3/06 PT208 added for random event * 
+********************************************************************************************;
+MPRINT(PTSD):   *Worst event;
+MPRINT(PTSD):   if PT68 = 1 or PT69 = 1 then iwptsc = 1;
+MPRINT(PTSD):   else if PT68 = 5 and PT69 = 5 then iwptsc = 5;
+MPRINT(PTSD):   else if PT68 = 9 or PT69 = 9 then iwptsc = 9;
+MPRINT(PTSD):   else if PT68 = 8 or PT69 = 8 then iwptsc = 8;
+MPRINT(PTSD):   *Random event;
+MPRINT(PTSD):   if PT208 = 1 or PT209 = 1 then irptsc = 1;
+MPRINT(PTSD):   else if PT208 = 5 and PT209 = 5 then irptsc = 5;
+MPRINT(PTSD):   else if PT208 = 9 or PT209 = 9 then irptsc = 9;
+MPRINT(PTSD):   else if PT208 = 8 or PT209 = 8 then irptsc = 8;
+MPRINT(PTSD):   *************************************************************************************************** * Criteria D 
+Part 1: inability to recall, either partially or completely, some important aspects * * of the period of exposure to the stressor * 
+* * * Worst Event: PT70 is Yes(1) * * Random Event: PT210 is Yes(1) * 
+***************************************************************************************************;
+MPRINT(PTSD):   iwptsd1 = PT70;
+MPRINT(PTSD):   *Worst event;
+MPRINT(PTSD):   irptsd1 = PT210;
+MPRINT(PTSD):   *Random event;
+MPRINT(PTSD):   ********************************************************************************************************* * 
+Criteria D Part 2: Persistent symptoms of increased psychological sensitivity and arousal * * (not present before exposure to the 
+stressor), shown by any two of the following: * * * * (a) difficulty in falling or staying asleep * * * * Worst Event: PT102 is 
+Yes(1) * * Random Event: PT233 is Yes(1) * * * * (b) irritability or outbursts of anger * * * * Worst Event: PT103 is Yes(1) * * 
+Random Event: PT234 is Yes(1) * * * * (c) difficulty in concentrating * * * * Worst Event: PT104 is Yes(1) * * Random Event: PT235 
+is Yes(1) * * * * (d) hypervigilance * * * * Worst Event: PT105 is Yes(1) * * Random Event: PT236 is Yes(1) * * * * (e) exaggerated 
+startle response * * * * Worst Event: PT106 is Yes(1) * * Random Event: PT237 is Yes(1) * 
+*********************************************************************************************************;
+MPRINT(PTSD):   if sum(PT102 = 1, PT103 = 1, PT104 = 1, PT105 = 1, PT106 = 1) >= 2 then iwptsd2 = 1;
+MPRINT(PTSD):   else if sum(PT102 = 5, PT103 = 5, PT104 = 5, PT105 = 5, PT106 = 5) >= 4 then iwptsd2 = 5;
+MPRINT(PTSD):   else if PT102 = 9 or PT103 = 9 or PT104 = 9 or PT105 = 9 or PT106 = 9 then iwptsd2 = 9;
+MPRINT(PTSD):   else if PT102 = 8 or PT103 = 8 or PT104 = 8 or PT105 = 8 or PT106 = 8 then iwptsd2 = 8;
+MPRINT(PTSD):   if sum(PT233 = 1, PT234 = 1, PT235 = 1, PT236 = 1, PT237 = 1) >= 2 then irptsd2 = 1;
+MPRINT(PTSD):   else if sum(PT233 = 5, PT234 = 5, PT235 = 5, PT236 = 5, PT237 = 5) >= 4 then irptsd2 = 5;
+MPRINT(PTSD):   else if PT233 = 9 or PT234 = 9 or PT235 = 9 or PT236 = 9 or PT237 = 9 then irptsd2 = 9;
+MPRINT(PTSD):   else if PT233 = 8 or PT234 = 8 or PT235 = 8 or PT236 = 8 or PT237 = 8 then irptsd2 = 8;
+MPRINT(PTSD):   ****************************************************************************************** * Combine ICD Criteria D 
+Parts 1 and 2 for Random and Worst event * 
+******************************************************************************************;
+MPRINT(PTSD):   if iwptsd1 = 1 or iwptsd2 = 1 then iwptsd = 1;
+MPRINT(PTSD):   else if iwptsd1 = 5 and iwptsd2 = 5 then iwptsd = 5;
+MPRINT(PTSD):   else if iwptsd1 = 9 or iwptsd2 = 9 then iwptsd = 9;
+MPRINT(PTSD):   else if iwptsd1 = 8 or iwptsd2 = 8 then iwptsd = 8;
+MPRINT(PTSD):   if irptsd1 = 1 or irptsd2 = 1 then irptsd = 1;
+MPRINT(PTSD):   else if irptsd1 = 5 and irptsd2 = 5 then irptsd = 5;
+MPRINT(PTSD):   else if irptsd1 = 9 or irptsd2 = 9 then irptsd = 9;
+MPRINT(PTSD):   else if irptsd1 = 8 or irptsd2 = 8 then irptsd = 8;
+MPRINT(PTSD):   ****************************************************************************************************** * Criteria 
+E: Criteria B, C, And D must all be met within 6 months of the stressful event or * * the end of a period of stress. (For some 
+purposes, onset delayed more than 6 months * * may be included, but this should be clearly specified) * * * * 1. Criteria B * * * * 
+Worst Event: PT93 <= 6 months * * Random Event: PT228 <= 6 months * * * * 2. Criteria C * * * * Worst Event: PT77 <= 6 months * * 
+Random Event: PT217 <= 6 months * * * * 3. Criteria D * * * * Worst Event: PT77 <= 6 months OR PT109 <= 6 months * * Random Event: 
+PT217 <= 6 months OR PT239 <= 6 months * * * * Note: PT77, PT93, PT109 are deleted. Criteria Not Operationalized for worst event * 
+******************************************************************************************************;
+MPRINT(TDY_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS):   if PT217a ~IN (998,999) then do;
+MPRINT(TDY_PTS):   select (PT217b);
+MPRINT(TDY_PTS):   when(1) PT217 = PT217a;
+MPRINT(TDY_PTS):   when(2) PT217 = 7*PT217a;
+MPRINT(TDY_PTS):   when(3) PT217 = 30*PT217a;
+MPRINT(TDY_PTS):   when(4) PT217 = 365*PT217a;
+15 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(TDY_PTS):   otherwise;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   if PT217 >= 99995 then PT217 = 99995;
+MPRINT(TDY_PTS):   if PT217a = 998 then PT217 = 99998;
+MPRINT(TDY_PTS):   if PT217a = 999 then PT217 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(TDY_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS):   if PT228a ~IN (998,999) then do;
+MPRINT(TDY_PTS):   select (PT228b);
+MPRINT(TDY_PTS):   when(1) PT228 = PT228a;
+MPRINT(TDY_PTS):   when(2) PT228 = 7*PT228a;
+MPRINT(TDY_PTS):   when(3) PT228 = 30*PT228a;
+MPRINT(TDY_PTS):   when(4) PT228 = 365*PT228a;
+MPRINT(TDY_PTS):   otherwise;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   if PT228 >= 99995 then PT228 = 99995;
+MPRINT(TDY_PTS):   if PT228a = 998 then PT228 = 99998;
+MPRINT(TDY_PTS):   if PT228a = 999 then PT228 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(TDY_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TDY_PTS):   if PT239a ~IN (998,999) then do;
+MPRINT(TDY_PTS):   select (PT239b);
+MPRINT(TDY_PTS):   when(1) PT239 = PT239a;
+MPRINT(TDY_PTS):   when(2) PT239 = 7*PT239a;
+MPRINT(TDY_PTS):   when(3) PT239 = 30*PT239a;
+MPRINT(TDY_PTS):   when(4) PT239 = 365*PT239a;
+MPRINT(TDY_PTS):   otherwise;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   end;
+MPRINT(TDY_PTS):   if PT239 >= 99995 then PT239 = 99995;
+MPRINT(TDY_PTS):   if PT239a = 998 then PT239 = 99998;
+MPRINT(TDY_PTS):   if PT239a = 999 then PT239 = 99999;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   * Random event;
+MPRINT(PTSD):   if 0 <= PT228 <= 180 and 0 <= PT217 <= 180 and (0 <= PT217 <= 180 or 0 <= PT239 <= 180) then irptse = 1;
+MPRINT(PTSD):   else if 180 < PT228 < 99998 or 180 < PT217 < 99998 or (180 < PT217 < 99998 and 180 < PT239 < 99998) then irptse = 5;
+MPRINT(PTSD):   else if PT217 = 99999 or PT228 = 99999 or PT239 = 99999 then irptse = 9;
+MPRINT(PTSD):   else if PT217 = 99998 or PT228 = 99998 or PT239 = 99998 then irptse = 8;
+MPRINT(PTSD):   ************************************************************************************ * Combine Criteria A,B,C,D,E 
+for Worst Event and Random Event * * * * Criteria E Not Operationalized for Worst Event * 
+************************************************************************************;
+MPRINT(PTSD):   *Worst Event;
+MPRINT(PTSD):   if icdptsa = 1 and iwptsb = 1 and iwptsc = 1 and iwptsd = 1 then iwpts = 1;
+MPRINT(PTSD):   *All criteria are met;
+MPRINT(PTSD):   else iwpts = 5;
+MPRINT(PTSD):   *Criteria are not met;
+MPRINT(PTSD):   *Random Event;
+MPRINT(PTSD):   if icdptsa = 1 and irptsb = 1 and irptsc = 1 and irptsd = 1 and irptse = 1 then irpts = 1;
+MPRINT(PTSD):   *All criteria are met;
+MPRINT(PTSD):   else irpts = 5;
+MPRINT(PTSD):   *Criteria are not met;
+MPRINT(PTSD):   if iwpts = 1 or irpts = 1 then icd_pts = 1;
+MPRINT(PTSD):   else icd_pts = 5;
+MPRINT(PTSD):   ****************************************************************************************** * Calculate Onset, 
+Recency, Persistence of PTSD for DSM and ICD * 
+******************************************************************************************;
+MPRINT(PTSD):   length PT59by 8;
+MPRINT(PTSD):   if PT59b_5 ~IN(998,999) then PT59by = PT59b_5;
+MPRINT(PTSD):   else if PT59b_5 IN(998,999) OR PT59b_5 > 999 then PT59by = .;
+MPRINT(TYR_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS):   if PT217a < 998 then do;
+16 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(TYR_PTS):   select (PT217b);
+MPRINT(TYR_PTS):   when(1) PT217y = PT217a/365;
+MPRINT(TYR_PTS):   when(2) PT217y = PT217a/52;
+MPRINT(TYR_PTS):   when(3) PT217y = PT217a/12;
+MPRINT(TYR_PTS):   when(4) PT217y = PT217a;
+MPRINT(TYR_PTS):   otherwise;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   if PT217a IN(998,999) then PT217y = .;
+MPRINT(PTSD):  ;
+MPRINT(TYR_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS):   if PT228a < 998 then do;
+MPRINT(TYR_PTS):   select (PT228b);
+MPRINT(TYR_PTS):   when(1) PT228y = PT228a/365;
+MPRINT(TYR_PTS):   when(2) PT228y = PT228a/52;
+MPRINT(TYR_PTS):   when(3) PT228y = PT228a/12;
+MPRINT(TYR_PTS):   when(4) PT228y = PT228a;
+MPRINT(TYR_PTS):   otherwise;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   if PT228a IN(998,999) then PT228y = .;
+MPRINT(PTSD):  ;
+MPRINT(TYR_PTS):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS):   if PT239a < 998 then do;
+MPRINT(TYR_PTS):   select (PT239b);
+MPRINT(TYR_PTS):   when(1) PT239y = PT239a/365;
+MPRINT(TYR_PTS):   when(2) PT239y = PT239a/52;
+MPRINT(TYR_PTS):   when(3) PT239y = PT239a/12;
+MPRINT(TYR_PTS):   when(4) PT239y = PT239a;
+MPRINT(TYR_PTS):   otherwise;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   end;
+MPRINT(TYR_PTS):   if PT239a IN(998,999) then PT239y = .;
+MPRINT(PTSD):  ;
+MPRINT(TYR_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS2):   if PT110a < 998 then do;
+MPRINT(TYR_PTS2):   select (PT110b);
+MPRINT(TYR_PTS2):   when(1) PT110y = PT110a/365;
+MPRINT(TYR_PTS2):   when(2) PT110y = PT110a/52;
+MPRINT(TYR_PTS2):   when(3) PT110y = PT110a/12;
+MPRINT(TYR_PTS2):   when(4) PT110y = PT110a;
+MPRINT(TYR_PTS2):   otherwise;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   if PT110a = 997 then PT110y = 31/365;
+MPRINT(TYR_PTS2):   if PT110a IN(998,999) then PT110y = .;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT110y IN(998,999) then PT110y = .;
+MPRINT(PTSD):   if PT110c = 1 and (PT110y <= 30/365 or PT110a IN(998,999)) then PT110y = 31/365;
+MPRINT(TYR_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS2):   if PT218a < 998 then do;
+MPRINT(TYR_PTS2):   select (PT218b);
+MPRINT(TYR_PTS2):   when(1) PT218y = PT218a/365;
+MPRINT(TYR_PTS2):   when(2) PT218y = PT218a/52;
+MPRINT(TYR_PTS2):   when(3) PT218y = PT218a/12;
+MPRINT(TYR_PTS2):   when(4) PT218y = PT218a;
+MPRINT(TYR_PTS2):   otherwise;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   if PT218a = 997 then PT218y = 31/365;
+MPRINT(TYR_PTS2):   if PT218a IN(998,999) then PT218y = .;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT218y IN(998,999) then PT218y = .;
+17 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   if PT218c = 1 and (PT218y <= 30/365 or PT218a IN(998,999)) then PT218y = 31/365;
+MPRINT(TYR_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS2):   if PT229a < 998 then do;
+MPRINT(TYR_PTS2):   select (PT229b);
+MPRINT(TYR_PTS2):   when(1) PT229y = PT229a/365;
+MPRINT(TYR_PTS2):   when(2) PT229y = PT229a/52;
+MPRINT(TYR_PTS2):   when(3) PT229y = PT229a/12;
+MPRINT(TYR_PTS2):   when(4) PT229y = PT229a;
+MPRINT(TYR_PTS2):   otherwise;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   if PT229a = 997 then PT229y = 31/365;
+MPRINT(TYR_PTS2):   if PT229a IN(998,999) then PT229y = .;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT229y IN(998,999) then PT229y = .;
+MPRINT(PTSD):   if PT229c = 1 and (PT229y <= 30/365 or PT229a IN(998,999)) then PT229y = 31/365;
+MPRINT(TYR_PTS2):   *Calculate length of time in days, from # of units and unit of time;
+MPRINT(TYR_PTS2):   if PT240a < 998 then do;
+MPRINT(TYR_PTS2):   select (PT240b);
+MPRINT(TYR_PTS2):   when(1) PT240y = PT240a/365;
+MPRINT(TYR_PTS2):   when(2) PT240y = PT240a/52;
+MPRINT(TYR_PTS2):   when(3) PT240y = PT240a/12;
+MPRINT(TYR_PTS2):   when(4) PT240y = PT240a;
+MPRINT(TYR_PTS2):   otherwise;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   end;
+MPRINT(TYR_PTS2):   if PT240a = 997 then PT240y = 31/365;
+MPRINT(TYR_PTS2):   if PT240a IN(998,999) then PT240y = .;
+MPRINT(PTSD):  ;
+MPRINT(PTSD):   if PT240y IN(998,999) then PT240y = .;
+MPRINT(PTSD):   if PT240c = 1 and (PT240y <= 30/365 or PT240a IN(998,999)) then PT240y = 31/365;
+MPRINT(PTSD):   array PTyvar PT59by PT110y PT217y PT218y PT228y PT229y PT239y PT240y;
+MPRINT(PTSD):   do over PTyvar;
+MPRINT(PTSD):   if PTyvar IN(998,999) then PTyvar = .;
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   if PT64a ~IN(998,999) then pts_onw = PT64a;
+MPRINT(PTSD):   pts_recw = pts_onw + PT110y;
+MPRINT(PTSD):   if pts_recw >= SC1 + 1 then pts_recw = .;
+MPRINT(PTSD):   pts_onr = min(PT59by + PT217y, PT59by + PT228y, PT59by + PT239y);
+MPRINT(PTSD):   *PTSD onset random event;
+MPRINT(PTSD):   pts_recr = max(PT59by + PT217y + PT218y, PT59by + PT228y + PT229y, PT59by + PT239y + PT240y);
+MPRINT(PTSD):   *PTSD recency random event;
+MPRINT(PTSD):   if 0 <= pts_onw < 4 then pts_onw = 4;
+MPRINT(PTSD):   if 0 <= pts_onr < 4 then pts_onr = 4;
+MPRINT(PTSD):   if 0 <= pts_recw < 4 then pts_recw = 4;
+MPRINT(PTSD):   if 0 <= pts_recr < 4 then pts_recr = 4;
+MPRINT(PTSD):   if pts_onr >= SC1 + 1 then pts_onr = .;
+MPRINT(PTSD):   if pts_recr >= SC1 + 1 then pts_recr = .;
+MPRINT(PTSD):   pts_perw = PT110y;
+MPRINT(PTSD):   *PTSD persistence worst event;
+MPRINT(PTSD):   pts_perr = max(PT218y, PT229y, PT240y);
+MPRINT(PTSD):   *PTSD persistence random event;
+MPRINT(PTSD):   if drpts = 1 and dwpts = 1 then do;
+MPRINT(PTSD):   pts_ond = min(pts_onr,pts_onw);
+MPRINT(PTSD):   if PT261 = 1 then pts_recd = SC1;
+MPRINT(PTSD):   else pts_recd = max(pts_recr, pts_recw);
+MPRINT(PTSD):   pts_perd = max(pts_perw, pts_perr);
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   else if drpts = 1 and dwpts ^= 1 then do;
+MPRINT(PTSD):   pts_ond = pts_onr;
+MPRINT(PTSD):   if PT261 = 1 then pts_recd = SC1;
+MPRINT(PTSD):   else pts_recd = pts_recr;
+MPRINT(PTSD):   pts_perd = pts_perr;
+18 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   else if drpts ^= 1 and dwpts = 1 then do;
+MPRINT(PTSD):   pts_ond = pts_onw;
+MPRINT(PTSD):   if PT261 = 1 then pts_recd = SC1;
+MPRINT(PTSD):   else pts_recd = pts_recw;
+MPRINT(PTSD):   pts_perd = pts_perw;
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   if irpts = 1 and iwpts = 1 then do;
+MPRINT(PTSD):   pts_oni = min(pts_onr, pts_onw);
+MPRINT(PTSD):   if PT261 = 1 then pts_reci = SC1;
+MPRINT(PTSD):   else pts_reci = max(pts_recr, pts_recw);
+MPRINT(PTSD):   pts_peri = max(pts_perw, pts_perr);
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   else if irpts = 1 and iwpts ^= 1 then do;
+MPRINT(PTSD):   pts_oni = pts_onr;
+MPRINT(PTSD):   if PT261 = 1 then pts_reci = SC1;
+MPRINT(PTSD):   else pts_reci = pts_recr;
+MPRINT(PTSD):   pts_peri = pts_perr;
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   else if irpts ^= 1 and iwpts = 1 then do;
+MPRINT(PTSD):   pts_oni = pts_onw;
+MPRINT(PTSD):   if PT261 = 1 then pts_reci = SC1;
+MPRINT(PTSD):   else pts_reci = pts_recw;
+MPRINT(PTSD):   pts_peri = pts_perw;
+MPRINT(PTSD):   end;
+MPRINT(PTSD):   pts_ond = int(pts_ond);
+MPRINT(PTSD):   pts_oni = int(pts_oni);
+MPRINT(PTSD):   pts_recd = int(pts_recd);
+MPRINT(PTSD):   pts_reci = int(pts_reci);
+MPRINT(A):  ;
+MPRINT(A):   if (dsmptsa1 = 1 and dwptsc1 = 1 and dwptsd1 = 1) or (dsmptsa1 = 1 and drptsc1 = 1 and drptsd1 = 1) then 
+ncsr_pts_sample = 1;
+MPRINT(A):   else ncsr_pts_sample = 0;
+MPRINT(A):   if PT69 ^= . then PT209 = PT69;
+MPRINT(A):   if PT71 ^= . then PT211 = PT71;
+MPRINT(A):   if PT72 ^= . then PT212 = PT72;
+MPRINT(A):   if PT73 ^= . then PT213 = PT73;
+MPRINT(A):   if PT74 ^= . then PT214 = PT74;
+MPRINT(A):   if PT102 ^= . then PT233 = PT102;
+MPRINT(A):   if PT106 ^= . then PT237 = PT106;
+MPRINT(A):   array PTVAR PT41-PT46 PT48 PT50 PT50_1 PT51 PT55 PT209-PT214 PT233 PT237;
+MPRINT(A):   do over PTVAR;
+MPRINT(A):   if PTVAR ^= 1 then PTVAR = 0;
+MPRINT(A):   end;
+MPRINT(A):   if dsm_pts ^= 1 then dsm_pts = 0;
+MPRINT(A):   run;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      261:187   
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      4959 at 1347:208   5131 at 1347:20    5171 at 1347:31    5210 at 1347:48    5181 at 1347:65    5133 at 1347:114
+      5171 at 1347:125   5175 at 1347:134   5210 at 1347:151   5217 at 1347:160   5181 at 1347:177   5183 at 1347:186
+      5122 at 1347:67    1 at 1347:189      1 at 1347:112      5098 at 1347:71    4851 at 1347:99    5104 at 1347:124
+      4873 at 1347:150   
+NOTE: There were 9836 observations read from the data set WORK.NCSR_MAIN.
+NOTE: There were 5692 observations read from the data set WORK.NCSR_DEM.
+NOTE: The data set WORK.NCSR has 5692 observations and 675 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.14 seconds
+      
+
+19 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(A):   data mental_health_yt_20101004;
+MPRINT(A):   set mto.mental_health_yt_20101004;
+NOTE: Data file MTO.MENTAL_HEALTH_YT_20101004.DATA is in a format that is native to another host, or the file encoding does not 
+      match the session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and 
+      might reduce performance.
+MPRINT(A):   format _numeric_;
+MPRINT(A):   ****************************************************************** * PROGRAM: Datafix2-youth.sas * * DATE: 4/15/2010 * 
+* * * MTO Youth * ******************************************************************;
+MPRINT(DATAFIX2):   ****************************************************************************************** * For onset/recency 
+ages less than 4 reset to 4 * ******************************************************************************************;
+MPRINT(DATAFIX2):   array onsetrec YDE6a_D22a YDE6d_D22c YDE13a_D37a YDE13b_D37b1 YDE14b_D38c YMA2a_M3a YMA2d_M3c YMA6a_M6a 
+YMA6d_M6c YMA10a_M18a YMA10b_M18b1 YMA13_M19d YPD5a_PD9a YPD5b_PD9b1 YPD7c_PD10d YGA11a_G26a YGA11b_G26b1 YGA12c_G27c YIE8a_IED18a 
+YIE8b_IED18b1 YIE9a_IED22a YCV14b_PT64a YCV14c YOD3a_OD3a YOD3b_OD3b1 YOD4a_OD4a;
+MPRINT(DATAFIX2):   do over onsetrec;
+MPRINT(DATAFIX2):   if 0 <= onsetrec < 4 then onsetrec = 4;
+MPRINT(DATAFIX2):   end;
+MPRINT(A):  ;
+MPRINT(A):   ***************************************************************************** * PROGRAM: agefix-youth.sas * * DATE: 
+4/8/10 * * * * MTO youth * *****************************************************************************;
+MPRINT(A):   options mprint;
+MPRINT(A):   if YGA5a_G5 IN(.,.D,.R) then do;
+MPRINT(A):   if YGA5c_G5 = 1 then do;
+MPRINT(A):   YGA5a_G5 = 6;
+MPRINT(A):   YGA5b_G5 = 3;
+MPRINT(A):   end;
+MPRINT(A):   else if YGA5d_G5 = 1 then do;
+MPRINT(A):   YGA5a_G5 = 1;
+MPRINT(A):   YGA5b_G5 = 3;
+MPRINT(A):   end;
+MPRINT(A):   end;
+MPRINT(AGEFIX1):   if YDE13a_D37a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13a_D37a = 4;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13a_D37a = 12;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 5 then YDE13a_D37a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YDE13b_D37b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13b_D37b1 = 4;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13b_D37b1 = 12;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 5 then YDE13b_D37b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YMA10a_M18a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YMA10c_M18b2 = 1 then YMA10a_M18a = 4;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 1 then YMA10a_M18a = 12;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 5 then YMA10a_M18a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YMA10b_M18b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YMA10c_M18b2 = 1 then YMA10b_M18b1 = 4;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 1 then YMA10b_M18b1 = 12;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 5 then YMA10b_M18b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YPD5a_PD9a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YPD5c_PD9b2 = 1 then YPD5a_PD9a = 4;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 1 then YPD5a_PD9a = 12;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 5 then YPD5a_PD9a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YPD5b_PD9b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YPD5c_PD9b2 = 1 then YPD5b_PD9b1 = 4;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 1 then YPD5b_PD9b1 = 12;
+20 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 5 then YPD5b_PD9b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YGA11a_G26a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YGA11c_G26b2 = 1 then YGA11a_G26a = 4;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 1 then YGA11a_G26a = 12;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 5 then YGA11a_G26a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YGA11b_G26b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YGA11c_G26b2 = 1 then YGA11b_G26b1 = 4;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 1 then YGA11b_G26b1 = 12;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 5 then YGA11b_G26b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YIE8a_IED18a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YIE8c_IED18b2 = 1 then YIE8a_IED18a = 4;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 1 then YIE8a_IED18a = 12;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 5 then YIE8a_IED18a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YIE8b_IED18b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YIE8c_IED18b2 = 1 then YIE8b_IED18b1 = 4;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 1 then YIE8b_IED18b1 = 12;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 5 then YIE8b_IED18b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YOD3a_OD3a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3a_OD3a = 4;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3a_OD3a = 12;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3a_OD3a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(AGEFIX1):   if YOD3b_OD3b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3b_OD3b1 = 4;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3b_OD3b1 = 12;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3b_OD3b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(A):  ;
+MPRINT(A):   run;
+
+NOTE: There were 5101 observations read from the data set MTO.MENTAL_HEALTH_YT_20101004.
+NOTE: The data set WORK.MENTAL_HEALTH_YT_20101004 has 5101 observations and 438 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.17 seconds
+      cpu time            0.17 seconds
+      
+
+MPRINT(MTOPTSD):   data mental_health_yt;
+MPRINT(MTOPTSD):   set mental_health_yt_20101004(keep = ppid YCV1_PT13 YCV2_PT14 YCV3_PT15 YCV4_PT16 YCV5_PT17 YCV6_PT18 YCV7_PT20 
+YCV8_PT22 YCV9_PT22_1 YCV10_PT23 YCV11_PT27 YCV13_PT62 YCV14_PT64 YCV14a YCV14b_PT64a YCV14c YCV22_PT261 YCV15_PT269 YCV16_PT270 
+YCV17_PT271 YCV18_PT272 YCV19_PT273 YCV20_PT274 YCV21_PT275 YCV24_PT269 YCV25_PT270 YCV26_PT271 YCV27_PT272 YCV28_PT273 YCV29_PT274 
+YCV30_PT275 f_svy_age_iw f_svy_ethnic f_svy_race f_svy_gender f_wt_totsvy);
+MPRINT(MTOPTSD):   if YCV1_PT13 = 1 or YCV2_PT14 = 1 or YCV3_PT15 = 1 or YCV4_PT16 = 1 or YCV5_PT17 = 1 or YCV6_PT18 = 1 or 
+YCV7_PT20 = 1 or YCV8_PT22 = 1 or YCV9_PT22_1 = 1 or YCV10_PT23 = 1 or YCV11_PT27 = 1 then f_mh_pts_a1 = 1;
+MPRINT(MTOPTSD):   else f_mh_pts_a1 = 0;
+MPRINT(MTOPTSD):   if sum(YCV21_PT275 = 1 or YCV30_PT275 = 1, YCV15_PT269 = 1 or YCV24_PT269 = 1, YCV16_PT270 = 1 or YCV25_PT270 = 
+1, YCV17_PT271 = 1 or YCV26_PT271 = 1, YCV18_PT272 = 1 or YCV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;
+MPRINT(MTOPTSD):   else f_mh_pts_c1 = 0;
+MPRINT(MTOPTSD):   if (YCV19_PT273 = 1 or YCV28_PT273 = 1) and (YCV20_PT274 = 1 or YCV29_PT274 = 1) then f_mh_pts_d1 = 1;
+MPRINT(MTOPTSD):   else f_mh_pts_d1 = 0;
+MPRINT(MTOPTSD):   if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
+MPRINT(MTOPTSD):   else mto_ptsd_sample = 0;
+21 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+MPRINT(MTOPTSD):   array PTVAR YCV1_PT13 YCV2_PT14 YCV3_PT15 YCV4_PT16 YCV5_PT17 YCV6_PT18 YCV7_PT20 YCV8_PT22 YCV9_PT22_1 
+YCV10_PT23 YCV11_PT27 YCV13_PT62 YCV15_PT269 YCV16_PT270 YCV17_PT271 YCV18_PT272 YCV19_PT273 YCV20_PT274 YCV21_PT275 YCV24_PT269 
+YCV25_PT270 YCV26_PT271 YCV27_PT272 YCV28_PT273 YCV29_PT274 YCV30_PT275;
+MPRINT(MTOPTSD):   do over PTVAR;
+MPRINT(MTOPTSD):   if PTVAR ^= 1 then PTVAR = 0;
+MPRINT(MTOPTSD):   end;
+MPRINT(MTOPTSD):   if f_svy_gender = 'F' then sexf = 1;
+MPRINT(MTOPTSD):   else sexf = 0;
+MPRINT(MTOPTSD):   rhisp = 0;
+MPRINT(MTOPTSD):   rwh = 0;
+MPRINT(MTOPTSD):   rblk = 0;
+MPRINT(MTOPTSD):   roth = 0;
+MPRINT(MTOPTSD):   if f_svy_ethnic = 1 then rhisp = 1;
+MPRINT(MTOPTSD):   else do;
+MPRINT(MTOPTSD):   if f_svy_race = 1 then rblk = 1;
+MPRINT(MTOPTSD):   else if f_svy_race = 2 then rwh = 1;
+MPRINT(MTOPTSD):   else if f_svy_race IN(3,4,5) then roth = 1;
+MPRINT(MTOPTSD):   end;
+MPRINT(MTOPTSD):   in_mto = 1;
+MPRINT(MTOPTSD):   if 0 <= f_svy_age_iw <= 18 then age = 18;
+MPRINT(MTOPTSD):   else age = f_svy_age_iw;
+MPRINT(MTOPTSD):   if YCV15_PT269 = 1 or YCV24_PT269 = 1 then PT211 = 1;
+MPRINT(MTOPTSD):   else PT211 = 0;
+MPRINT(MTOPTSD):   if YCV16_PT270 = 1 or YCV25_PT270 = 1 then PT212 = 1;
+MPRINT(MTOPTSD):   else PT212 = 0;
+MPRINT(MTOPTSD):   if YCV17_PT271 = 1 or YCV26_PT271 = 1 then PT213 = 1;
+MPRINT(MTOPTSD):   else PT213 = 0;
+MPRINT(MTOPTSD):   if YCV18_PT272 = 1 or YCV27_PT272 = 1 then PT214 = 1;
+MPRINT(MTOPTSD):   else PT214 = 0;
+MPRINT(MTOPTSD):   if YCV19_PT273 = 1 or YCV28_PT273 = 1 then PT233 = 1;
+MPRINT(MTOPTSD):   else PT233 = 0;
+MPRINT(MTOPTSD):   if YCV20_PT274 = 1 or YCV29_PT274 = 1 then PT237 = 1;
+MPRINT(MTOPTSD):   else PT237 = 0;
+MPRINT(MTOPTSD):   if YCV21_PT275 = 1 or YCV30_PT275 = 1 then PT209 = 1;
+MPRINT(MTOPTSD):   else PT209 = 0;
+MPRINT(MTOPTSD):   format _numeric_;
+MPRINT(MTOPTSD):   rename YCV1_PT13 = PT41 YCV2_PT14 = PT42 YCV3_PT15 = PT43 YCV4_PT16 = PT44 YCV5_PT17 = PT45 YCV6_PT18 = PT46 
+YCV7_PT20 = PT48 YCV8_PT22 = PT50 YCV9_PT22_1 = PT50_1 YCV10_PT23 = PT51 YCV11_PT27 = PT55;
+MPRINT(MTOPTSD):   run;
+
+NOTE: There were 5101 observations read from the data set WORK.MENTAL_HEALTH_YT_20101004.
+NOTE: The data set WORK.MENTAL_HEALTH_YT has 5101 observations and 55 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+MPRINT(A):  ;
+MPRINT(A):   data ncsr_mto;
+MPRINT(A):   set ncsr mental_health_yt(in = yt);
+MPRINT(A):   length ppid_num 8;
+MPRINT(A):   ppid_num = put(ppid, 15.0);
+MPRINT(A):   if in_mto = 1 then finalp2wt = f_wt_totsvy;
+MPRINT(A):   if yt = 1 then mto_youth = 1;
+MPRINT(A):   _one_ = 1;
+MPRINT(A):   run;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      3567:143   
+NOTE: There were 5692 observations read from the data set WORK.NCSR.
+NOTE: There were 5101 observations read from the data set WORK.MENTAL_HEALTH_YT.
+NOTE: The data set WORK.NCSR_MTO has 10793 observations and 709 variables.
+NOTE: DATA statement used (Total process time):
+22 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+      real time           0.06 seconds
+      cpu time            0.07 seconds
+      
+
+MPRINT(A):   proc sort data = ncsr_mto;
+MPRINT(A):   by str15 secu;
+MPRINT(A):   run;
+
+NOTE: There were 10793 observations read from the data set WORK.NCSR_MTO.
+NOTE: The data set WORK.NCSR_MTO has 10793 observations and 709 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.13 seconds
+      cpu time            0.13 seconds
+      
+
+MPRINT(A):   proc rlogist data = ncsr_mto design = wr filetype = sas;
+MPRINT(A):   model dsm_pts = age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 
+PT213 PT214 PT233 PT237;
+MPRINT(A):   nest _one_;
+MPRINT(A):   weight finalp2wt;
+MPRINT(A):   subpopn ncsr_pts_sample = 1;
+MPRINT(A):   test waldchi;
+MPRINT(A):   idvar age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 
+PT233 PT237 sampleid_num ppid_num f_svy_age_iw f_wt_totsvy mto_ptsd_sample mto_youth YCV13_PT62 YCV14_PT64 YCV14a YCV14b_PT64a 
+YCV14c YCV22_PT261;
+MPRINT(A):   output beta / filetype = sas filename = beta1 replace;
+MPRINT(A):   output idvar subpopn expected / filetype = sas filename = pred1 replace;
+MPRINT(A):   output covar / filetype = sas filename = covarmatrix;
+MPRINT(A):   run;
+
+ 
+************************************************************
+SUDAAN Release 11.0.1, Build 326
+SAS-Callable, RHEL, 64 bit version
+Serial Number A0005271 for 2 user(s) is licensed to
+Dept of Health Care Policy (Kenny Lau).
+This license expires on March 24, 2016.
+************************************************************
+ 
+ 
+ 
+ 
+Opened SAS data file NCSR_MTO for reading.
+ 
+SEMANTIC NOTE
+:
+Entire VARIANCE Group will be included on OUTPUT
+ 
+Opened SAS data file BETA1 for writing.
+Note:
+ 24 records written to file BETA1
+ 
+Opened SAS data file PRED1 for writing.
+Note:
+ 10793 records written to file PRED1
+ 
+Opened SAS data file COVARMATRIX01 for writing.
+Note:
+ 97 records written to file COVARMATRIX01
+NOTE: The PROCEDURE RLOGIST printed pages 1-6.
+NOTE: PROCEDURE RLOGIST used (Total process time):
+      real time           0.36 seconds
+      cpu time            0.34 seconds
+23 The SAS System                                                                                   14:20 Wednesday, January 6, 2016
+
+      
+
+MPRINT(A):   data mtomp.youth_covmatrix;
+MPRINT(A):   set covarmatrix01;
+MPRINT(A):   run;
+
+NOTE: There were 97 observations read from the data set WORK.COVARMATRIX01.
+NOTE: The data set MTOMP.YOUTH_COVMATRIX has 97 observations and 33 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.37 seconds
+      cpu time            2.29 seconds
+      
