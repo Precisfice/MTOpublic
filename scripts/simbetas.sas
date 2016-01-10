@@ -159,4 +159,3 @@ proc iml;
   print or_ci[colname={'Odds Ratio' 'Lower CL' 'Upper CL'}
               rowname=rownames];
 run;
-
