@@ -25,29 +25,16 @@ run;
 proc means data=bogus_or_ci;
 run;
 
-* 2. Stack the data in value-attribute fashion to support overlays ;
-data grouped_or_ci;
-  keep x varname;
-  set bogus_or_ci(in=OR rename=(Odds_Ratio=x))
-      bogus_or_ci(in=LL rename=(Lower_CL=x))
-      bogus_or_ci(in=UL rename=(Upper_CL=x));
-  if      OR=1 then varname = "Odds Ratio";
-  else if LL=1 then varname = "Lower CL";
-  else if UL=1 then varname = "Upper CL";
-  *end;
-run;
-
-*PROC PRINT DATA=grouped_or_ci;
-*RUN;
-
-* 3. Plot the histogram  for 'Ods Ratio' column ;
-ods graphics / reset attrpriority=color width=5in height=3in imagename='BootstrappedORs';
+* 2. Plot the superimposed histograms, with density estimates ;
 title 'Bootstrapped Estimate of Low-Poverty Voucher Effect on PTSD';
-proc sgplot data=grouped_or_ci;
-  histogram x / group=varname filltype=gradient transparency=0.5 nbins=400 name='est';
-  density x / group=varname;
-  xaxis display=(nolabel) min=-3 max=3;
-  yaxis grid;
-  keylegend 'est' / location=inside across=1 position=topright;
+proc sgplot data=bogus_or_ci;
+   histogram Odds_Ratio / fillattrs=graphdata1 transparency=0.7 binstart=-3 binwidth=0.05;
+   density Odds_Ratio / lineattrs=graphdata1;
+   histogram Lower_CL / fillattrs=graphdata2 transparency=0.5 binstart=-3 binwidth=0.05;
+   density Lower_CL / lineattrs=graphdata2;
+   histogram Upper_CL / fillattrs=graphdata3 transparency=0.5 binstart=-3 binwidth=0.05;
+   density Upper_CL / lineattrs=graphdata3;
+   keylegend / location=inside position=topright noborder across=2;
+   yaxis grid;
+   xaxis display=(nolabel) values=(-3 to 3 by 0.5);
 run;
-
