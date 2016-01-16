@@ -9,7 +9,7 @@
 /*options ps = 65 nocenter mprint macrogen;*/
 
 /*Updating file location*/
-%LET folder =E:\NSCR Replication study\MTO Data and codes;
+%LET folder =E:\NSCR_Replication_study;
 libname mto "&folder";
 
 
@@ -27,8 +27,8 @@ run;
 data mental_health_yt_20101004;
 set mental_health_yt_20101004;
 format _numeric_;
-%include "&folder/Datafix2-mto-youth.sas";
-%include "&folder/agefix-youth.sas";
+%include "&folder\Datafix2-mto-youth.sas";
+%include "&folder\agefix-youth.sas";
 run;
 
 %macro mtoptsd(datain, pfx, dataout);
@@ -214,25 +214,26 @@ title 'Youth PTSD, new diagnosis lifetime, unweighted';
 tables f_mh_pts_evr_yt  / list missing;
 run;
 
-/****
+****
 * TODO 2: Uncomment the code below, and debug as necessary
-****/
-  /*
-  data fnlpred_ptsd_youth(keep = ppid mto_ptsd_sample pred_prob ptsd_random f_mh_pts_evr_yt );
-    set inputfor2x2;
-  run;
-  
-  proc export data=inputfor2x2
-    outfile='&folder\whereoutputgoes\inputfor2x2.txt'
-    dbms=tab;
-  run;
+****;
 
-  */
+
+/*  data fnlpred_ptsd_youth(keep = ppid mto_ptsd_sample pred_prob ptsd_random f_mh_pts_evr_yt );*/
+/*    set inputfor2x2;*/
+/*  run;*/
+/*  */
+/*  proc export data=inputfor2x2*/
+/*    outfile='&folder\whereoutputgoes\inputfor2x2.txt'*/
+/*    dbms=tab;*/
+/*  run;*/
+
   
-/****
+  
+****
 * TODO 3: Inspect the txt file to ensure it poses no danger of subject identification,
 *         and check it in.
-****/
+****
 
 %mend a;
 

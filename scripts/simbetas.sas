@@ -1,4 +1,5 @@
-%LET folder = E:\NSCR Replication study\MTO Data and codes; /* for Andy's workstation */
+%LET folder = E:\NSCR_Replication_study; /* for Andy's workstation */
+ /* for Andy's workstation */
 
 /* Read coefficients from our replication attempt, along with std errs.
  * These are found starting at column #44 on lines 115-138 of "slopes.txt",

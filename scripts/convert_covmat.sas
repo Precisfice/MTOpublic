@@ -1,19 +1,19 @@
 /* Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible
  * with the variance-covariance matrix (and parameter estimates) as
- * received from Nancy Sampson.
+ * provided by Nancy Sampson.
  */
 
 * 1. Read the covariance matrix from original authors ;
 
 data covar_theirs;
-  set "/folders/myfolders/youth_covmatrix.sas7bdat";
+  set "&folder/youth_covmatrix.sas7bdat";
 run;
 
 
 * 2. Read the covariance matrix for our estimated imputation coefficients ;
 
 data covar_ours;
-  infile "/folders/myfolders/covmat01.dbs";
+  infile "&folder/covmat01.dbs";
   * Fill in the leftmost, uninformative columns ;
   PROCNUM = .;
   MODELNO = .;
