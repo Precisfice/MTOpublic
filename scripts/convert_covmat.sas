@@ -1,6 +1,6 @@
 /* Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible
  * with the variance-covariance matrix (and parameter estimates) as
- * provided by Nancy Sampson.
+ * received from Nancy Sampson.
  */
 
 * 1. Read the covariance matrix from original authors ;
