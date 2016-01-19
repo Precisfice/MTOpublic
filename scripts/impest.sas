@@ -18,3 +18,27 @@ proc surveylogistic
                   PT209 PT211 PT212 PT213 PT214 PT233 PT237;
   weight ncsrwtlg;
 run;
+
+/* Additionally, examine the age distribution for questions
+ * of generalizability.  How does the pts_sampl=1 population
+ * differ from the full NCS-R sample?
+ */
+proc sort data=NCSR.ncsr;
+  by pts_smpl;
+proc means data=NCSR.ncsr;
+  var age;
+  by pts_smpl;
+run;
+
+/* Plot a histogram to show the age density clearly,
+ * both for pts_smpl=1 and pts_smpl=0 groups.
+ */
+ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
+proc sgplot data=NCSR.ncsr;
+  histogram age / group=pts_smpl filltype=gradient transparency=0.5
+                  nbins=75 name='est';
+  density age / group=pts_smpl;
+  xaxis display=(nolabel) min=15 max=90;
+  yaxis grid;
+  keylegend 'est' / location=inside across=1 position=topright;
+run;
