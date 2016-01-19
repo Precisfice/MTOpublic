@@ -5,6 +5,7 @@
  * and that the standard errors match to within about
  * 1% in relative terms.
  */
+ods pdf file = "&myfolders/outputs/impest.pdf";
 proc surveylogistic
   varmethod=taylor
   data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
@@ -42,3 +43,5 @@ proc sgplot data=NCSR.ncsr;
   yaxis grid;
   keylegend 'est' / location=inside across=1 position=topright;
 run;
+ods pdf close;
+
