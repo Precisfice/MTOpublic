@@ -138,23 +138,6 @@ proc iml;
     title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     print formula;
     title1;
-    /* Demonstrate the SAS idioms by which this would be done.
-     * That is, show how a SAS script may be invoked by PROC IML
-     * code (using a SUBMIT..ENDSUBMIT block), with our 'formula'
-     * being passed to that script and used for some calculation
-     * to be made available for further processing by IML.
-     *
-     * A dummy calculation will suffice for demonstration purposes,
-     * but of course it might be helpful to conjure up some data to
-     * allow a call to PROC SURVEYLOGISTIC, thereby demonstrating
-     * exactly how the voucher effect is to be captured and passed
-     * back to IML.
-     *
-     * Let me just write an impdata20x_stuntdouble.sas script
-     * that demonstrates it has received the 'formula' string,
-     * and then proceeds to estimate a PROC SURVEYLOGISTIC against
-     * some sample data that I hope comes with SAS.
-     */
      submit formula; * the 'formula' parameter allows substitution below;
        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
        %include "&folder\impdata20x.sas";
