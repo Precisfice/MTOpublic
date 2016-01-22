@@ -1,11 +1,16 @@
-/* Attempt to reproduce the PTSD imputation model
- * using SAS PROC SURVEYLOGISTIC instead of SUDAAN.
- * I find that the coefficients themselves match to
- * the 4th decimal place (roughly 1 part in 10^5),
- * and that the standard errors match to within about
- * 1% in relative terms.
+/* Estimate the PTSD imputation model employed by Kessler et al.,
+ * and additionally several variations on that model to abstract
+ * away some of the arbitrariness of model specification.
  */
 ods pdf file = "&myfolders/outputs/impest.pdf";
+/* This macro allows the PTSD imputation model to be estimated
+ * with several simple modifications.  Variable AGE may be
+ * included (as with the original model), or excluded from the
+ * model specification.  Likewise, RACE (coded as 3 summies in
+ * the original model) may also be optionally omitted from the
+ * model.  Finally, the model may be estimated optionally in a
+ * younger NCSR subset than the 18-85yo cohort originally used.
+ */
 %macro est_ptsd_imput_model(incl_age, incl_race, max_age);
 %if &incl_age=1 %then
   %do;
@@ -25,6 +30,19 @@ ods pdf file = "&myfolders/outputs/impest.pdf";
   %end;
 %if &max_age=%str() %then %let max_age=99;
 %let suffix=A&incl_age.R&incl_race.S&max_age;
+/* On the Seattle workstation where this code was prototyped,
+ * SAS-callable SUDAAN is unavailable.  Consequently, we use
+ * PROC SURVEYLOGISTIC instead of PROC RLOGIST as used by the
+ * original authors in Ptsd-mtoncsr-youth.sas.
+ * I have found that PROC SURVEYLOGISTIC coefficients match
+ * those of SUDAAN (invoked at the command line) to the 4th
+ * decimal place (roughly 1 part in 10^5), and the standard
+ * errors match to within about 1% in relative terms.
+ * Thus, whatever differences are introduced by this PROC
+ * substitution are probably negligible compared with the
+ * differences between our ICPSR-licensed NCSR data set and
+ * the Kessler team's raw NCSR data.
+ */
 proc surveylogistic
   varmethod=taylor
   data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
@@ -32,14 +50,12 @@ proc surveylogistic
                       PT209 PT211 PT212 PT213 PT214 PT233 PT237
                       NCSRWTSH NCSRWTLG PTS_SMPL
                  where=(pts_smpl=1 and age<=&max_age));
-  * TODO: let macro parameters select the model ;
   model dsm_pts(event='(1) ENDORSED')
                 = &age_term sexf &race_terms PT41 PT42 PT43
                   PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
                   PT209 PT211 PT212 PT213 PT214 PT233 PT237
         / covb;
   weight ncsrwtlg;
-  * TODO: let macro params determine output file name ;
   ods output CovB=covs&suffix
     ParameterEstimates=betas&suffix(keep=Variable Estimate); 
 run;
@@ -58,7 +74,7 @@ run;
 %models_grid;
 
 /* Additionally, examine the age distribution for questions
- * of generalizability.  How does the pts_sampl=1 population
+ * of generalizability.  How does the pts_smpl=1 population
  * differ from the full NCS-R sample?
  */
 proc sort data=NCSR.ncsr;

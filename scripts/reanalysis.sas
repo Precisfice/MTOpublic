@@ -2,6 +2,9 @@
 
 %LET scripts = /folders/myfolders/scripts;
 
+/* PHASE I -- Prepare NCSR data
+ *******************************/
+
 * Load misc. definitions specific to your directory setup ;
 %include "&scripts./folder_defs.sas";
 
@@ -9,26 +12,17 @@
 %include "&scripts./prep_NCSR_data.sas";
 
 * Export NCSR data + formats to XPORT files readable by SUDAAN ;
-%include "&scripts./xport-ncsr.sas";
+%include "&scripts./xport-ncsr.sas"; * Seattle workstation only ;
 
-/***** THE FOLLOWING LINES, NOT YET IMPLEMENTED, ARE COMMENTED OUT
+/* PHASE II -- Estimate PTSD imputation models
+ **********************************************/
 
-* Reproduce the coefficients used in [1] to impute PTSD outcome ;
-%include "&scripts./ptsd_imput_coefs_repro.sas";
+%include "&scripts./impest.sas";
 
-* Reproduce the cohort analyzed in [1] ;
-%include "&scripts./cohort_repro.sas";
+/* PHASE III -- Bootstrap the voucher effects
+ *********************************************/
 
-* Reproduce the effects estimates reported in [1] ;
-%include "&scripts./voucher_ptsd_effects_repro.sas";
-
-* Abstract away arbitrariness due to random-seed choice for PTSD imputation ;
-%include "&scripts./inner_loop.sas";
-
-* Abstract away arbitrariness due to overfitting of PTSD imputation model ;
-%include "&scripts./outer_loop.sas";
-
-**********/
+*%include "&scripts./simbetas.sas";
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
