@@ -2,8 +2,10 @@
  * pending receipt of the MTO Youth Restricted Access Dataset (RAD),
  * we use this script as a functional 'placeholder', in conjunction
  * with the post-imputation MTO dataset received in May 2015.
- * This script is based largely on two scripts provided by Nancy A.
- * Sampson 12/7/2015: MTO_makedata_10112013.sas & MTO_table4_alt.sas.
+ * This script incorporates functionality drawn from two scripts
+ * provided by Nancy A. Sampson on 12/7/2015:
+ *    - MTO_makedata_10112013.sas
+ *    - MTO_table4_alt.sas
  * 
  * Our bootstrap loop resamples the PTSD imputation model from its
  * frequentist sampling distribution, invoking the code ... 
@@ -46,8 +48,10 @@ by ppid; run;
 /* The MTO_makedata_10112013.sas script constructs &varlistc
  * and &varimp macros, that seem to represent (respectively)
  * a list of variables that are completely non-missing, and
- * the list of partly-missing variables to be imputed.  The
- * intent seems to be to use the former to impute the latter.
+ * the list of partly-missing variables to be imputed -- the
+ * intent being to use the former to impute the latter.
+ * (Of note, Matt Sciandra's 1/14/2016 documentation confirms
+ * this understanding as correct.)
  * We set dummy values for these macros here, so that we can
  * achieve some running code that may be refactored or replaced
  * once the RAD is delivered.
@@ -72,14 +76,18 @@ PROC MI DATA= Mental_health_yt_20101004_2  NIMPUTE=5 OUT=impdata0 SEED=524232;
  VAR &varlistc &varimp;
 RUN; 
 
-* Run the PTSD imputation model on the resulting dataset, using original coeffs ;
+* Run the PTSD imputation model on the resulting dataset ;
 %mtoptsd(impdata0,Y, impdata); * Y => youth in this dual-purpose adult/youth script ;
 
-* Obtain a voucher effect on PTSD (sans clustering of stderrs since we lack -tract-) ;
+* Obtain a voucher effect on PTSD ;
 
 %LET dep = f_mh_pts_rec_yt;
-%LET controls = ra_grp_exp ra_grp_s8; * modnum=1 ;
+%LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
 
+/* We comment out the original clustering of stderrs,
+ * since we lack the TRACT variable pending delivery
+ * of the RAD.
+ */
 PROC SURVEYLOGISTIC DATA = impdata ;
    STRATA ra_site; *CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
