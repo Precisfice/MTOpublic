@@ -25,7 +25,7 @@
  * PARAMETER of 'Ptsd_MTO_youth.sas'.  With only this minor
  * modification to the original authors' code, we are able to
  * invoke it simply by %include'ing it after setting a value
- * for &folder.  (That value-setting occurs within the bootstrap
+ * for &formula.  (That value-setting occurs within the bootstrap
  * loop of 'simbetas.sas', followed immediately by an %include
  * of THIS script.)  This software design is motivated by the
  * desire to achieve our reanalysis with as little modification
