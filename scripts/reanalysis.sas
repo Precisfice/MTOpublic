@@ -37,8 +37,6 @@ run;
 /* PHASE IV -- Bootstrap the voucher effects
  ********************************************/
 
-%include "&scripts./mtoptsd_macro.sas"; * Define %mtoptsd macro extracted from Ptsd_MTO_youth.sas ;
-
 %include "&scripts./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
 %include "&scripts./simbetas.sas"; * Run the bootstrap ;
