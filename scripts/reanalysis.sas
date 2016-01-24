@@ -22,6 +22,7 @@
 /* PHASE III -- Prepare the MTO data
  ************************************/
 
+* This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
 proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
 by ppid;
 run;
@@ -36,9 +37,11 @@ run;
 /* PHASE IV -- Bootstrap the voucher effects
  ********************************************/
 
-%include "&scripts./mtoptsd_macro.sas";
+%include "&scripts./mtoptsd_macro.sas"; * Define %mtoptsd macro extracted from Ptsd_MTO_youth.sas ;
 
-%include "&scripts./simbetas.sas";
+%include "&scripts./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
+
+%include "&scripts./simbetas.sas"; * Run the bootstrap ;
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions

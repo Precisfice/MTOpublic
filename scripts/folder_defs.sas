@@ -11,3 +11,5 @@
 	PTSD_slopes_from_NCSR.csv
 	*/
 LIBNAME NCSR "&ncsr";
+
+%LET folder = E:\NSCR_Replication_study; /* for Andy's workstation */
