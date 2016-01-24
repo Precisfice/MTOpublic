@@ -19,10 +19,26 @@
 
 %include "&scripts./impest.sas";
 
-/* PHASE III -- Bootstrap the voucher effects
- *********************************************/
+/* PHASE III -- Prepare the MTO data
+ ************************************/
 
-*%include "&scripts./simbetas.sas";
+proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
+by ppid;
+run;
+
+data mental_health_yt_20101004;
+set mental_health_yt_20101004;
+format _numeric_;
+%include "&folder\Datafix2-mto-youth.sas";
+%include "&folder\agefix-youth.sas";
+run;
+
+/* PHASE IV -- Bootstrap the voucher effects
+ ********************************************/
+
+%include "&scripts./mtoptsd_macro.sas";
+
+%include "&scripts./simbetas.sas";
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions

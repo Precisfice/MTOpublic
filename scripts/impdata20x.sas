@@ -2,44 +2,23 @@
  * pending receipt of the MTO Youth Restricted Access Dataset (RAD),
  * we use this script as a functional 'placeholder', in conjunction
  * with the post-imputation MTO dataset received in May 2015.
- * This script incorporates functionality drawn from two scripts
- * provided by Nancy A. Sampson on 12/7/2015:
- *    - MTO_makedata_10112013.sas
- *    - MTO_table4_alt.sas
+ * This script incorporates functionality drawn from three scripts
+ * provided by Nancy A. Sampson on the dates noted:
+ *    - Ptsd_MTO_youth.sas        (11/13/2014)
+ *    - MTO_makedata_10112013.sas (12/07/2015)
+ *    - MTO_table4_alt.sas        (12/07/2015)
  * 
  * Our bootstrap loop resamples the PTSD imputation model from its
  * frequentist sampling distribution, invoking the code ... 
  */
 
-/* TODO: If &formula is not already set, then set it to the
- *       original value.  (Actually, maybe this should be done
- *       in the Ptsd_MTO_youth.sas file.  That would very nicely
- *       make this code work standalone.)
- */
-
-/* We include Ptsd_MTO_youth.sas, which has been modified by
- * COMMENTING OUT the section of code that reads the original
- * imputation coefficients from a CSV file and assembles a
- * model RHS &formula.  By decoupling the &formula from the
- * CSV file in this way, we effectively turn &formula into a
- * PARAMETER of 'Ptsd_MTO_youth.sas'.  With only this minor
- * modification to the original authors' code, we are able to
- * invoke it simply by %include'ing it after setting a value
- * for &formula.  (That value-setting occurs within the bootstrap
- * loop of 'simbetas.sas', followed immediately by an %include
- * of THIS script.)  This software design is motivated by the
- * desire to achieve our reanalysis with as little modification
- * as possible of the original authors' code.
- */
-%Include "&folder\Ptsd_MTO_youth.sas";
-    
 /* Perform the 20x multiple imputation of missing covariates
  ************************************************************/
 
-proc sort data =  Fnlpred_ptsd_youth; 
+proc sort data =  fnlpred_ptsd_youth; 
 by ppid; run;
 
-proc sort data =  Mental_health_yt_20101004; 
+proc sort data =  mental_health_yt_20101004; 
 by ppid; run;
 
 data Mental_health_yt_20101004_2;
@@ -80,14 +59,52 @@ RUN;
 /* Run the PTSD imputation model on the resulting dataset
  *********************************************************/
 
-/* Macro 'mtopdsd' is defined in Ptsd_MTO_youth.sas, which was
- * %included above.  It computes the several PTSD criteria that
- * were operationalized in the MTO Youth Final Survey, and also
- * cross-walks from NCSR to MTO survey question variables.
- * (It is a dual-purpose macro intended for both A=adult and
- * Y=youth data sets; hence its 2nd argument.)
+%mtoptsd(impdata0,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
+
+data pred_ptsd_youth;
+set impdata;
+pred_prob = exp(&formula)/(1+exp(&formula));
+run;
+
+/* Impute lifetime PTSD, then calculate 'recency' to assign 12-month diagnosis
+ ******************************************************************************/
+
+/* The code in this section was copied from the end of Ptsd_MTO_youth.sas,
+ * with modifications as noted (+++) to support additional analyses.
  */
-%mtoptsd(impdata0,Y, impdata);
+
+data fnlpred_ptsd_youth(keep = ppid f_mh_pts_evr_yt f_mh_pts_aoo_yt f_mh_pts_rec_yt f_wt_totsvy
+    ptsd_random pred_prob); * (+++) last 2 vars added ;
+set pred_ptsd_youth;
+/* Calculate lifetime PTSD by comparing random # to predicted probability */
+ptsd_random = ranuni(1234567);
+if mto_ptsd_sample = 1 and 0 < ptsd_random <= pred_prob then f_mh_pts_evr_yt = 1;
+else f_mh_pts_evr_yt = 0;
+
+******************************************************************************************
+* Calculate Recency of PTSD for DSM                                                      *
+******************************************************************************************;
+
+if YCV14b_PT64a <= f_svy_age_iw then pts_ons = YCV14b_PT64a;
+else pts_ons = YCV14c;
+
+if pts_ons IN(.D, .R) then pts_ons = .;
+if pts_ons > f_svy_age_iw then pts_ons = .;
+
+if YCV22_PT261 = 1 or pts_ons = f_svy_age_iw then pts_rec = f_svy_age_iw;
+
+if pts_rec IN(.D, .R) then pts_rec = .;
+
+if 0 <= pts_ons < 4 then pts_ons = 4;
+if 0 <= pts_rec < 4 then pts_rec = 4;
+
+if f_mh_pts_evr_yt = 1 then do;
+    f_mh_pts_aoo_yt = pts_ons;            
+    f_mh_pts_rec_yt = pts_rec;            
+end;
+
+run;
+
 
 /* Obtain a voucher effect on PTSD
  **********************************/
@@ -95,17 +112,15 @@ RUN;
 %LET dep = f_mh_pts_rec_yt;
 %LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
 
-/* We comment out the original clustering of stderrs,
- * since we lack the TRACT variable pending delivery
- * of the RAD.
+/* This PROC comes from 'MTO_table4_alt.sas'; we comment out
+ * the original clustering of stderrs, since we lack the TRACT
+ * variable pending delivery of the RAD.
  */
 PROC SURVEYLOGISTIC DATA = impdata ;
    STRATA ra_site; *CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
    WEIGHT f_wt_totsvy ;
-   *OUTPUT OUT=preddata PREDICTED=pp;
    ODS OUTPUT parameterestimates=parmest  
               OddsRatios = ors;   
-              *covb=covm  ;
 RUN;
