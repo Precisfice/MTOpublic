@@ -33,7 +33,8 @@
  */
 %Include "&folder\Ptsd_MTO_youth.sas";
     
-* Perform the 20x multiple imputation of missing covariates ;
+/* Perform the 20x multiple imputation of missing covariates
+ ************************************************************/
 
 proc sort data =  Fnlpred_ptsd_youth; 
 by ppid; run;
@@ -76,10 +77,20 @@ PROC MI DATA= Mental_health_yt_20101004_2  NIMPUTE=5 OUT=impdata0 SEED=524232;
  VAR &varlistc &varimp;
 RUN; 
 
-* Run the PTSD imputation model on the resulting dataset ;
-%mtoptsd(impdata0,Y, impdata); * Y => youth in this dual-purpose adult/youth script ;
+/* Run the PTSD imputation model on the resulting dataset
+ *********************************************************/
 
-* Obtain a voucher effect on PTSD ;
+/* Macro 'mtopdsd' is defined in Ptsd_MTO_youth.sas, which was
+ * %included above.  It computes the several PTSD criteria that
+ * were operationalized in the MTO Youth Final Survey, and also
+ * cross-walks from NCSR to MTO survey question variables.
+ * (It is a dual-purpose macro intended for both A=adult and
+ * Y=youth data sets; hence its 2nd argument.)
+ */
+%mtoptsd(impdata0,Y, impdata);
+
+/* Obtain a voucher effect on PTSD
+ **********************************/
 
 %LET dep = f_mh_pts_rec_yt;
 %LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
