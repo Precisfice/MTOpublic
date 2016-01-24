@@ -24,7 +24,7 @@ proc iml;
 run;
 
 * Define %mtoptsd macro needed by impdata20x.sas, %included in bootstrap loop below ;
-%include "&scripts./mtoptsd_macro.sas";
+%include "&reanalysis./mtoptsd_macro.sas";
 
 /* Iterate over the betas_posterior_samples, constructing a model
  * formula for each one and passing it to the 'impdata20x.sas'.

@@ -5,7 +5,7 @@
 
 * TODO: Rationalize this to separate sections for Seattle and SLC workstations ;
 * TODO: Consider even making this conditionally executed code ;
-%LET scripts = /folders/myfolders/scripts;
+%LET reanalysis = /folders/myfolders/reanalysis;
 %LET myfolders = /folders/myfolders;
 %LET ncsr = &myfolders./protected/ICPSR_20240/data;
 	/*Modify location to match home folder:
@@ -24,15 +24,15 @@ LIBNAME NCSR "&ncsr";
  *******************************/
 
 * Merge public + restricted NCSR data, impute missing values ;
-%include "&scripts./prep_NCSR_data.sas";
+%include "&reanalysis./prep_NCSR_data.sas";
 
 * Export NCSR data + formats to XPORT files readable by SUDAAN ;
-%include "&scripts./xport-ncsr.sas"; * Seattle workstation only ;
+%include "&reanalysis./xport-ncsr.sas"; * Seattle workstation only ;
 
 /* PHASE II -- Estimate PTSD imputation models
  **********************************************/
 
-%include "&scripts./impest.sas";
+%include "&reanalysis./impest.sas";
 
 /* PHASE III -- Prepare the MTO data
  ************************************/
@@ -52,9 +52,9 @@ run;
 /* PHASE IV -- Bootstrap the voucher effects
  ********************************************/
 
-%include "&scripts./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
+%include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
-%include "&scripts./simbetas.sas"; * Run the bootstrap ;
+%include "&reanalysis./simbetas.sas"; * Run the bootstrap ;
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
