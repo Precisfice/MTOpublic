@@ -234,16 +234,6 @@ data coef_rep;
       ;
 run;
 
-* Read the covariance matrix for our estimated imputation coefficients ;
-data covar;
-  infile "&outputs./covmat01.dbs";
-  input Intercept 25-38 Age SEXF RHISP RBLK ROTH
-        PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
-        PT209 PT211 PT212 PT213 PT214 PT233 PT237
-        ;
-  if _N_ <= 24;
-run;
-
 * Read the coefficients of the PTSD imputation model ;
 * used in the 2014 JAMA paper.                       ;
 proc import datafile="&folder./PTSD_slopes_from_NCSR.csv"
@@ -251,6 +241,33 @@ proc import datafile="&folder./PTSD_slopes_from_NCSR.csv"
      dbms=csv
      replace;
      getnames=yes;
+run;
+
+* Read the covariance matrix from original authors ;
+data covar_theirs;
+  set "&folder/youth_covmatrix.sas7bdat";
+run;
+
+* Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible ;
+* with the variance-covariance matrix (and parameter estimates) as    ;
+* received from Nancy Sampson.                                        ;
+data covar_ours;
+  infile "&outputs./covmat01.dbs";
+  * Fill in the leftmost, uninformative columns ;
+  PROCNUM = .;
+  MODELNO = .;
+  NCELL   = .;
+  EST_ID  = .;
+  IDNUM   = .;
+  ROWNUM  = .;
+  DDF     = .;
+  CHECK   = .;
+  RANK    = .;
+  * Load the substantive content ;
+  input Intercept 25-38 Age SEXF RHISP RBLK ROTH
+        PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+        PT209 PT211 PT212 PT213 PT214 PT233 PT237
+        ;
 run;
 
 * As a check, we print our respective covariance matrices,  ;
