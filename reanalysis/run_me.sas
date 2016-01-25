@@ -28,7 +28,7 @@ LIBNAME NCSR "&ncsr";
 LIBNAME MTO "&mto";
 
 /* PHASE I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
- **************************************************************************************/
+ ***************************************************************************************/
  
 * I-1: Generate formatted unrestricted and restricted data sets ;
 * ---------------------------------------------------------------- ;
@@ -128,22 +128,23 @@ ods pdf close;
   run;
 %END;
 
+/* end of PHASE I */
+
 /* PHASE II -- Estimate PTSD imputation models
  **********************************************/
 
-/* Estimate the PTSD imputation model employed by Kessler et al.,
- * and additionally several variations on that model to abstract
- * away some of the arbitrariness of their model specification.
- */
+* Estimate the PTSD imputation model employed by Kessler et al., ;
+* and additionally several variations on that model to abstract  ;
+* away some of the arbitrariness of their model specification.   ;
 ods pdf file = "&outputs/impest.pdf";
-/* This macro allows the PTSD imputation model to be estimated
- * with several simple modifications.  Variable AGE may be
- * included (as with the original model), or excluded from the
- * model specification.  Likewise, RACE (coded as 3 summies in
- * the original model) may also be optionally omitted from the
- * model.  Finally, the model may be estimated optionally in a
- * younger NCSR subset than the 18-85yo cohort originally used.
- */
+
+* This macro allows the PTSD imputation model to be estimated  ;
+* with several simple modifications.  Variable AGE may be      ;
+* included (as with the original model), or excluded from the  ;
+* model specification.  Likewise, RACE (coded as 3 summies in  ;
+* the original model) may also be optionally omitted from the  ;
+* model.  Finally, the model may be estimated optionally in a  ;
+* younger NCSR subset than the 18-85yo cohort originally used. ;
 %macro est_ptsd_imput_model(incl_age, incl_race, max_age);
 %if &incl_age=1 %then
   %do;
@@ -163,19 +164,19 @@ ods pdf file = "&outputs/impest.pdf";
   %end;
 %if &max_age=%str() %then %let max_age=99;
 %let suffix=A&incl_age.R&incl_race.S&max_age;
-/* On the Seattle workstation where this code was prototyped,
- * SAS-callable SUDAAN is unavailable.  Consequently, we use
- * PROC SURVEYLOGISTIC instead of PROC RLOGIST as used by the
- * original authors in Ptsd-mtoncsr-youth.sas.
- * I have found that PROC SURVEYLOGISTIC coefficients match
- * those of SUDAAN (invoked at the command line) to the 4th
- * decimal place (roughly 1 part in 10^5), and the standard
- * errors match to within about 1% in relative terms.
- * Thus, whatever differences are introduced by this PROC
- * substitution are probably negligible compared with the
- * differences between our ICPSR-licensed NCSR data set and
- * the Kessler team's (publicly unavailable) raw NCSR data.
- */
+* On the Seattle workstation where this code was prototyped, ;
+* SAS-callable SUDAAN is unavailable.  Consequently, we use  ;
+* PROC SURVEYLOGISTIC instead of PROC RLOGIST as used by the ;
+* original authors in Ptsd-mtoncsr-youth.sas.                ;
+* I have found that PROC SURVEYLOGISTIC coefficients match   ;
+* those of SUDAAN (invoked at the command line) to the 4th   ;
+* decimal place (roughly 1 part in 10^5), and the standard   ;
+* errors match to within about 1% in relative terms.         ;
+* Thus, whatever differences are introduced by this PROC     ;
+* substitution are probably negligible compared with the     ;
+* differences between our ICPSR-licensed NCSR data set and   ;
+* the (publicly unavailable) raw NCSR data held by Kessler   ;
+* and colleagues.                                            ;
 proc surveylogistic
   varmethod=taylor
   data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
@@ -206,10 +207,9 @@ run;
 
 %models_grid;
 
-/* Additionally, examine the age distribution for questions
- * of generalizability.  How does the pts_smpl=1 population
- * differ from the full NCS-R sample?
- */
+* Additionally, examine the age distribution for questions ;
+* of generalizability.  How does the pts_smpl=1 population ;
+* differ from the full NCS-R sample?                       ;
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
@@ -217,9 +217,8 @@ proc means data=NCSR.ncsr;
   by pts_smpl;
 run;
 
-/* Plot a histogram to show the age density clearly,
- * both for pts_smpl=1 and pts_smpl=0 groups.
- */
+* Plot a histogram to show the age density clearly, ;
+* both for pts_smpl=1 and pts_smpl=0 groups.        ;
 ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
 proc sgplot data=NCSR.ncsr;
   histogram age / group=pts_smpl filltype=gradient transparency=0.5
@@ -230,6 +229,8 @@ proc sgplot data=NCSR.ncsr;
   keylegend 'est' / location=inside across=1 position=topright;
 run;
 ods pdf close;
+
+/* end of PHASE II */
 
 /* PHASE III -- Prepare the MTO data
  ************************************/
@@ -246,12 +247,16 @@ format _numeric_;
 %include "&folder\agefix-youth.sas";
 run;
 
+/* end of PHASE III */
+
 /* PHASE IV -- Bootstrap the voucher effects
  ********************************************/
 
 %include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
 %include "&reanalysis./simbetas.sas"; * Run the bootstrap ;
+
+/* end of PHASE IV */
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
