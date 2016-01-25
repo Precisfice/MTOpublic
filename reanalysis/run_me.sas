@@ -29,6 +29,8 @@ LIBNAME MTO "&mto";
 
 /* PHASE I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  ***************************************************************************************/
+ *                                                           add/remove forward slash --^ ;
+ *                                                           to enable/disable PHASE I    ;
  
 * I-1: Generate formatted unrestricted and restricted data sets ;
 * ---------------------------------------------------------------- ;
@@ -132,6 +134,8 @@ ods pdf close;
 
 /* PHASE II -- Estimate PTSD imputation models
  **********************************************/
+ *                  add/remove forward slash --^ ;
+ *                  to enable/disable PHASE II   ;
 
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
@@ -234,6 +238,8 @@ ods pdf close;
 
 /* PHASE III -- Prepare the MTO data
  ************************************/
+ *        add/remove forward slash --^ ;
+ *        to enable/disable PHASE III  ;
 
 * This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
 proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
@@ -251,6 +257,8 @@ run;
 
 /* PHASE IV -- Bootstrap the voucher effects
  ********************************************/
+ *                add/remove forward slash --^ ;
+ *                to enable/disable PHASE IV   ;
 
 %include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
