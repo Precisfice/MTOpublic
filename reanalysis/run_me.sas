@@ -41,12 +41,12 @@ LIBNAME MTO "&mto";
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 
 * WORK.DA20240P2 & WORK.DA20240P5 to contain respectively unrestricted & restricted data ;
-proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
-proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
+proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
+proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
 
 * Formatting code provided by ICPSR converts DA20240P(2|5) --> formatted S20240P(2|5) ;
-%include "&ncsr/20240-0002-Supplemental_syntax.sas";
-%include "&ncsr/20240-0005-Supplemental_syntax-REST.sas";
+%include "&ncsr./20240-0002-Supplemental_syntax.sas";
+%include "&ncsr./20240-0005-Supplemental_syntax-REST.sas";
 
 * I-2: Merge by CPES Case Id ;
 * ----------------------------- ;
@@ -144,7 +144,7 @@ ods pdf close;
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
 * away some of the arbitrariness of their model specification.   ;
-ods pdf file = "&outputs/PHASE_II.pdf";
+ods pdf file = "&outputs./PHASE_II.pdf";
 
 * This macro allows the PTSD imputation model to be estimated  ;
 * with several simple modifications.  Variable AGE may be      ;
@@ -245,7 +245,7 @@ run;
 
 * Read the covariance matrix from original authors ;
 data covar_theirs;
-  set "&folder/youth_covmatrix.sas7bdat";
+  set "&folder./youth_covmatrix.sas7bdat";
 run;
 
 * Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible ;
@@ -321,7 +321,7 @@ proc iml;
   append var {rhs_vars our_beta their_beta their_stderr diff_in_stderrs var_detail};
 run;
 
-ods pdf file = "&outputs/PHASE_III.pdf";
+ods pdf file = "&outputs./PHASE_III.pdf";
 proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
@@ -341,8 +341,8 @@ run;
 data mental_health_yt_20101004;
 set mental_health_yt_20101004;
 format _numeric_;
-%include "&folder/Datafix2-mto-youth.sas";
-%include "&folder/agefix-youth.sas";
+%include "&folder./Datafix2-mto-youth.sas";
+%include "&folder./agefix-youth.sas";
 run;
 
 /* end of PHASE IV */
@@ -540,7 +540,7 @@ proc iml;
     title1;
     submit formula; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-      %include "&folder/impdata20x.sas";
+      %include "&folder./impdata20x.sas";
     endsubmit;
     * Extract the desired effect estimate and its CI ;
     use ORs;
