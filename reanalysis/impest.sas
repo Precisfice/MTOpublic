@@ -2,7 +2,7 @@
  * and additionally several variations on that model to abstract
  * away some of the arbitrariness of model specification.
  */
-ods pdf file = "&myfolders/outputs/impest.pdf";
+ods pdf file = "&outputs/impest.pdf";
 /* This macro allows the PTSD imputation model to be estimated
  * with several simple modifications.  Variable AGE may be
  * included (as with the original model), or excluded from the

@@ -3,22 +3,26 @@
 /* PHASE 0 -- Define folders to match your directory setup
  **********************************************************/
 
-* TODO: Rationalize this to separate sections for Seattle and SLC workstations ;
-* TODO: Consider even making this conditionally executed code ;
-%LET reanalysis = /folders/myfolders/reanalysis;
-%LET myfolders = /folders/myfolders;
-%LET ncsr = &myfolders./protected/ICPSR_20240/data;
-	/*Modify location to match home folder:
-	Needs: 
-	20240-0002-Data.stc
-	20240-0002-Supplemental_syntax.sas
-	20240-0005-Data-REST.stc
-	20240-0005-Supplemental_syntax-REST.sas
-	PTSD_slopes_from_NCSR.csv
-	*/
-LIBNAME NCSR "&ncsr";
+%LET workstation = Seattle;
+*%LET workstation = SLC;
 
-%LET folder = E:\NSCR_Replication_study; /* for Andy's workstation */
+%IF workstation = Seattle %THEN %DO;
+  %LET folder = /folders/myfolders;
+  %LET reanalysis = &folder./reanalysis;
+  %LET outputs = &folder./outputs;
+  %LET ncsr = &folder./protected/ICPSR_20240/data;
+%END;
+
+%IF workstation = SLC %THEN %DO;
+  %LET folder = E:\NSCR_Replication_study;
+  * TODO: Correct the following as needed. They assume a flat directory structure ;
+  %LET reanalysis = &folder;
+  %LET outputs = &folder;
+  %LET ncsr = &folder;
+%END;
+
+
+LIBNAME NCSR "&ncsr";
 
 /* PHASE I -- Prepare NCSR data
  *******************************/

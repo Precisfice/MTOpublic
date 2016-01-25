@@ -52,7 +52,7 @@ If RANCEST in(4, 12) then ROTH = 1; *(4) ALL OTHER ASIAN, (12) ALL OTHER ;
 
 /* Calculate PTSD diagnosis and sub-criteria variables */
 *%include '/home/jin/WMH/NSHS/REPLICATION/DIAGNOSIS/Ptsd.sas';
-%include "&myfolders./Ptsd.sas";
+%include "&folder./Ptsd.sas";
 
 /* Cases to use in NCSR have Worst Event A1,C1,D1 criteria or Random Event A1,C1,D1 criteria  */
 /* NB: The var name 'pts_smpl' is used instead of 'ncsr_pts_sample'
@@ -82,7 +82,7 @@ run;
 * STEP 5: Run a PROC CONTENTS on the file ;
 
 *Output: pdf file with contents of proc contents on NCSR merged (restricted & unrestricted) data;
-ods pdf file = "&myfolders/outputs/contents_NCSR_&sysdate..pdf";
+ods pdf file = "&outputs./contents_NCSR_&sysdate..pdf";
 proc contents data = NCSR.ncsr;
 run;
 ods pdf close;
