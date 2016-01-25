@@ -137,14 +137,14 @@ ods pdf close;
 /* end of PHASE I */
 
 /* PHASE II -- Estimate PTSD imputation models
- **********************************************
+ **********************************************/
  *                  add/remove forward slash --^ ;
  *                  to enable/disable PHASE II   ;
 
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
 * away some of the arbitrariness of their model specification.   ;
-ods pdf file = "&outputs/impest.pdf";
+ods pdf file = "&outputs/PHASE_II.pdf";
 
 * This macro allows the PTSD imputation model to be estimated  ;
 * with several simple modifications.  Variable AGE may be      ;
@@ -214,11 +214,12 @@ run;
 %mend models_grid;
 
 %models_grid;
+ods pdf close;
 
 /* end of PHASE II */
 
 /* PHASE III -- Compare coefficients
- ************************************
+ ************************************/
  *        add/remove forward slash --^ ;
  *        to enable/disable PHASE III  ;
 
@@ -226,7 +227,7 @@ run;
 * These are found starting at column #44 on lines 115-138 of slopes.txt,  ;
 * which is the output log from a SUDAAN run.                              ;
 data coef_rep;
-  infile "&folder\slopes.txt" firstobs=115;
+  infile "&outputs./slopes.txt" firstobs=115;
   if _N_<=24;
   input @44 coef
       +1 stderr
@@ -235,7 +236,7 @@ run;
 
 * Read the covariance matrix for our estimated imputation coefficients ;
 data covar;
-  infile "&folder\covmat01.dbs";
+  infile "&outputs./covmat01.dbs";
   input Intercept 25-38 Age SEXF RHISP RBLK ROTH
         PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
         PT209 PT211 PT212 PT213 PT214 PT233 PT237
@@ -245,7 +246,7 @@ run;
 
 * Read the coefficients of the PTSD imputation model ;
 * used in the 2014 JAMA paper.                       ;
-proc import datafile="&folder\PTSD_slopes_from_NCSR.csv"
+proc import datafile="&folder./PTSD_slopes_from_NCSR.csv"
      out=coef_ori
      dbms=csv
      replace;
@@ -303,6 +304,7 @@ proc iml;
   append var {rhs_vars their_beta our_beta our_stderr diff_in_stderrs var_detail};
 run;
 
+ods pdf file = "&outputs/PHASE_III.pdf";
 proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
@@ -322,8 +324,8 @@ run;
 data mental_health_yt_20101004;
 set mental_health_yt_20101004;
 format _numeric_;
-%include "&folder\Datafix2-mto-youth.sas";
-%include "&folder\agefix-youth.sas";
+%include "&folder/Datafix2-mto-youth.sas";
+%include "&folder/agefix-youth.sas";
 run;
 
 /* end of PHASE IV */
@@ -404,25 +406,25 @@ run;
 * Y=youth data sets -- hence its 2nd argument.)                   ;
 %macro mtoptsd(datain, pfx, dataout);
 
-   /* MTO Adult questionnaire PTSD data */
+   * MTO Adult questionnaire PTSD data ;
    data &dataout;
    set &datain;
 
-   /* Criteria A1 */
+   * Criteria A1 ;
    if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or &pfx.CV5_PT17 = 1 or
       &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or &pfx.CV10_PT23 = 1 or
       &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
    else f_mh_pts_a1 = 0;
 
-   /* Criteria C1 */
+   * Criteria C1 ;
    if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1,
           &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1,
-          &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;              /* Yes */
+          &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;              * Yes ;
    else f_mh_pts_c1 = 0;
 
-   /* Criteria D1 */
+   * Criteria D1 ;
    if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1)
-       then f_mh_pts_d1 = 1;  /* Yes */
+       then f_mh_pts_d1 = 1;  * Yes ;
    else f_mh_pts_d1 = 0;
 
    if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
@@ -438,11 +440,11 @@ run;
       if PTVAR ^= 1 then PTVAR = 0;
    end;
 
-   /* Gender */
+   * Gender ;
    if f_svy_gender = 'F' then sexf = 1;
    else sexf = 0;
 
-   /* Race */
+   * Race ;
    rhisp = 0;
    rwh = 0;
    rblk = 0;
@@ -459,7 +461,7 @@ run;
    if 0 <= f_svy_age_iw <= 18 then age = 18;
    else age = f_svy_age_iw;
 
-   /* Create corresponding NCSR variables */
+   * Create corresponding NCSR variables ;
    if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
    else PT211 = 0;
 
@@ -521,7 +523,7 @@ proc iml;
     title1;
     submit formula; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-      %include "&folder\impdata20x.sas";
+      %include "&folder/impdata20x.sas";
     endsubmit;
     * Extract the desired effect estimate and its CI ;
     use ORs;
