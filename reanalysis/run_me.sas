@@ -213,10 +213,19 @@ run;
 
 /* end of PHASE II */
 
-/* PHASE III -- Prepare the MTO data
+/* PHASE III -- Compare coefficients
  ************************************/
  *        add/remove forward slash --^ ;
  *        to enable/disable PHASE III  ;
+
+%include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
+
+/* end of PHASE III */
+
+/* PHASE IV -- Prepare the MTO data
+ ***********************************/
+ *       add/remove forward slash --^ ;
+ *       to enable/disable PHASE IV   ;
 
 * This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
 proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
@@ -230,12 +239,12 @@ format _numeric_;
 %include "&folder\agefix-youth.sas";
 run;
 
-/* end of PHASE III */
+/* end of PHASE IV */
 
-/* PHASE IV -- Compare MTO vs NCS-R age distributions
- *****************************************************/
+/* PHASE V -- Compare MTO vs NCS-R age distributions
+ ****************************************************/
  *                        add/remove forward slash --^ ;
- *                         to enable/disable PHASE IV   ;
+ *                        to enable/disable PHASE V    ;
 
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
@@ -262,15 +271,6 @@ ods pdf close;
 
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
 *       of the age distributions of MTO and NCS-R.                    ;
-
-/* end of PHASE IV */
-
-/* PHASE V -- Compare coefficients
- **********************************/
- *      add/remove forward slash --^ ;
- *      to enable/disable PHASE V    ;
-
-%include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
 /* end of PHASE V */
 
