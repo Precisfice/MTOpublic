@@ -6,29 +6,33 @@
 %LET workstation = Seattle;
 *%LET workstation = SLC;
 
-%IF workstation = Seattle %THEN %DO;
-  %LET folder = /folders/myfolders;
-  %LET reanalysis = &folder./reanalysis;
-  %LET outputs = &folder./outputs;
-  %LET ncsr = &folder./protected/ICPSR_20240/data;
-  * MTO libref undefined on Seattle workstation pending licensing ;
-  *%LET mto = &folder./protected/MTO/data;
-%END;
+%macro define_workstation_folders;
+  %IF &workstation = Seattle %THEN %DO;
+    %LET folder = /folders/myfolders;
+    %LET reanalysis = &folder./reanalysis;
+    %LET outputs = &folder./outputs;
+    %LET ncsr = &folder./protected/ICPSR_20240/data;
+    * MTO libref undefined on Seattle workstation pending licensing ;
+    *%LET mto = &folder./protected/MTO/data;
+  %END;
 
-%IF workstation = SLC %THEN %DO;
-  %LET folder = E:\NSCR_Replication_study;
-  * TODO: Correct the following as needed. They assume a flat directory structure ;
-  %LET reanalysis = &folder;
-  %LET outputs = &folder;
-  %LET ncsr = &folder;
-  %LET mto = &folder;
-%END;
+  %IF &workstation = SLC %THEN %DO;
+    %LET folder = E:/NSCR_Replication_study;
+    * TODO: Correct the following as needed. They assume a flat directory structure ;
+    %LET reanalysis = &folder;
+    %LET outputs = &folder;
+    %LET ncsr = &folder;
+    %LET mto = &folder;
+  %END;
+%mend;
+
+%define_workstation_folders;
 
 LIBNAME NCSR "&ncsr";
 LIBNAME MTO "&mto";
 
 /* PHASE I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
- ***************************************************************************************/
+ ***************************************************************************************
  *                                                           add/remove forward slash --^ ;
  *                                                           to enable/disable PHASE I    ;
  
@@ -133,7 +137,7 @@ ods pdf close;
 /* end of PHASE I */
 
 /* PHASE II -- Estimate PTSD imputation models
- **********************************************/
+ **********************************************
  *                  add/remove forward slash --^ ;
  *                  to enable/disable PHASE II   ;
 
@@ -214,7 +218,7 @@ run;
 /* end of PHASE II */
 
 /* PHASE III -- Compare coefficients
- ************************************/
+ ************************************
  *        add/remove forward slash --^ ;
  *        to enable/disable PHASE III  ;
 
@@ -306,7 +310,7 @@ run;
 /* end of PHASE III */
 
 /* PHASE IV -- Prepare the MTO data
- ***********************************/
+ ***********************************
  *       add/remove forward slash --^ ;
  *       to enable/disable PHASE IV   ;
 
@@ -325,7 +329,7 @@ run;
 /* end of PHASE IV */
 
 /* PHASE V -- Compare MTO vs NCS-R age distributions
- ****************************************************/
+ ****************************************************
  *                        add/remove forward slash --^ ;
  *                        to enable/disable PHASE V    ;
 
@@ -358,7 +362,7 @@ ods pdf close;
 /* end of PHASE V */
 
 /* PHASE VI -- Bootstrap the voucher effects
- ********************************************/
+ ********************************************
  *                add/remove forward slash --^ ;
  *                to enable/disable PHASE VI   ;
 
