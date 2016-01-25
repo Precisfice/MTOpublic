@@ -31,7 +31,7 @@ LIBNAME NCSR "&ncsr";
 %include "&reanalysis./prep_NCSR_data.sas";
 
 * Export NCSR data + formats to XPORT files readable by SUDAAN ;
-%include "&reanalysis./xport-ncsr.sas"; * Seattle workstation only ;
+%include "&reanalysis./xport-ncsr.sas"; * This will execute on Seattle workstation only ;
 
 /* PHASE II -- Estimate PTSD imputation models
  **********************************************/

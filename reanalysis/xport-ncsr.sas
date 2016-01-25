@@ -1,3 +1,5 @@
+%IF workstation = Seattle %THEN %DO;
+
 * Export NCSR data in SASXPORT format for use by SUDAAN ;
 libname OUT XPORT "&ncsr./ncsr.xpt";
 * TODO: Ensure that only the needed variables are output ;
@@ -15,3 +17,5 @@ libname XOUT XPORT "&ncsr./ncsrlev.xpt";
 proc copy in=WORK out=XOUT;
   select fmtdat;
 run;
+
+%END;
