@@ -211,6 +211,32 @@ run;
 
 %models_grid;
 
+/* end of PHASE II */
+
+/* PHASE III -- Prepare the MTO data
+ ************************************/
+ *        add/remove forward slash --^ ;
+ *        to enable/disable PHASE III  ;
+
+* This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
+proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
+by ppid;
+run;
+
+data mental_health_yt_20101004;
+set mental_health_yt_20101004;
+format _numeric_;
+%include "&folder\Datafix2-mto-youth.sas";
+%include "&folder\agefix-youth.sas";
+run;
+
+/* end of PHASE III */
+
+/* PHASE IV -- Compare MTO vs NCS-R age distributions
+ *****************************************************/
+ *                        add/remove forward slash --^ ;
+ *                         to enable/disable PHASE IV   ;
+
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
 * differ from the full NCS-R sample?                       ;
@@ -234,37 +260,28 @@ proc sgplot data=NCSR.ncsr;
 run;
 ods pdf close;
 
-/* end of PHASE II */
+* TODO: Plot a similar histogram demonstrating the negligible overlap ;
+*       of the age distributions of MTO and NCS-R.                    ;
 
-/* PHASE III -- Prepare the MTO data
- ************************************/
- *        add/remove forward slash --^ ;
- *        to enable/disable PHASE III  ;
+/* end of PHASE IV */
 
-* This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
-proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
-by ppid;
-run;
-
-data mental_health_yt_20101004;
-set mental_health_yt_20101004;
-format _numeric_;
-%include "&folder\Datafix2-mto-youth.sas";
-%include "&folder\agefix-youth.sas";
-run;
-
-/* end of PHASE III */
-
-/* PHASE IV -- Bootstrap the voucher effects
- ********************************************/
- *                add/remove forward slash --^ ;
- *                to enable/disable PHASE IV   ;
+/* PHASE V -- Compare coefficients
+ **********************************/
+ *      add/remove forward slash --^ ;
+ *      to enable/disable PHASE V    ;
 
 %include "&reanalysis./compare_coefs.sas"; * Compare PTSD model coefs -- theirs vs ours vs alt models ;
 
+/* end of PHASE V */
+
+/* PHASE VI -- Bootstrap the voucher effects
+ ********************************************/
+ *                add/remove forward slash --^ ;
+ *                to enable/disable PHASE VI   ;
+
 %include "&reanalysis./simbetas.sas"; * Run the bootstrap ;
 
-/* end of PHASE IV */
+/* end of PHASE VI */
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
