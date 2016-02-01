@@ -9,11 +9,11 @@
 %macro define_workstation_folders;
   %IF &workstation = Seattle %THEN %DO;
     %LET folder = /folders/myfolders;
-    %LET reanalysis = &folder./reanalysis;
-    %LET outputs = &folder./outputs;
-    %LET ncsr = &folder./protected/ICPSR_20240/data;
+    %LET reanalysis = &folder/reanalysis;
+    %LET outputs = &folder/outputs;
+    %LET ncsr = &folder/protected/ICPSR_20240/data;
     * MTO libref undefined on Seattle workstation pending licensing ;
-    *%LET mto = &folder./protected/MTO/data;
+    *%LET mto = &folder/protected/MTO/data;
   %END;
 
   %IF &workstation = SLC %THEN %DO;
@@ -43,20 +43,20 @@ options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 * WORK.DA20240P2 & WORK.DA20240P5 to contain respectively unrestricted & restricted data ;
 %macro import_ncsr_data;
 %IF &workstation = Seattle %THEN %DO;
-proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
-proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
+proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
+proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
 %END;
 %IF &workstation = SLC %THEN %DO;
-proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=F; run;
-proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
+proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=F; run;
+proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
 %END;
 %mend;
 
 %import_ncsr_data;
 
 * Formatting code provided by ICPSR converts DA20240P(2|5) --> formatted S20240P(2|5) ;
-%include "&ncsr./20240-0002-Supplemental_syntax.sas";
-%include "&ncsr./20240-0005-Supplemental_syntax-REST.sas";
+%include "&ncsr/20240-0002-Supplemental_syntax.sas";
+%include "&ncsr/20240-0005-Supplemental_syntax-REST.sas";
 
 * I-2: Merge by CPES Case Id ;
 * ----------------------------- ;
@@ -93,7 +93,7 @@ data NCSR.ncsr;
   * Remaining var tweaks in this section were copied from Ptsd-mtoncsr-youth.sas ;
 
   * Calculate PTSD diagnosis and sub-criteria variables ;
-  %include "&folder./Ptsd.sas";
+  %include "&folder/Ptsd.sas";
 
   * Cases to use in NCSR have Worst Event A1,C1,D1 criteria or Random Event A1,C1,D1 criteria ;
   * NB: short varname pts_smpl was used instead of ncsr_pts_sample to maintain v6 compatibility for XPORT ;
@@ -121,7 +121,7 @@ run;
 * I-4: Run a PROC CONTENTS ;
 * ------------------------ ;
 
-ods pdf file = "&outputs./PHASE_I.pdf";
+ods pdf file = "&outputs/PHASE_I.pdf";
 proc contents data = NCSR.ncsr;
 run;
 ods pdf close;
@@ -130,7 +130,7 @@ ods pdf close;
 * -------------------------------------------------------------------------------- ;
 %IF workstation = Seattle %THEN %DO;
   * Export NCSR data in SASXPORT format for use by SUDAAN ;
-  libname OUT XPORT "&ncsr./ncsr.xpt";
+  libname OUT XPORT "&ncsr/ncsr.xpt";
   * TODO: Ensure that only the needed variables are output ;
   data OUT.ncsr;
     set NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
@@ -142,7 +142,7 @@ ods pdf close;
   * Now also create the format catalog in XPORT format ;
   proc format lib=NCSR cntlout=fmtdat;
   run;
-  libname XOUT XPORT "&ncsr./ncsrlev.xpt";
+  libname XOUT XPORT "&ncsr/ncsrlev.xpt";
   proc copy in=WORK out=XOUT;
     select fmtdat;
   run;
@@ -158,7 +158,7 @@ ods pdf close;
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
 * away some of the arbitrariness of their model specification.   ;
-ods pdf file = "&outputs./PHASE_II.pdf";
+ods pdf file = "&outputs/PHASE_II.pdf";
 
 * This macro allows the PTSD imputation model to be estimated  ;
 * with several simple modifications.  Variable AGE may be      ;
@@ -241,7 +241,7 @@ ods pdf close;
 * These are found starting at column #44 on lines 115-138 of slopes.txt,  ;
 * which is the output log from a SUDAAN run.                              ;
 data coef_rep;
-  infile "&outputs./slopes.txt" firstobs=115;
+  infile "&outputs/slopes.txt" firstobs=115;
   if _N_<=24;
   input @44 coef
       +1 stderr
@@ -250,7 +250,7 @@ run;
 
 * Read the coefficients of the PTSD imputation model ;
 * used in the 2014 JAMA paper.                       ;
-proc import datafile="&folder./PTSD_slopes_from_NCSR.csv"
+proc import datafile="&folder/PTSD_slopes_from_NCSR.csv"
      out=coef_ori
      dbms=csv
      replace;
@@ -259,14 +259,14 @@ run;
 
 * Read the covariance matrix from original authors ;
 data covar_theirs;
-  set "&folder./youth_covmatrix.sas7bdat";
+  set "&folder/youth_covmatrix.sas7bdat";
 run;
 
 * Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible ;
 * with the variance-covariance matrix (and parameter estimates) as    ;
 * received from Nancy Sampson.                                        ;
 data covar_ours;
-  infile "&outputs./covmat01.dbs";
+  infile "&outputs/covmat01.dbs";
   * Fill in the leftmost, uninformative columns ;
   PROCNUM = .;
   MODELNO = .;
@@ -335,7 +335,7 @@ proc iml;
   append var {rhs_vars our_beta their_beta their_stderr diff_in_stderrs var_detail};
 run;
 
-ods pdf file = "&outputs./PHASE_III.pdf";
+ods pdf file = "&outputs/PHASE_III.pdf";
 proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
@@ -355,8 +355,8 @@ run;
 data mental_health_yt_20101004;
 set mental_health_yt_20101004;
 format _numeric_;
-%include "&folder./Datafix2-mto-youth.sas";
-%include "&folder./agefix-youth.sas";
+%include "&folder/Datafix2-mto-youth.sas";
+%include "&folder/agefix-youth.sas";
 run;
 
 /* end of PHASE IV */
@@ -369,7 +369,7 @@ run;
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
 * differ from the full NCS-R sample? ;
-ods pdf file = "&outputs./Age_compare.pdf";
+ods pdf file = "&outputs/Age_compare.pdf";
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
@@ -571,7 +571,7 @@ proc iml;
     title1;
     submit formula; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-      %include "&folder./impdata20x.sas";
+      %include "&folder/impdata20x.sas";
     endsubmit;
     * Extract the desired effect estimate and its CI ;
     use ORs;
