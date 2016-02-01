@@ -45,11 +45,11 @@ options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 %IF &workstation = Seattle %THEN %DO;
 proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
 proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
-%END
+%END;
 %IF &workstation = SLC %THEN %DO;
 proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=F; run;
 proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
-%END
+%END;
 %mend;
 
 %import_ncsr_data;
@@ -391,7 +391,7 @@ proc sgplot data=NCSR.ncsr;
   yaxis grid;
   keylegend 'est' / location=inside across=1 position=topright;
 run;
-%END
+%END;
 %IF &workstation = SLC %THEN %DO;
 proc sgplot data=NCSR.ncsr;
   histogram age/ nbins=75 name='est';
@@ -401,9 +401,9 @@ proc sgplot data=NCSR.ncsr;
   keylegend 'est' / location=inside across=1 position=topright;
   by pts_smpl;
 run;
-%END
-%mend
-%plot_age_dens
+%END;
+%mend;
+%plot_age_dens;
 ods pdf close;
 
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
