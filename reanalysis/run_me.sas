@@ -3,8 +3,8 @@
 /* PHASE 0 -- Define folders to match your directory setup
  **********************************************************/
 
-%LET workstation = Seattle;
-*%LET workstation = SLC;
+*%LET workstation = Seattle;
+%LET workstation = SLC;
 
 %macro define_workstation_folders;
   %IF &workstation = Seattle %THEN %DO;
@@ -29,10 +29,10 @@
 %define_workstation_folders;
 
 LIBNAME NCSR "&ncsr";
-LIBNAME MTO "&mto";
+libname mto "&mto";
 
 /* PHASE I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
- ***************************************************************************************
+ ***************************************************************************************/
  *                                                           add/remove forward slash --^ ;
  *                                                           to enable/disable PHASE I    ;
  
@@ -41,8 +41,18 @@ LIBNAME MTO "&mto";
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 
 * WORK.DA20240P2 & WORK.DA20240P5 to contain respectively unrestricted & restricted data ;
+%macro import_ncsr_data;
+%IF &workstation = Seattle %THEN %DO;
 proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
 proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
+%END
+%IF &workstation = SLC %THEN %DO;
+proc cimport infile="&ncsr./20240-0002-Data.stc" lib=WORK isfileutf8=F; run;
+proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
+%END
+%mend;
+
+%import_ncsr_data;
 
 * Formatting code provided by ICPSR converts DA20240P(2|5) --> formatted S20240P(2|5) ;
 %include "&ncsr./20240-0002-Supplemental_syntax.sas";
@@ -52,6 +62,10 @@ proc cimport infile="&ncsr./20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run
 * ----------------------------- ;
 proc sort data = S20240P2;
 by CPESCASE;
+run;
+
+data S20240P5;
+Set Da20240p5_format;
 run;
 
 proc sort data = S20240P5;
@@ -325,11 +339,11 @@ ods pdf file = "&outputs./PHASE_III.pdf";
 proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
-
+ods pdf close;
 /* end of PHASE III */
 
 /* PHASE IV -- Prepare the MTO data
- ***********************************
+ ***********************************/
  *       add/remove forward slash --^ ;
  *       to enable/disable PHASE IV   ;
 
@@ -348,13 +362,14 @@ run;
 /* end of PHASE IV */
 
 /* PHASE V -- Compare MTO vs NCS-R age distributions
- ****************************************************
+ ****************************************************/
  *                        add/remove forward slash --^ ;
  *                        to enable/disable PHASE V    ;
 
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
-* differ from the full NCS-R sample?                       ;
+* differ from the full NCS-R sample? ;
+ods pdf file = "&outputs./Age_compare.pdf";
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
@@ -365,6 +380,9 @@ run;
 * Plot a histogram to show the age density clearly, ;
 * both for pts_smpl=1 and pts_smpl=0 groups.        ;
 ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
+
+%macro plot_age_dens
+%IF &workstation = Seattle %THEN %DO;
 proc sgplot data=NCSR.ncsr;
   histogram age / group=pts_smpl filltype=gradient transparency=0.5
                   nbins=75 name='est';
@@ -373,6 +391,19 @@ proc sgplot data=NCSR.ncsr;
   yaxis grid;
   keylegend 'est' / location=inside across=1 position=topright;
 run;
+%END
+%IF &workstation = SLC %THEN %DO;
+proc sgplot data=NCSR.ncsr;
+  histogram age/ nbins=75 name='est';
+  density age;
+  xaxis display=(nolabel) min=15 max=90;
+  yaxis grid;
+  keylegend 'est' / location=inside across=1 position=topright;
+  by pts_smpl;
+run;
+%END
+%mend
+%plot_age_dens
 ods pdf close;
 
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
@@ -381,7 +412,7 @@ ods pdf close;
 /* end of PHASE V */
 
 /* PHASE VI -- Bootstrap the voucher effects
- ********************************************
+ ********************************************/
  *                add/remove forward slash --^ ;
  *                to enable/disable PHASE VI   ;
 
