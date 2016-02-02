@@ -1,0 +1,14 @@
+* Reading notes from Matt Sciandra's Jan 11, 2016 documentation
+  1. We should enquire as to any specific problems expected when running this code on SAS v9.4
+  2. Redoing the imputation w/ and w/o tract clustering will make interesting comparison
+  3. Align our paper's terminology with Mr. Sciandra's p. 5: /LPV/, /TRV/, /control/
+  4. Ensure alignment where necessary as well with the collection-phase terms on pp. 5-6
+  5. Check the weighted response rate (90.0%) vs JAMA paper; I recall something in the 80s
+  6. The imputation described in Section 4.2 is truly remarkable:
+     - fully 22% (absolute count) of the imputed individuals were completely made up!
+     - (TODO: calculate this figure on a weighted basis, also)
+     - How could anyone expect this to do anything but magnify RNG errors?
+     - **This makes an interviewed-case (NB, /not/ 'complete-case') analysis essential**
+     - **Changing the imputation seed is also essential**
+  7. Our paper must anticipate and circumvent the original authors' potential misuse of 'false discovery rate' as a defense against our argument.
+  8. 
