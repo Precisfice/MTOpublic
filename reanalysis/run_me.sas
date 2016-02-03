@@ -383,7 +383,7 @@ ods pdf close;
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
 * differ from the full NCS-R sample? ;
-ods pdf file = "&outputs/Age_compare.pdf";
+ods pdf file = "&outputs/PHASE_V.pdf";
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
@@ -446,7 +446,9 @@ ods pdf close;
 * density implied by the original coefficients of the JAMA article, taken     ;
 * together with their variance-covariance matrix received from Nancy Sampson. ;
 * Demonstrate that the mean and covariance matrix for these samples match     ;
-* closely the desired values.                                                 ;
+* closely the desired values.   ;
+
+ods pdf file = "&outputs/PHASE_VI.pdf";
 proc iml;
   title1 "Sampling from joint posterior of PTSD model coefficients";
   title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
@@ -576,6 +578,7 @@ run;
 * Iterate over the betas_posterior_samples, constructing a model    ;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Collect the resulting voucher effect estimates with their CIs.    ;
+
 proc iml;
   title1 "Constructing PTSD imputation model formulas";
   title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
@@ -615,7 +618,7 @@ proc iml;
   print or_ci[colname={'Odds Ratio' 'Lower CL' 'Upper CL'}
               rowname=rownames];
 run;
-
+ods pdf close; 
 /* end of PHASE VI */
 
 /* --- References ---
