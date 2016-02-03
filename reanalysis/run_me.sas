@@ -4,16 +4,33 @@
  **********************************************************/
 
 *%LET workstation = Seattle;
-*%LET workstation = SLC;
+%LET workstation = SLC;
 
-
- * For workstation in SLC ;
+%macro map_workstation_directory_structure_to_global_vars;
+  %GLOBAL folder;     * code from Kessler et al & NBER ;
+  %GLOBAL reanalysis; * code written for the reanalysis ;
+  %GLOBAL outputs;    * directory for outputs ;
+  %GLOBAL ncsr;       * location of NCSR data files ;
+  %GLOBAL mto;        * location of MTO data files ;
+  %IF &workstation = Seattle %THEN %DO;
+    %LET folder = /folders/myfolders;
+    %LET reanalysis = &folder/reanalysis;
+    %LET outputs = &folder/outputs;
+    %LET ncsr = &folder/protected/ICPSR_20240/data;
+    * MTO libref undefined on Seattle workstation pending licensing to DNC LLC ;
+    *%LET mto = &folder/protected/MTO/data;
+  %END;
+  
+  %IF &workstation = SLC %THEN %DO;
     %LET folder = C:/Users/Anolinx/MTO;
-    * TODO: Correct the following as needed. They assume a flat directory structure ;
     %LET reanalysis = &folder/reanalysis;
     %LET outputs = &folder/outputs;
     %LET ncsr = E:/NSCR_Replication_study;
     %LET mto = E:/NSCR_Replication_study;
+  %END;
+%mend;
+
+%map_workstation_directory_structure_to_global_vars;
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
@@ -28,7 +45,7 @@ libname mto "&mto";
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 
 * WORK.DA20240P2 & WORK.DA20240P5 to contain respectively unrestricted & restricted data ;
-%macro import_ncsr_data(workstation=);
+%macro import_ncsr_data;
 %IF &workstation = Seattle %THEN %DO;
 proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
 proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
@@ -39,7 +56,7 @@ proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
 %END;
 %mend;
 
-%import_ncsr_data(workstation=SLC);
+%import_ncsr_data;
 
 * Formatting code provided by ICPSR converts DA20240P(2|5) --> formatted S20240P(2|5) ;
 %include "&ncsr/20240-0002-Supplemental_syntax.sas";
@@ -115,7 +132,7 @@ ods pdf close;
 
 * I-5: (Seattle only) Export NCSR data + formats to XPORT files readable by SUDAAN ;
 * -------------------------------------------------------------------------------- ;
-%macro export_ncsr_for_sudaan(workstation=);
+%macro export_ncsr_for_sudaan;
 %IF workstation = Seattle %THEN %DO;
   * Export NCSR data in SASXPORT format for use by SUDAAN ;
   libname OUT XPORT "&ncsr/ncsr.xpt";
@@ -137,7 +154,7 @@ ods pdf close;
 %END;
 %mend;
 
-%export_ncsr_for_sudaan(workstation=SLC);
+%export_ncsr_for_sudaan;
 
 /* end of PHASE I */
 
@@ -378,7 +395,7 @@ run;
 * both for pts_smpl=1 and pts_smpl=0 groups.        ;
 ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
 
-%macro plot_age_dens(workstation=);
+%macro plot_age_dens;
 %IF &workstation = Seattle %THEN %DO;
 proc sgplot data=NCSR.ncsr;
   histogram age / group=pts_smpl filltype=gradient transparency=0.5
@@ -400,7 +417,7 @@ proc sgplot data=NCSR.ncsr;
 run;
 %END;
 %mend;
-%plot_age_dens(workstation=SLC);
+%plot_age_dens;
 ods pdf close;
 
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
