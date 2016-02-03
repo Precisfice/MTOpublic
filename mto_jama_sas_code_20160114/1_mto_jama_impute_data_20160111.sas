@@ -70,11 +70,13 @@ STEPS:
 %let today = %sysfunc(date(),yymmddn8.);
 /* !!!! USER MUST UPDATE DIRECTORY LOCATION FOR FORMATS/OUTPUT FILE AND DATA LOCATION. !!!! */
 * Location of formats programs and output location for log/results;
-%let pgmdir = ~/mtoproj/m10_pgm/papers/icpsr_archive/jama/;
+%let pgmdir = C:/Users/Anolinx/MTO/outputs;
 * Data file location;
-libname mto "~/mtoproj/m10_data/papers/icpsr_archive/jama";
+libname mto "E:/NSCR_Replication_study";
 * Input data file: pre-imputation dataset (one observation for each youth);
-%let preimp = mto.mto_jama_preimp_20160111;
+%LET NBER = E:/NSCR_Replication_study/NBER;
+Libname NBER "&NBER";
+%let preimp = NBER.Mto_jama_preimp_20160111;
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
 %let imputed = mto.mto_jama_imputed_&today.;
 
@@ -569,7 +571,16 @@ PROC SORT DATA=impdata;
 RUN;
  
 DATA impdata2;
-	MERGE impdata (in=imp) &preimp. (keep = ppid ra_group f_svy_age_bl_imp);
+	MERGE impdata (in=imp) &preimp. (keep = ppid ra_group f_svy_age_bl_imp 
+f_svy_age_iw 
+x_f_ch_male
+YCV1_PT13 YCV2_PT14 YCV3_PT15 YCV4_PT16 YCV5_PT17
+YCV6_PT18 YCV7_PT20 YCV8_PT22 YCV9_PT22_1 YCV10_PT23
+YCV11_PT27 YCV13_PT62 YCV14_PT64 YCV14b_PT64a
+YCV14c YCV22_PT261 YCV15_PT269 YCV16_PT270 YCV17_PT271 
+YCV18_PT272 YCV19_PT273 YCV20_PT274 YCV21_PT275
+YCV24_PT269 YCV25_PT270 YCV26_PT271 YCV27_PT272 
+YCV28_PT273 YCV29_PT274 YCV30_PT275);
 	BY ppid; 
 	if imp;
 RUN;
@@ -586,9 +597,9 @@ RUN;
 
 
 **** Step 5d. Output contents of final dataset ****;
-ods listing close;
-ods html file="&pgmdir.contents_mto_jama_imputed_&today..xls" style=minimal;
+
+ods pdf file="&pgmdir/contents_mto_jama_imputed_&today..pdf" style=minimal;
 proc contents data=&imputed. varnum;
 run;
-ods html close;
-ods listing;
+ods pdf close;
+

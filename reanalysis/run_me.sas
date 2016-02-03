@@ -6,7 +6,7 @@
 *%LET workstation = Seattle;
 %LET workstation = SLC;
 
-%macro map_workstation_directory_structure_to_global_vars;
+%macro map_workstation_dirs;
   %GLOBAL folder;     * code from Kessler et al & NBER ;
   %GLOBAL reanalysis; * code written for the reanalysis ;
   %GLOBAL outputs;    * directory for outputs ;
@@ -30,7 +30,7 @@
   %END;
 %mend;
 
-%map_workstation_directory_structure_to_global_vars;
+%map_workstation_dirs;
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
@@ -383,7 +383,7 @@ ods pdf close;
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
 * differ from the full NCS-R sample? ;
-ods pdf file = "&outputs/Age_compare.pdf";
+ods pdf file = "&outputs/PHASE_V.pdf";
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
@@ -425,6 +425,18 @@ ods pdf close;
 
 /* end of PHASE V */
 
+/* PHASE_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
+ * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
+ *       essential parts for our investigation of PTSD.  At present, his code is very
+ *       general, and probably does a lot of extra work that makes the program run
+ *       quite slowly -- taking perhaps 5 minutes or more.  Obviously, that won't
+ *       do inside our bootstrapping loop!
+ ***********************************************************************************/
+ *                                                       add/remove forward slash --^ ;
+ *                                                       to enable/disable PHASE Z    ;
+%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+/* end of PHASE Z */
+
 /* PHASE VI -- Bootstrap the voucher effects
  ********************************************/
  *                add/remove forward slash --^ ;
@@ -434,7 +446,9 @@ ods pdf close;
 * density implied by the original coefficients of the JAMA article, taken     ;
 * together with their variance-covariance matrix received from Nancy Sampson. ;
 * Demonstrate that the mean and covariance matrix for these samples match     ;
-* closely the desired values.                                                 ;
+* closely the desired values.   ;
+
+ods pdf file = "&outputs/PHASE_VI.pdf";
 proc iml;
   title1 "Sampling from joint posterior of PTSD model coefficients";
   title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
@@ -564,6 +578,7 @@ run;
 * Iterate over the betas_posterior_samples, constructing a model    ;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Collect the resulting voucher effect estimates with their CIs.    ;
+
 proc iml;
   title1 "Constructing PTSD imputation model formulas";
   title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
@@ -591,8 +606,9 @@ proc iml;
     use ORs;
     read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
     close ORs;
-    effrow = loc(compbl(Effect)='ra_Grp_Exp'
+    effrow = loc(compbl(Effect)='ra_grp_exp'
                      & _Imputation_=.);
+    * How about this, as cause of 'Matrix value not set' error? ;
     or_ci[i,1] = OddsRatioEst[effrow];
     or_ci[i,2] = LowerCL[effrow];
     or_ci[i,3] = UpperCL[effrow];
@@ -602,12 +618,12 @@ proc iml;
   print or_ci[colname={'Odds Ratio' 'Lower CL' 'Upper CL'}
               rowname=rownames];
 run;
-
+ods pdf close; 
 /* end of PHASE VI */
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
    for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during Adolescence.
-   JAMA 311, no. 9 (March 5, 2014): 937–48. doi:10.1001/jama.2014.607.
+   JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
     
     */
