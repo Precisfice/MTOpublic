@@ -425,6 +425,18 @@ ods pdf close;
 
 /* end of PHASE V */
 
+/* PHASE_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
+ * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
+ *       essential parts for our investigation of PTSD.  At present, his code is very
+ *       general, and probably does a lot of extra work that makes the program run
+ *       quite slowly -- taking perhaps 5 minutes or more.  Obviously, that won't
+ *       do inside our bootstrapping loop!
+ ***********************************************************************************/
+ *                                                       add/remove forward slash --^ ;
+ *                                                       to enable/disable PHASE Z    ;
+%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+/* end of PHASE Z */
+
 /* PHASE VI -- Bootstrap the voucher effects
  ********************************************/
  *                add/remove forward slash --^ ;
@@ -591,8 +603,9 @@ proc iml;
     use ORs;
     read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
     close ORs;
-    effrow = loc(compbl(Effect)='ra_Grp_Exp'
+    effrow = loc(compbl(Effect)='ra_grp_exp'
                      & _Imputation_=.);
+    * How about this, as cause of 'Matrix value not set' error? ;
     or_ci[i,1] = OddsRatioEst[effrow];
     or_ci[i,2] = LowerCL[effrow];
     or_ci[i,3] = UpperCL[effrow];
@@ -608,6 +621,6 @@ run;
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
    for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during Adolescence.
-   JAMA 311, no. 9 (March 5, 2014): 937–48. doi:10.1001/jama.2014.607.
+   JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
     
     */
