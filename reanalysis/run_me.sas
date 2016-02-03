@@ -6,7 +6,7 @@
 *%LET workstation = Seattle;
 %LET workstation = SLC;
 
-%macro map_workstation_directory_structure_to_global_vars;
+%macro map_workstation_dirs;
   %GLOBAL folder;     * code from Kessler et al & NBER ;
   %GLOBAL reanalysis; * code written for the reanalysis ;
   %GLOBAL outputs;    * directory for outputs ;
@@ -30,7 +30,7 @@
   %END;
 %mend;
 
-%map_workstation_directory_structure_to_global_vars;
+%map_workstation_dirs;
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
