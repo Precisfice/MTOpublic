@@ -4,29 +4,16 @@
  **********************************************************/
 
 *%LET workstation = Seattle;
-%LET workstation = SLC;
+*%LET workstation = SLC;
 
-%macro define_workstation_folders;
-  %IF &workstation = Seattle %THEN %DO;
-    %LET folder = /folders/myfolders;
+
+ * For workstation in SLC ;
+    %LET folder = C:/Users/Anolinx/MTO;
+    * TODO: Correct the following as needed. They assume a flat directory structure ;
     %LET reanalysis = &folder/reanalysis;
     %LET outputs = &folder/outputs;
-    %LET ncsr = &folder/protected/ICPSR_20240/data;
-    * MTO libref undefined on Seattle workstation pending licensing ;
-    *%LET mto = &folder/protected/MTO/data;
-  %END;
-
-  %IF &workstation = SLC %THEN %DO;
-    %LET folder = E:/NSCR_Replication_study;
-    * TODO: Correct the following as needed. They assume a flat directory structure ;
-    %LET reanalysis = &folder;
-    %LET outputs = &folder;
-    %LET ncsr = &folder;
-    %LET mto = &folder;
-  %END;
-%mend;
-
-%define_workstation_folders;
+    %LET ncsr = E:/NSCR_Replication_study;
+    %LET mto = E:/NSCR_Replication_study;
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
@@ -41,7 +28,7 @@ libname mto "&mto";
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
 
 * WORK.DA20240P2 & WORK.DA20240P5 to contain respectively unrestricted & restricted data ;
-%macro import_ncsr_data;
+%macro import_ncsr_data(workstation=);
 %IF &workstation = Seattle %THEN %DO;
 proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
 proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
@@ -52,7 +39,7 @@ proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
 %END;
 %mend;
 
-%import_ncsr_data;
+%import_ncsr_data(workstation=SLC);
 
 * Formatting code provided by ICPSR converts DA20240P(2|5) --> formatted S20240P(2|5) ;
 %include "&ncsr/20240-0002-Supplemental_syntax.sas";
@@ -128,6 +115,7 @@ ods pdf close;
 
 * I-5: (Seattle only) Export NCSR data + formats to XPORT files readable by SUDAAN ;
 * -------------------------------------------------------------------------------- ;
+%macro export_ncsr_for_sudaan(workstation=);
 %IF workstation = Seattle %THEN %DO;
   * Export NCSR data in SASXPORT format for use by SUDAAN ;
   libname OUT XPORT "&ncsr/ncsr.xpt";
@@ -147,6 +135,9 @@ ods pdf close;
     select fmtdat;
   run;
 %END;
+%mend;
+
+%export_ncsr_for_sudaan(workstation=SLC);
 
 /* end of PHASE I */
 
@@ -359,6 +350,12 @@ format _numeric_;
 %include "&folder/agefix-youth.sas";
 run;
 
+ods pdf file = "&outputs/PHASE_IV.pdf";
+Title "MTO Contents";
+proc contents data =mental_health_yt_20101004 ;
+run;
+ods pdf close; 
+
 /* end of PHASE IV */
 
 /* PHASE V -- Compare MTO vs NCS-R age distributions
@@ -381,7 +378,7 @@ run;
 * both for pts_smpl=1 and pts_smpl=0 groups.        ;
 ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
 
-%macro plot_age_dens
+%macro plot_age_dens(workstation=);
 %IF &workstation = Seattle %THEN %DO;
 proc sgplot data=NCSR.ncsr;
   histogram age / group=pts_smpl filltype=gradient transparency=0.5
@@ -403,7 +400,7 @@ proc sgplot data=NCSR.ncsr;
 run;
 %END;
 %mend;
-%plot_age_dens;
+%plot_age_dens(workstation=SLC);
 ods pdf close;
 
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
@@ -571,7 +568,7 @@ proc iml;
     title1;
     submit formula; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-      %include "&folder/impdata20x.sas";
+      %include "&reanalysis/impdata20x.sas";
     endsubmit;
     * Extract the desired effect estimate and its CI ;
     use ORs;
