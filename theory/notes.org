@@ -11,4 +11,15 @@
      - [ ] **This makes an interviewed-case (NB, /not/ 'complete-case') analysis essential**
      - [ ] **Changing the imputation seed is also essential**
   7. Our paper must anticipate and circumvent the original authors' potential misuse of 'false discovery rate' as a defense against our argument.
-  8. 
+
+* Notes after our first successful end-to-end run of run_me.sas
+  1. [ ] Prepend the original coefficients as first of the 10,000 betas_posterior_samples
+  2. [ ] Check that the initial OR and its CI match the JAMA paper
+  3. [ ] Backtrack to find out why they didn't P-^(
+     It seems almost inevitable that /something/ will cause a mismatch, whether this a mismatched
+     selection of random seed, or some other problem.
+  4. [ ] Investigate whether M3 can be installed _easily_ from USB (i.e., w/o Internet)
+  5. [ ] Implement a passable age distribution comparison overlay graphic
+  6. [ ] Implement a passable UpperCL & LowerCL bootstrap density graphic
+  7. [ ] Fix whatever problem we found in step #3 above
+  8. [ ] If SAS graphics are unsuitable for publication, make R versions of them
