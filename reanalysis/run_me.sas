@@ -429,7 +429,7 @@ ods pdf close;
  * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
  *       essential parts for our investigation of PTSD.  At present, his code is very
  *       general, and probably does a lot of extra work that makes the program run
- *       quite slowly -- taking perhaps 5 minutes or more.  Obviously, that won't
+ *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
  *       do inside our bootstrapping loop!
  ***********************************************************************************/
  *                                                       add/remove forward slash --^ ;
@@ -455,8 +455,10 @@ proc iml;
   load their_beta their_cov CovarNames;
   call randseed(2016);
   betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
-  sample_labels = "Sample1":"Sample5";
-  print(betas_posterior_samples[1:5,])[Label="First 5 sample coefficient vectors"
+  * Simply overwrite the first sample with the original beta vector ;
+  betas_posterior_samples[1,] = their_beta;
+  sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+  print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient vectors"
    colname=CovarNames rowname=sample_labels];
   SampleMean = mean(betas_posterior_samples);
   SampleCov = cov(betas_posterior_samples);
@@ -608,7 +610,6 @@ proc iml;
     close ORs;
     effrow = loc(compbl(Effect)='ra_grp_exp'
                      & _Imputation_=.);
-    * How about this, as cause of 'Matrix value not set' error? ;
     or_ci[i,1] = OddsRatioEst[effrow];
     or_ci[i,2] = LowerCL[effrow];
     or_ci[i,3] = UpperCL[effrow];
