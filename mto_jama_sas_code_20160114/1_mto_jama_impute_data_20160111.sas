@@ -65,9 +65,7 @@ STEPS:
 
 /* !!!! NOTE: This program was run using SAS 9.3. The user may run into issues using other versions of SAS. !!!! */
 
-** Set date, directories, libraries, and datasets;
-* Today's date (appended to output dataset and log/output files);
-%let today = %sysfunc(date(),yymmddn8.);
+** Set directories, libraries, and datasets;
 /* !!!! USER MUST UPDATE DIRECTORY LOCATION FOR FORMATS/OUTPUT FILE AND DATA LOCATION. !!!! */
 * Location of formats programs and output location for log/results;
 %let pgmdir = C:/Users/Anolinx/MTO/outputs;
@@ -78,7 +76,7 @@ libname mto "E:/NSCR_Replication_study";
 Libname NBER "&NBER";
 %let preimp = NBER.Mto_jama_preimp_20160111;
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
-%let imputed = mto.mto_jama_imputed_&today.;
+%let imputed = mto.mto_jama_imputed;
 
 * Set options;
 ODS RESULTS OFF;
@@ -220,7 +218,7 @@ RUN;
 %GLOBAL varlistn;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runlog_&today..log";
+ LOG="&pgmdir.02_mto_jama_runlog.log";
  RUN;
 %variable_concatenator(missings,new_str,varlistn);
 PROC PRINTTO NEW;
@@ -250,7 +248,7 @@ RUN;
 %GLOBAL varlistc;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runlog_&today..log";
+ LOG="&pgmdir.02_mto_jama_runlog.log";
  RUN;
 %variable_concatenator(nomiss&i,new_str,varlistc);
 
@@ -498,8 +496,8 @@ RUN;
 ****************************************************************************;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runimputedata_&today..log"
- PRINT="&pgmdir.02_mto_jama_runimputedata_&today..lst";
+ LOG="&pgmdir.02_mto_jama_runimputedata.log"
+ PRINT="&pgmdir.02_mto_jama_runimputedata.lst";
  RUN;
 %runMI(ra_Grp_Exp);
 %runMI(ra_Grp_S8);
@@ -598,7 +596,7 @@ RUN;
 
 **** Step 5d. Output contents of final dataset ****;
 
-ods pdf file="&pgmdir/contents_mto_jama_imputed_&today..pdf" style=minimal;
+ods pdf file="&pgmdir/contents_mto_jama_imputed.pdf" style=minimal;
 proc contents data=&imputed. varnum;
 run;
 ods pdf close;

@@ -47,7 +47,7 @@
 
 *%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 
-%mtoptsd(MTO.Mto_jama_imputed_20160203,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
+%mtoptsd(MTO.Mto_jama_imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 
 ods pdf file="&outputs/impdata_contents.pdf";
