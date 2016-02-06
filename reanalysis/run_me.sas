@@ -1,6 +1,6 @@
 /* Top-level script for reanalysis of reported PTSD findings of Kessler et al [1] */
 
-/* PHASE 0 -- Define folders to match your directory setup
+/*  STEP 0 -- Define folders to match your directory setup
  **********************************************************/
 
 *%LET workstation = Seattle;
@@ -35,10 +35,10 @@
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
 
-/* PHASE I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
+/*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  ***************************************************************************************/
  *                                                           add/remove forward slash --^ ;
- *                                                           to enable/disable PHASE I    ;
+ *                                                           to enable/disable STEP I     ;
  
 PROC PRINTTO NEW
   LOG="&outputs/RS1.log";
@@ -160,12 +160,12 @@ ods pdf close;
 
 %export_ncsr_for_sudaan;
 
-/* end of PHASE I */
+/* end of STEP I */
 
-/* PHASE II -- Estimate PTSD imputation models
+/*  STEP II -- Estimate PTSD imputation models
  **********************************************/
  *                  add/remove forward slash --^ ;
- *                  to enable/disable PHASE II   ;
+ *                  to enable/disable STEP II    ;
 
 PROC PRINTTO NEW
   LOG="&outputs/RS2.log";
@@ -246,12 +246,12 @@ run;
 %models_grid;
 ods pdf close;
 
-/* end of PHASE II */
+/* end of STEP II */
 
-/* PHASE III -- Compare coefficients
+/*  STEP III -- Compare coefficients
  ************************************/
  *        add/remove forward slash --^ ;
- *        to enable/disable PHASE III  ;
+ *        to enable/disable STEP III   ;
 
 PROC PRINTTO NEW
   LOG="&outputs/RS3.log";
@@ -360,12 +360,12 @@ proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
 ods pdf close;
-/* end of PHASE III */
+/* end of STEP III */
 
-/* PHASE IV -- Prepare the MTO data
+/*  STEP IV -- Prepare the MTO data
  ***********************************/
  *       add/remove forward slash --^ ;
- *       to enable/disable PHASE IV   ;
+ *       to enable/disable STEP IV    ;
 
 PROC PRINTTO NEW
   LOG="&outputs/RS4.log";
@@ -389,12 +389,12 @@ proc contents data =mental_health_yt_20101004 ;
 run;
 ods pdf close; 
 
-/* end of PHASE IV */
+/* end of STEP IV */
 
-/* PHASE V -- Compare MTO vs NCS-R age distributions
+/*  STEP V -- Compare MTO vs NCS-R age distributions
  ****************************************************/
  *                        add/remove forward slash --^ ;
- *                        to enable/disable PHASE V    ;
+ *                        to enable/disable STEP V     ;
 
 PROC PRINTTO NEW
   LOG="&outputs/RS5.log";
@@ -444,9 +444,9 @@ ods pdf close;
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
 *       of the age distributions of MTO and NCS-R.                    ;
 
-/* end of PHASE V */
+/* end of STEP V */
 
-/* PHASE_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
+/*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
  * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
  *       essential parts for our investigation of PTSD.  At present, his code is very
  *       general, and probably does a lot of extra work that makes the program run
@@ -454,14 +454,14 @@ ods pdf close;
  *       do inside our bootstrapping loop!
  ***********************************************************************************/
  *                                                       add/remove forward slash --^ ;
- *                                                       to enable/disable PHASE Z    ;
+ *                                                       to enable/disable STEP Z     ;
 %include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-/* end of PHASE Z */
+/* end of STEP Z */
 
-/* PHASE VI -- Bootstrap the voucher effects
+/*  STEP VI -- Bootstrap the voucher effects
  ********************************************/
  *                add/remove forward slash --^ ;
- *                to enable/disable PHASE VI   ;
+ *                to enable/disable STEP VI    ;
 
 PROC PRINTTO NEW
   LOG="&outputs/RS6.log";
@@ -645,7 +645,7 @@ proc iml;
               rowname=rownames];
 run;
 ods pdf close; 
-/* end of PHASE VI */
+/* end of STEP VI */
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
