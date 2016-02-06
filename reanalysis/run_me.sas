@@ -125,7 +125,7 @@ run;
 * I-4: Run a PROC CONTENTS ;
 * ------------------------ ;
 
-ods pdf file = "&outputs/PHASE_I.pdf";
+ods pdf file = "&outputs/RS1-NCSR_Contents.pdf";
 proc contents data = NCSR.ncsr;
 run;
 ods pdf close;
@@ -166,7 +166,7 @@ ods pdf close;
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
 * away some of the arbitrariness of their model specification.   ;
-ods pdf file = "&outputs/PHASE_II.pdf";
+ods pdf file = "&outputs/RS2-Eight_Models.pdf";
 
 * This macro allows the PTSD imputation model to be estimated  ;
 * with several simple modifications.  Variable AGE may be      ;
@@ -343,7 +343,7 @@ proc iml;
   append var {rhs_vars our_beta their_beta their_stderr diff_in_stderrs var_detail};
 run;
 
-ods pdf file = "&outputs/PHASE_III.pdf";
+ods pdf file = "&outputs/RS3-Betas_Compared.pdf";
 proc print data=betas;
   title1 'Comparison of original PTSD imputation model betas with our reproduction attempt';
 run;
@@ -367,7 +367,7 @@ format _numeric_;
 %include "&folder/agefix-youth.sas";
 run;
 
-ods pdf file = "&outputs/PHASE_IV.pdf";
+ods pdf file = "&outputs/RS4-MTO_Contents.pdf";
 Title "MTO Contents";
 proc contents data =mental_health_yt_20101004 ;
 run;
@@ -383,7 +383,8 @@ ods pdf close;
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
 * differ from the full NCS-R sample? ;
-ods pdf file = "&outputs/PHASE_V.pdf";
+ods pdf file = "&outputs/RS5-Age_MTO_vs_NCSR.pdf";
+title "Age distributions in NCSR and MTO barely overlap";
 proc sort data=NCSR.ncsr;
   by pts_smpl;
 proc means data=NCSR.ncsr;
