@@ -40,6 +40,10 @@ libname mto "&mto";
  *                                                           add/remove forward slash --^ ;
  *                                                           to enable/disable PHASE I    ;
  
+PROC PRINTTO NEW
+  LOG="&outputs/RS1.log";
+RUN;
+
 * I-1: Generate formatted unrestricted and restricted data sets ;
 * ---------------------------------------------------------------- ;
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
@@ -163,6 +167,10 @@ ods pdf close;
  *                  add/remove forward slash --^ ;
  *                  to enable/disable PHASE II   ;
 
+PROC PRINTTO NEW
+  LOG="&outputs/RS2.log";
+RUN;
+
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;
 * away some of the arbitrariness of their model specification.   ;
@@ -244,6 +252,10 @@ ods pdf close;
  ************************************/
  *        add/remove forward slash --^ ;
  *        to enable/disable PHASE III  ;
+
+PROC PRINTTO NEW
+  LOG="&outputs/RS3.log";
+RUN;
 
 * Read coefficients from our replication attempt, along with std errs.    ;
 * These are found starting at column #44 on lines 115-138 of slopes.txt,  ;
@@ -355,6 +367,10 @@ ods pdf close;
  *       add/remove forward slash --^ ;
  *       to enable/disable PHASE IV   ;
 
+PROC PRINTTO NEW
+  LOG="&outputs/RS4.log";
+RUN;
+
 * This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
 proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
 by ppid;
@@ -379,6 +395,10 @@ ods pdf close;
  ****************************************************/
  *                        add/remove forward slash --^ ;
  *                        to enable/disable PHASE V    ;
+
+PROC PRINTTO NEW
+  LOG="&outputs/RS5.log";
+RUN;
 
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;
@@ -442,6 +462,10 @@ ods pdf close;
  ********************************************/
  *                add/remove forward slash --^ ;
  *                to enable/disable PHASE VI   ;
+
+PROC PRINTTO NEW
+  LOG="&outputs/RS6.log";
+RUN;
 
 * Draw 10^5 different sets of imputation coefficients from the posterior      ;
 * density implied by the original coefficients of the JAMA article, taken     ;
