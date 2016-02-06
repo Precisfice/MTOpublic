@@ -218,7 +218,7 @@ RUN;
 %GLOBAL varlistn;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runlog.log";
+ LOG="&pgmdir/02_mto_jama_runlog.log";
  RUN;
 %variable_concatenator(missings,new_str,varlistn);
 PROC PRINTTO NEW;
@@ -248,7 +248,7 @@ RUN;
 %GLOBAL varlistc;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runlog.log";
+ LOG="&pgmdir/02_mto_jama_runlog.log";
  RUN;
 %variable_concatenator(nomiss&i,new_str,varlistc);
 
@@ -496,8 +496,8 @@ RUN;
 ****************************************************************************;
 
 PROC PRINTTO NEW
- LOG="&pgmdir.02_mto_jama_runimputedata.log"
- PRINT="&pgmdir.02_mto_jama_runimputedata.lst";
+ LOG="&pgmdir/02_mto_jama_runimputedata.log"
+ PRINT="&pgmdir/02_mto_jama_runimputedata.lst";
  RUN;
 %runMI(ra_Grp_Exp);
 %runMI(ra_Grp_S8);
