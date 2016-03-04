@@ -2,6 +2,37 @@
  * estimates from the JAMA paper
  ************************************************************/
 
+%LET workstation = SLC;
+
+%macro map_workstation_dirs;
+  %GLOBAL folder;     * code from Kessler et al & NBER ;
+  %GLOBAL reanalysis; * code written for the reanalysis ;
+  %GLOBAL outputs;    * directory for outputs ;
+  %GLOBAL ncsr;       * location of NCSR data files ;
+  %GLOBAL mto;        * location of MTO data files ;
+  %IF &workstation = Seattle %THEN %DO;
+    %LET folder = /folders/myfolders;
+    %LET reanalysis = &folder/reanalysis;
+    %LET outputs = &folder/outputs;
+    %LET ncsr = &folder/protected/ICPSR_20240/data;
+    * MTO libref undefined on Seattle workstation pending licensing to DNC LLC ;
+    *%LET mto = &folder/protected/MTO/data;
+  %END;
+  
+  %IF &workstation = SLC %THEN %DO;
+    %LET folder = C:/Users/Anolinx/MTO;
+    %LET reanalysis = &folder/reanalysis;
+    %LET outputs = &folder/outputs;
+    %LET ncsr = E:/NSCR_Replication_study;
+    %LET mto = E:/NSCR_Replication_study;
+  %END;
+%mend;
+
+%map_workstation_dirs;
+
+LIBNAME NCSR "&ncsr";
+libname mto "&mto";
+
 /* NOTE: This idempotent invocation of the Sciandra/Sanbonmatsu code
  *       may readily be commented out once it has run once, to speed
  *       whatever further debugging may be necessary.
@@ -25,7 +56,10 @@ data impdata_orignames;
            YCV8_PT22_NEW = YCV8_PT22
            YCV9_PT22_1_NEW = YCV9_PT22_1
            YCV10_PT23_NEW = YCV10_PT23
-           YCV11_PT27_NEW = YCV11_PT27;
+           YCV11_PT27_NEW = YCV11_PT27
+           YCV14b_PT64a_NEW = YCV14b_PT64a
+           YCV14c_NEW       = YCV14c
+           YCV22_PT261_NEW  = YCV22_PT261;
    run;
 
 /* Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.

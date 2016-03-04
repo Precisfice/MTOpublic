@@ -151,7 +151,8 @@ you will run the logistic regression to predict each mental disorder with just t
 %LET sitevars = ra_site;
 %LET convars= x_f_ch_male mov_drugs x_f_ch_bl_age617 large_family exclude_lrgfam hardtoreach exclude_htr;
 %LET ptsdvars = ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new 
-		ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
+		ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new
+        YCV14b_PT64a_new YCV14c_new YCV22_PT261_new; * <-- added by DCN+ARW ;
 %LET dxvars= f_mh_deph_y_yt ymh_bipolar_i_ii_y f_mh_pds_y_yt f_mh_pts_y_yt f_mh_odd_y_yt f_mh_ied_y_yt ymh_cd_3x_y;
 
 DATA mto2 (WHERE=(&grp=1));
@@ -393,8 +394,10 @@ DATA mto1_all (drop=i);
 	IF x_f_hh_size3 = 1 OR hhsize_4plus = 1 THEN hhsize_3plus = 1; ELSE hhsize_3plus = 0;
 
 	* YOUTH PTSD ITEMS ;
-	array rawvar {11} ycv1_pt13 ycv2_pt14 ycv3_pt15 ycv4_pt16 ycv5_pt17 ycv6_pt18 ycv7_pt20 ycv8_pt22 ycv9_pt22_1 ycv10_pt23 ycv11_pt27;
-	array newvar {11} ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
+	array rawvar {14} ycv1_pt13 ycv2_pt14 ycv3_pt15 ycv4_pt16 ycv5_pt17 ycv6_pt18 ycv7_pt20 ycv8_pt22 ycv9_pt22_1 ycv10_pt23 ycv11_pt27
+                      YCV14b_PT64a YCV14c YCV22_PT261; * <-- added by DCN+ARW ;
+	array newvar {14} ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new
+                      YCV14b_PT64a_new YCV14c_new YCV22_PT261_new; * <-- added by DCN+ARW ;
 	do i = 1 to dim(rawvar);
 		IF rawvar{i} = 1 THEN newvar{i} = 1;
 		IF rawvar{i} = 5 THEN newvar{i} = 0;
