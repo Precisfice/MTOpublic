@@ -13,15 +13,43 @@
   7. Our paper must anticipate and circumvent the original authors' potential misuse of 'false discovery rate' as a defense against our argument.
 
 * Notes after our first successful end-to-end run of run_me.sas
-  1. [ ] Prepend the original coefficients as first of the 10,000 betas_posterior_samples
+  1. [X] Prepend the original coefficients as first of the 10,000 betas_posterior_samples
   2. [ ] Check that the initial OR and its CI match the JAMA paper
   3. [ ] Backtrack to find out why they didn't P-^(
      It seems almost inevitable that /something/ will cause a mismatch, whether this a mismatched
      selection of random seed, or some other problem.
-  4. [ ] Investigate whether M3 can be installed _easily_ from USB (i.e., w/o Internet)
+  4. [X] Investigate whether M3 can be installed _easily_ from USB (i.e., w/o Internet)
   5. [ ] Implement a passable age distribution comparison overlay graphic
   6. [ ] Implement a passable UpperCL & LowerCL bootstrap density graphic
   7. [ ] Fix whatever problem we found in step #3 above
   8. [ ] If SAS graphics are unsuitable for publication, make R versions of them
   9. [ ] Work out a scheme for version control on the _logs_
   10. [ ] Inspect the logs closely for WARNINGs
+
+* Notes & follow-up from Friday, March 4 work session
+  1. [X] Verify that the MS/LS code cannot have reproduced JAMA voucher ORs
+     - [X] Verify that C1 and D1 criteria YCV* inputs are missing from their post-imputation output
+       The PROC CONTENTS shows it's missing all YCV Qs after YCV11!
+  2. [ ] Demonstrate that successful pass-thru of A1 Qs can be achieved without the '_NEW' renaming
+     My hypothesis is that this '_NEW' detritus reflects some kind of last-minute NBER panicky
+     programming-to-deadline in the face of format-related problems that the NBER attributed (not
+     very credibly IMO) to some poorly-understood difference between SAS 9.3 and 9.4.  It represents
+     an awful lot of extra machinery to deal with, and just simply an awful lot of extra /typing/
+     for us to do.  Removing this bug-not-feature of the code (if possible) will go a long way
+     toward speeding our work this weekend! 
+     - [ ] Stash existing changes
+     - [ ] Re-run current HEAD to verify f_mh_pts_a1 and its inputs appear in /Fnlpred_ptsd_youth/
+     - [ ] Expunge '_NEW' from the code
+     - [ ] Verify f_mh_pts_a1 still appears in /Fnlpred_ptsd_youth/
+     - [ ] Check in this refactoring
+  3. [ ] Pass thru C1 and D1 YCV vars
+     - [ ] Verify /f_mh_pts_c1/ and its inputs appear in _Fnlpred ptsd youth_
+     - [ ] Verify /f_mh_pts_d1/ and its inputs appear in _Fnlpred ptsd youth_
+  4. [ ] Identify the next bug
+     - [ ] Did we get /OddsRatios/?
+     - [ ] /f_mh_pts_rec_yt/ 'recency' present in _Flpred ptsd youth_?
+     - [ ] /mto_ptsd_sample/ indicator present in _Flpred ptsd youth_?
+  5. [ ] Restore ability to generate regular OUTPUT _MAX TIME: 30 mins_
+     Unlike the 9.4M2 graphics, which are a mere nicety, the ability to write plain output during
+     debugging loops would seem /close to being/ (if not quite truly) a _minimal_ requirement.
+     Let's see if we can correct the current situation, where only ODS PDFs seem to be writable.
