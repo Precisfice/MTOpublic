@@ -40,25 +40,6 @@ libname mto "&mto";
 *%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 /* ~~~ */
 
-/* To enable application of the %mtoptsd macro as defined in Ptsd_MTO_youth.sas,
- * we restore the original variable names in the 20x imputed data, removing the
- * '_new' suffix appended by the Sciandra/Sanbonmatsu code to key PTSD variables:
- ********************************************************************************/
-data impdata_orignames;
-    set MTO.Mto_jama_imputed;
-    rename YCV1_PT13_NEW = YCV1_PT13
-           YCV2_PT14_NEW = YCV2_PT14
-           YCV3_PT15_NEW = YCV3_PT15
-           YCV4_PT16_NEW = YCV4_PT16
-           YCV5_PT17_NEW = YCV5_PT17
-           YCV6_PT18_NEW = YCV6_PT18
-           YCV7_PT20_NEW = YCV7_PT20
-           YCV8_PT22_NEW = YCV8_PT22
-           YCV9_PT22_1_NEW = YCV9_PT22_1
-           YCV10_PT23_NEW = YCV10_PT23
-           YCV11_PT27_NEW = YCV11_PT27;
-   run;
-
 /* Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.
  * It computes the several PTSD criteria that were operationalized
  * in the MTO Youth Final Survey, and also cross-walks from NCSR
@@ -164,7 +145,7 @@ data impdata_orignames;
 
 %mend mtoptsd;
 
-%mtoptsd(impdata_orignames,Y, impdata_crosswalked); * Crosswalk MTO-->NCSR PTSD varnames ;
+%mtoptsd(MTO.Mto_jama_imputed,Y, impdata_crosswalked); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 ods pdf file="&outputs/impdata_crosswalked_contents.pdf";
 proc contents data = impdata_crosswalked;

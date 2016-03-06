@@ -596,6 +596,23 @@ RUN;
  
 DATA &imputed.;
 	SET impdata2;
+	/* I believe this renaming with _NEW suffixes was intended solely to permit easy
+	   application of SUM(.) for calculating ymh_pts_event_count above (line 566),
+	   and that it has no other purpose outside this file.  Consequently, I restore
+	   the original names at this point, to avoid complicating the 'client code' in
+	   our reanalysis. -DCN
+	*/
+    rename YCV1_PT13_NEW = YCV1_PT13
+           YCV2_PT14_NEW = YCV2_PT14
+           YCV3_PT15_NEW = YCV3_PT15
+           YCV4_PT16_NEW = YCV4_PT16
+           YCV5_PT17_NEW = YCV5_PT17
+           YCV6_PT18_NEW = YCV6_PT18
+           YCV7_PT20_NEW = YCV7_PT20
+           YCV8_PT22_NEW = YCV8_PT22
+           YCV9_PT22_1_NEW = YCV9_PT22_1
+           YCV10_PT23_NEW = YCV10_PT23
+           YCV11_PT27_NEW = YCV11_PT27;
 RUN;
 
 
