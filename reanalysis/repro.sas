@@ -37,7 +37,7 @@ libname mto "&mto";
  *       may readily be commented out once it has run once, to speed
  *       whatever further debugging may be necessary.
  **********************************************************************/
-%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+*%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 /* ~~~ */
 
 /* To enable application of the %mtoptsd macro as defined in Ptsd_MTO_youth.sas,
@@ -56,10 +56,7 @@ data impdata_orignames;
            YCV8_PT22_NEW = YCV8_PT22
            YCV9_PT22_1_NEW = YCV9_PT22_1
            YCV10_PT23_NEW = YCV10_PT23
-           YCV11_PT27_NEW = YCV11_PT27
-           YCV14b_PT64a_NEW = YCV14b_PT64a
-           YCV14c_NEW       = YCV14c
-           YCV22_PT261_NEW  = YCV22_PT261;
+           YCV11_PT27_NEW = YCV11_PT27;
    run;
 
 /* Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.
