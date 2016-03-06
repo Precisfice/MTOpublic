@@ -462,11 +462,11 @@ ods pdf close;
  ********************************************/
  *                add/remove forward slash --^ ;
  *                to enable/disable STEP VI    ;
-
+/*
 PROC PRINTTO NEW
   LOG="&outputs/RS6.log";
 RUN;
-
+*/
 * Draw 10^5 different sets of imputation coefficients from the posterior      ;
 * density implied by the original coefficients of the JAMA article, taken     ;
 * together with their variance-covariance matrix received from Nancy Sampson. ;
@@ -606,14 +606,14 @@ run;
 * Collect the resulting voucher effect estimates with their CIs.    ;
 
 proc iml;
-  title1 "Constructing PTSD imputation model formulas";
-  title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
+  *title1 "Constructing PTSD imputation model formulas";
+  *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-  reps = 5;
-  create orci var {i OddsRatioEst LowerCL UpperCL};
-  do i = 1 to reps;
-    coefs = betas_posterior_samples[i,];
+  reps = 2;
+  create orci var {imod seed OddsRatioEst LowerCL UpperCL};
+  do imod = 1 to reps;
+    coefs = betas_posterior_samples[imod,];
     * convert coefs to explicitly (+/-) signed strings ;
     signs = repeat(" ",1,ncol(coefs));
     signs[loc(coefs>=0)] = "+";
@@ -621,11 +621,13 @@ proc iml;
     * generate formula terms, then concatenate them ;
     terms = catx("*",coefs,CovarNames`);
     formula = rowcatc(terms);
-    title1 "Passing this formula to Ptsd_MTO_youth.sas script";
-    print formula;
-    title1;
-    submit formula; * the 'formula' parameter allows substitution below;
+    *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
+    *print formula;
+    *title1;
+	do seed = 101 to 102;
+    submit formula seed; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+      %let seedused=&seed;
       %include "&reanalysis/impdata20x.sas";
     endsubmit;
     * Extract the desired effect estimate and its CI ;
@@ -637,8 +639,9 @@ proc iml;
     OddsRatioEst = OddsRatioEst[effrow];
     LowerCL = LowerCL[effrow];
     UpperCL = UpperCL[effrow];
-    append var {i OddsRatioEst LowerCL UpperCL};
-  end;
+    append var {imod seed OddsRatioEst LowerCL UpperCL};
+    end; * seed_1 loop ;
+  end; * imod loop ;
   close orci;
 run;
 quit;

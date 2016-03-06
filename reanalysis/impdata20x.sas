@@ -1,8 +1,27 @@
 /* Perform the 20x multiple imputation of missing covariates
  ************************************************************/
+PROC PRINTTO;
+RUN;
+*%symdel seedused;
+%MACRO set_seedused;
+	%GLOBAL seedused;
+	%GLOBAL imputed;
+	%IF (&seedused=) %THEN %LET seedused = 524232; * Default to the seed used in JAMA paper ;
 
-%LET seedused = jama; * Select which imputed dataset to work on ;
-%mtoptsd(MTO.Mto_&seedused._imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
+	%IF &seedused=524232 %THEN %DO;
+		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
+		%END;
+	%ELSE %DO;
+		%LET imputed = MTO.mto_&seedused._imputed; * Name of output for arbitrary seed choice ;
+		%END;
+
+	%PUT Imputed output file will be named: &imputed;
+%MEND set_seedused;
+
+%set_seedused;
+%PUT SEEDUSED = &seedused;
+
+%mtoptsd(&imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 /* This stretch of code allows this script to run in a 'standalone' mode
    for testing and refactoring purposes.  In its intended application
