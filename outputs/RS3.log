@@ -1,1 +1,276 @@
-placeholder
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24498   
+24499   * Read coefficients from our replication attempt, along with std errs.
+24499 !   ;
+24500   * These are found starting at column #44 on lines 115-138 of slopes.txt,
+24500 !   ;
+24501   * which is the output log from a SUDAAN run.
+24501 !   ;
+24502   data coef_rep;
+24503     infile "&outputs/slopes.txt" firstobs=115;
+24504     if _N_<=24;
+24505     input @44 coef
+24506         +1 stderr
+24507         ;
+24508   run;
+
+NOTE: The infile "C:/Users/Anolinx/MTO/outputs/slopes.txt" is:
+      Filename=C:\Users\Anolinx\MTO\outputs\slopes.txt,
+      RECFM=V,LRECL=32767,File Size (bytes)=10397,
+      Last Modified=02Feb2016:11:54:07,
+      Create Time=02Feb2016:11:54:07
+
+NOTE: DATA STEP stopped due to looping.
+NOTE: 24 records were read from the infile 
+      "C:/Users/Anolinx/MTO/outputs/slopes.txt".
+      The minimum record length was 70.
+      The maximum record length was 70.
+NOTE: The data set WORK.COEF_REP has 24 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24509   
+24510   * Read the coefficients of the PTSD imputation model ;
+24511   * used in the 2014 JAMA paper.                       ;
+24512   proc import datafile="&folder/PTSD_slopes_from_NCSR.csv"
+24513        out=coef_ori
+24514        dbms=csv
+24515        replace;
+24516        getnames=yes;
+24517   run;
+
+24518    /**********************************************************************
+24519    *   PRODUCT:   SAS
+24520    *   VERSION:   9.4
+24521    *   CREATOR:   External File Interface
+24522    *   DATE:      05MAR16
+24523    *   DESC:      Generated SAS Datastep Code
+24524    *   TEMPLATE SOURCE:  (None Specified.)
+24525    ***********************************************************************
+24525 ! /
+24526       data WORK.COEF_ORI    ;
+24527       %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+24528       infile 'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv' delimiter =
+24528 ! ',' MISSOVER DSD lrecl=32767 firstobs=2 ;
+24529          informat Independent_variable $9. ;
+24530          informat Beta best32. ;
+24531          informat Label $64. ;
+24532          format Independent_variable $9. ;
+24533          format Beta best12. ;
+24534          format Label $64. ;
+24535       input
+24536                   Independent_variable $
+24537                   Beta
+24538                   Label $
+24539       ;
+24540       if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection
+24540 ! macro variable */
+24541       run;
+
+NOTE: The infile 'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv' is:
+      Filename=C:\Users\Anolinx\MTO\PTSD_slopes_from_NCSR.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1276,
+      Last Modified=02Feb2016:11:54:07,
+      Create Time=02Feb2016:11:54:07
+
+NOTE: 24 records were read from the infile 
+      'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv'.
+      The minimum record length was 14.
+      The maximum record length was 78.
+NOTE: The data set WORK.COEF_ORI has 24 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24 rows created in WORK.COEF_ORI from 
+C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv.
+  
+  
+  
+NOTE: WORK.COEF_ORI data set was successfully created.
+NOTE: The data set WORK.COEF_ORI has 24 observations and 3 variables.
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.25 seconds
+      cpu time            0.20 seconds
+      
+
+24542   
+24543   * Read the covariance matrix from original authors ;
+24544   data covar_theirs;
+24545     set "&folder/youth_covmatrix.sas7bdat";
+NOTE: Data file WC000001.YOUTH_COVMATRIX.DATA is in a format that is native to 
+      another host, or the file encoding does not match the session encoding. 
+      Cross Environment Data Access will be used, which might require 
+      additional CPU resources and might reduce performance.
+24546   run;
+
+NOTE: There were 97 observations read from the data set 
+      C:/Users/Anolinx/MTO/youth_covmatrix.sas7bdat.
+NOTE: The data set WORK.COVAR_THEIRS has 97 observations and 33 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24547   
+24548   * Convert SUDAAN's MODCOV-type output to a SAS7BDAT format compatible ;
+24549   * with the variance-covariance matrix (and parameter estimates) as    ;
+24550   * received from Nancy Sampson.                                        ;
+24551   data covar_ours;
+24552     infile "&outputs/covmat01.dbs";
+24553     * Fill in the leftmost, uninformative columns ;
+24554     PROCNUM = .;
+24555     MODELNO = .;
+24556     NCELL   = .;
+24557     EST_ID  = .;
+24558     IDNUM   = .;
+24559     ROWNUM  = .;
+24560     DDF     = .;
+24561     CHECK   = .;
+24562     RANK    = .;
+24563     * Load the substantive content ;
+24564     input Intercept 25-38 Age SEXF RHISP RBLK ROTH
+24565           PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+24566           PT209 PT211 PT212 PT213 PT214 PT233 PT237
+24567           ;
+24568   run;
+
+NOTE: The infile "C:/Users/Anolinx/MTO/outputs/covmat01.dbs" is:
+      Filename=C:\Users\Anolinx\MTO\outputs\covmat01.dbs,
+      RECFM=V,LRECL=32767,File Size (bytes)=35114,
+      Last Modified=02Feb2016:11:54:07,
+      Create Time=02Feb2016:11:54:07
+
+NOTE: 97 records were read from the infile 
+      "C:/Users/Anolinx/MTO/outputs/covmat01.dbs".
+      The minimum record length was 360.
+      The maximum record length was 360.
+NOTE: The data set WORK.COVAR_OURS has 97 observations and 33 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24569   
+24570   * As a check, we print our respective covariance matrices,  ;
+24571   * and compare them by several rough methods.                ;
+24572   proc iml;
+NOTE: IML Ready
+24573     * (A) Read 'ours' into IML matrices/vectors ;
+24574     use covar_ours;
+24575     read all var _num_ into our_cov[colname=CovarNames];
+24576     close covar_ours;
+24577     CovarNames=CovarNames[10:33];
+24578     our_beta = our_cov[25,10:33];
+24578 !                                 * The 25th row is our_beta ;
+24579     print our_beta[Label="Our betas, now taken from row #25 of covariance
+24579 ! matrix"
+24580      colname=CovarNames];
+24581     our_cov = our_cov[1:24,10:33];
+24581 !                                  * Top right 24x24 matrix is truly
+24581 ! our_cov ;
+24582     print our_cov[Label="Covariance matrix from our SUDAAN-estimated PTSD
+24582 ! imputation model"
+24583      colname=CovarNames rowname=CovarNames];
+24584     * (B) Read 'theirs' into IML matrices/vectors ;
+24585     use covar_theirs;
+24586     read all var _num_ into their_cov;
+24586 !                                      * ignore their colnames B001-B024 ;
+24587     close covar_theirs;
+24588     their_beta = their_cov[25,10:33];
+24588 !                                     * The 25th row is their_beta ;
+24589     print their_beta[Label="Their betas, now taken from row #25 of
+24589 ! covariance matrix"
+24590      colname=CovarNames];
+24591     their_cov = their_cov[1:24,10:33];
+24591 !                                      * Top right 24x24 matrix is truly
+24591 ! their_cov ;
+24592     print their_cov[Label="Covariance matrix from their PROC RLOGIST PTSD
+24592 ! imputation model"
+24593      colname=CovarNames rowname=CovarNames];
+24594     * (C) Ours-vs-theirs covariance matrix comparisons ;
+24595     maxdiff = max(abs(vecdiag(our_cov) - vecdiag(their_cov)));
+24596     print maxdiff[Label="Largest abs diff between our cov diagonal and
+24596 ! theirs"];
+24597     * TODO: Compare sum of squared errors? ;
+24598     ss_diffs = sum((our_cov - their_cov)##2);
+24599     ss_elems = sum(their_cov##2);
+24600     R2 = 1.0 - (ss_diffs/ss_elems);
+24601     print R2[Label="Fraction of 'variation' in their covar terms explained
+24601 !  by ours"];
+24602     store our_cov our_beta their_cov their_beta CovarNames;
+NOTE: Opening storage library WORK.IMLSTOR
+24603   run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+24604   
+24605   * Tabulate our replicated PTSD imputation coefficients for comparison ;
+24606   * with those used in the 2014 JAMA paper.                             ;
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           0.09 seconds
+      cpu time            0.04 seconds
+      
+
+24607   proc iml;
+NOTE: IML Ready
+24608     load our_cov our_beta their_cov their_beta;
+NOTE: Opening storage library WORK.IMLSTOR
+24609     their_stderr = sqrt(vecdiag(their_cov)`);
+24610     * Load some of the niceties (esp., *labels*) from the CSV;
+24611     use coef_ori;
+24612     *read all var "Beta" into their_beta[rowname=Independent_variable];
+24613     read all var "Independent_variable" into rhs_vars[rowname=Label];
+24614     read all var "Label" into var_detail[rowname=Independent_variable];
+24615     close coef_ori;
+24616     diff_in_stderrs = (their_beta - our_beta)/their_stderr;
+24617     create betas var {rhs_vars our_beta their_beta their_stderr
+24617 ! diff_in_stderrs var_detail};
+24618     append var {rhs_vars our_beta their_beta their_stderr diff_in_stderrs
+24618 ! var_detail};
+24619   run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+24620   
+24621   ods pdf file = "&outputs/RS3-Betas_Compared.pdf";
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\RS3-Betas_Compared.pdf", printer "PDF".
+NOTE: Exiting IML.
+NOTE: The data set WORK.BETAS has 24 observations and 6 variables.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           0.08 seconds
+      cpu time            0.07 seconds
+      
+
+24622   proc print data=betas;
+24623     title1 'Comparison of original PTSD imputation model betas with our
+24623 ! reproduction attempt';
+24624   run;
+
+NOTE: There were 24 observations read from the data set WORK.BETAS.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+
+24625   ods pdf close;
+NOTE: ODS PDF printed 1 page to 
+      C:\Users\Anolinx\MTO\outputs\RS3-Betas_Compared.pdf.
+24626   /* end of STEP III */
+24627   
+24628   /*  STEP IV -- Prepare the MTO data
+24629    ***********************************/
+24630    *       add/remove forward slash --^ ;
+24631    *       to enable/disable STEP IV    ;
+24632   
+24633   PROC PRINTTO NEW
+24634     LOG="&outputs/RS4.log";
+24635   RUN;
+

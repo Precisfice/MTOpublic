@@ -1,1 +1,512 @@
-placeholder
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24412   
+24413   * Estimate the PTSD imputation model employed by Kessler et al., ;
+24414   * and additionally several variations on that model to abstract  ;
+24415   * away some of the arbitrariness of their model specification.   ;
+24416   ods pdf file = "&outputs/RS2-Eight_Models.pdf";
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\RS2-Eight_Models.pdf", printer "PDF".
+24417   
+24418   * This macro allows the PTSD imputation model to be estimated  ;
+24419   * with several simple modifications.  Variable AGE may be      ;
+24420   * included (as with the original model), or excluded from the  ;
+24421   * model specification.  Likewise, RACE (coded as 3 summies in  ;
+24422   * the original model) may also be optionally omitted from the  ;
+24423   * model.  Finally, the model may be estimated optionally in a  ;
+24424   * younger NCSR subset than the 18-85yo cohort originally used. ;
+24425   %macro est_ptsd_imput_model(incl_age, incl_race, max_age);
+24426   %if &incl_age=1 %then
+24427     %do;
+24428     %let age_term=age;
+24429     %end;
+24430   %else
+24431     %do;
+24432     %let age_term=%str( );
+24433     %end;
+24434   %if &incl_race=1 %then
+24435     %do;
+24436     %let race_terms=rhisp rblk roth;
+24437     %end;
+24438   %else
+24439     %do;
+24440     %let race_terms=%str( );
+24441     %end;
+24442   %if &max_age=%str() %then %let max_age=99;
+24443   %let suffix=A&incl_age.R&incl_race.S&max_age;
+24444   * On the Seattle workstation where this code was prototyped, ;
+24445   * SAS-callable SUDAAN is unavailable.  Consequently, we use  ;
+24446   * PROC SURVEYLOGISTIC instead of PROC RLOGIST as used by the ;
+24447   * original authors in Ptsd-mtoncsr-youth.sas.                ;
+24448   * I have found that PROC SURVEYLOGISTIC coefficients match   ;
+24449   * those of SUDAAN (invoked at the command line) to the 4th   ;
+24450   * decimal place (roughly 1 part in 10^5), and the standard   ;
+24451   * errors match to within about 1% in relative terms.         ;
+24452   * Thus, whatever differences are introduced by this PROC     ;
+24453   * substitution are probably negligible compared with the     ;
+24454   * differences between our ICPSR-licensed NCSR data set and   ;
+24455   * the (publicly unavailable) raw NCSR data held by Kessler   ;
+24456   * and colleagues.                                            ;
+24457   proc surveylogistic
+24458     varmethod=taylor
+24459     data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43
+24460                         PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+24461                         PT209 PT211 PT212 PT213 PT214 PT233 PT237
+24462                         NCSRWTSH NCSRWTLG PTS_SMPL
+24463                    where=(pts_smpl=1 and age<=&max_age));
+24464     model dsm_pts(event='(1) ENDORSED')
+24465                   = &age_term sexf &race_terms PT41 PT42 PT43
+24466                     PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55
+24467                     PT209 PT211 PT212 PT213 PT214 PT233 PT237
+24468           / covb;
+24469     weight ncsrwtlg;
+24470     ods output CovB=covs&suffix
+24471       ParameterEstimates=betas&suffix(keep=Variable Estimate);
+24472   run;
+24473   %mend est_ptsd_imput_model;
+24474   
+24475   * Generate a 2x2x2 grid of model results ;
+24476   %macro models_grid;
+24477   %do age_incl=0 %to 1;
+24478     %do race_incl=0 %to 1;
+24479       %est_ptsd_imput_model(&age_incl,&race_incl,99);
+24480       %est_ptsd_imput_model(&age_incl,&race_incl,40);
+24481     %end;
+24482   %end;
+24483   %mend models_grid;
+24484   
+24485   %models_grid;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=99));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = sexf PT41 
+PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 
+PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA0R0S99 
+ParameterEstimates=betasA0R0S99(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA0R0S99 has 20 observations and 2 variables.
+NOTE: The data set WORK.COVSA0R0S99 has 20 observations and 21 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.17 seconds
+      cpu time            0.14 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=40));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = sexf PT41 
+PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 
+PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA0R0S40 
+ParameterEstimates=betasA0R0S40(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA0R0S40 has 20 observations and 2 variables.
+NOTE: The data set WORK.COVSA0R0S40 has 20 observations and 21 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.10 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=99));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = sexf 
+rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 
+PT211 PT212 PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA0R1S99 
+ParameterEstimates=betasA0R1S99(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA0R1S99 has 23 observations and 2 variables.
+NOTE: The data set WORK.COVSA0R1S99 has 23 observations and 24 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.26 seconds
+      cpu time            0.18 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=40));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = sexf 
+rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 
+PT211 PT212 PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA0R1S40 
+ParameterEstimates=betasA0R1S40(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA0R1S40 has 23 observations and 2 variables.
+NOTE: The data set WORK.COVSA0R1S40 has 23 observations and 24 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.15 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=99));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = age sexf 
+PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 
+PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA1R0S99 
+ParameterEstimates=betasA1R0S99(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA1R0S99 has 21 observations and 2 variables.
+NOTE: The data set WORK.COVSA1R0S99 has 21 observations and 22 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.14 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=40));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = age sexf 
+PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 
+PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA1R0S40 
+ParameterEstimates=betasA1R0S40(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA1R0S40 has 21 observations and 2 variables.
+NOTE: The data set WORK.COVSA1R0S40 has 21 observations and 22 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.13 seconds
+      cpu time            0.12 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=99));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = age sexf 
+rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 
+PT211 PT212 PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA1R1S99 
+ParameterEstimates=betasA1R1S99(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA1R1S99 has 24 observations and 2 variables.
+NOTE: The data set WORK.COVSA1R1S99 has 24 observations and 25 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.14 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * On the Seattle workstation where this code 
+was prototyped, ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * SAS-callable SUDAAN is unavailable. 
+Consequently, we use ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * PROC SURVEYLOGISTIC instead of PROC RLOGIST 
+as used by the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * original authors in Ptsd-mtoncsr-youth.sas. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * I have found that PROC SURVEYLOGISTIC 
+coefficients match ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * those of SUDAAN (invoked at the command line) 
+to the 4th ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * decimal place (roughly 1 part in 10^5), and 
+the standard ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * errors match to within about 1% in relative 
+terms. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * Thus, whatever differences are introduced by 
+this PROC ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * substitution are probably negligible compared 
+with the ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * differences between our ICPSR-licensed NCSR 
+data set and ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * the (publicly unavailable) raw NCSR data held 
+by Kessler ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   * and colleagues. ;
+MPRINT(EST_PTSD_IMPUT_MODEL):   proc surveylogistic varmethod=taylor 
+data=NCSR.ncsr(keep=DSM_PTS age sexf rhisp rblk roth PT41 PT42 PT43 PT44 PT45 
+PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237 
+NCSRWTSH NCSRWTLG PTS_SMPL where=(pts_smpl=1 and age<=40));
+MPRINT(EST_PTSD_IMPUT_MODEL):   model dsm_pts(event='(1) ENDORSED') = age sexf 
+rhisp rblk roth PT41 PT42 PT43 PT44 PT45 PT46 PT48 PT50 PT50_1 PT51 PT55 PT209 
+PT211 PT212 PT213 PT214 PT233 PT237 / covb;
+MPRINT(EST_PTSD_IMPUT_MODEL):   weight ncsrwtlg;
+MPRINT(EST_PTSD_IMPUT_MODEL):   ods output CovB=covsA1R1S40 
+ParameterEstimates=betasA1R1S40(keep=Variable Estimate);
+MPRINT(EST_PTSD_IMPUT_MODEL):   run;
+NOTE: The input data set is subset by WHERE, OBS, or FIRSTOBS. This provides a 
+      completely separate analysis of the subset. It does not provide a 
+      statistically valid subpopulation or domain analysis, where the total 
+      number of units in the subpopulation is not known with certainty. If you 
+      want a domain analysis, you should include the DOMAIN variables in a 
+      DOMAIN statement.
+NOTE: PROC SURVEYLOGISTIC is modeling the probability that DSM_PTS='(1) 
+      ENDORSED'.
+NOTE: Convergence criterion (GCONV=1E-8) satisfied.
+NOTE: The data set WORK.BETASA1R1S40 has 24 observations and 2 variables.
+NOTE: The data set WORK.COVSA1R1S40 has 24 observations and 25 variables.
+NOTE: PROCEDURE SURVEYLOGISTIC used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.14 seconds
+      
+
+MPRINT(MODELS_GRID):  ;
+24486   ods pdf close;
+NOTE: ODS PDF printed 40 pages to 
+      C:\Users\Anolinx\MTO\outputs\RS2-Eight_Models.pdf.
+24487   
+24488   /* end of STEP II */
+24489   
+24490   /*  STEP III -- Compare coefficients
+24491    ************************************/
+24492    *        add/remove forward slash --^ ;
+24493    *        to enable/disable STEP III   ;
+24494   
+24495   PROC PRINTTO NEW
+24496     LOG="&outputs/RS3.log";
+24497   RUN;
+

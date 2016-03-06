@@ -1,1 +1,140 @@
-placeholder
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+24636   
+24637   * This section is adapted from the first few lines of Ptsd_MTO_youth.sas
+24637 !  ;
+24638   proc sort data = mto.mental_health_yt_20150612 out =
+24638 ! mental_health_yt_20101004;
+24639   by ppid;
+24640   run;
+
+NOTE: There were 5101 observations read from the data set 
+      MTO.MENTAL_HEALTH_YT_20150612.
+NOTE: The data set WORK.MENTAL_HEALTH_YT_20101004 has 5101 observations and 440 
+      variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.21 seconds
+      cpu time            0.07 seconds
+      
+
+24641   
+24642   data mental_health_yt_20101004;
+24643   set mental_health_yt_20101004;
+24644   format _numeric_;
+24645   %include "&folder/Datafix2-mto-youth.sas";
+MPRINT(DATAFIX2):   
+********************************************************************************
+********** * For onset/recency ages less than 4 reset to 4 * 
+********************************************************************************
+**********;
+MPRINT(DATAFIX2):   array onsetrec YDE6a_D22a YDE6d_D22c YDE13a_D37a 
+YDE13b_D37b1 YDE14b_D38c YMA2a_M3a YMA2d_M3c YMA6a_M6a YMA6d_M6c YMA10a_M18a 
+YMA10b_M18b1 YMA13_M19d YPD5a_PD9a YPD5b_PD9b1 YPD7c_PD10d YGA11a_G26a 
+YGA11b_G26b1 YGA12c_G27c YIE8a_IED18a YIE8b_IED18b1 YIE9a_IED22a YCV14b_PT64a 
+YCV14c YOD3a_OD3a YOD3b_OD3b1 YOD4a_OD4a;
+MPRINT(DATAFIX2):   do over onsetrec;
+MPRINT(DATAFIX2):   if 0 <= onsetrec < 4 then onsetrec = 4;
+MPRINT(DATAFIX2):   end;
+24672   %include "&folder/agefix-youth.sas";
+MPRINT(AGEFIX1):   if YDE13a_D37a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13a_D37a = 4;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13a_D37a = 12;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 5 then YDE13a_D37a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YDE13b_D37b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13b_D37b1 = 4;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13b_D37b1 = 12;
+MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 5 then YDE13b_D37b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YMA10a_M18a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YMA10c_M18b2 = 1 then YMA10a_M18a = 4;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 1 then YMA10a_M18a = 12;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 5 then YMA10a_M18a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YMA10b_M18b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YMA10c_M18b2 = 1 then YMA10b_M18b1 = 4;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 1 then YMA10b_M18b1 = 12;
+MPRINT(AGEFIX1):   else if YMA10d_M18b3 = 5 then YMA10b_M18b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YPD5a_PD9a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YPD5c_PD9b2 = 1 then YPD5a_PD9a = 4;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 1 then YPD5a_PD9a = 12;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 5 then YPD5a_PD9a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YPD5b_PD9b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YPD5c_PD9b2 = 1 then YPD5b_PD9b1 = 4;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 1 then YPD5b_PD9b1 = 12;
+MPRINT(AGEFIX1):   else if YPD5d_PD9b3 = 5 then YPD5b_PD9b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YGA11a_G26a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YGA11c_G26b2 = 1 then YGA11a_G26a = 4;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 1 then YGA11a_G26a = 12;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 5 then YGA11a_G26a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YGA11b_G26b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YGA11c_G26b2 = 1 then YGA11b_G26b1 = 4;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 1 then YGA11b_G26b1 = 12;
+MPRINT(AGEFIX1):   else if YGA11d_G26b3 = 5 then YGA11b_G26b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YIE8a_IED18a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YIE8c_IED18b2 = 1 then YIE8a_IED18a = 4;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 1 then YIE8a_IED18a = 12;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 5 then YIE8a_IED18a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YIE8b_IED18b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YIE8c_IED18b2 = 1 then YIE8b_IED18b1 = 4;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 1 then YIE8b_IED18b1 = 12;
+MPRINT(AGEFIX1):   else if YIE8d_IED18b3 = 5 then YIE8b_IED18b1 = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YOD3a_OD3a IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3a_OD3a = 4;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3a_OD3a = 12;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3a_OD3a = 13;
+MPRINT(AGEFIX1):   end;
+MPRINT(AGEFIX1):   if YOD3b_OD3b1 IN(.,.D,.R) then do;
+MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3b_OD3b1 = 4;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3b_OD3b1 = 12;
+MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3b_OD3b1 = 13;
+MPRINT(AGEFIX1):   end;
+24723   run;
+
+NOTE: There were 5101 observations read from the data set 
+      WORK.MENTAL_HEALTH_YT_20101004.
+NOTE: The data set WORK.MENTAL_HEALTH_YT_20101004 has 5101 observations and 440 
+      variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.03 seconds
+      
+
+24724   
+24725   ods pdf file = "&outputs/RS4-MTO_Contents.pdf";
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\RS4-MTO_Contents.pdf", printer "PDF".
+24726   Title "MTO Contents";
+24727   proc contents data =mental_health_yt_20101004 ;
+24728   run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.23 seconds
+      cpu time            0.21 seconds
+      
+
+24729   ods pdf close;
+NOTE: ODS PDF printed 20 pages to 
+      C:\Users\Anolinx\MTO\outputs\RS4-MTO_Contents.pdf.
+24730   
+24731   /* end of STEP IV */
+24732   
+24733   /*  STEP V -- Compare MTO vs NCS-R age distributions
+24734    ****************************************************/
+24735    *                        add/remove forward slash --^ ;
+24736    *                        to enable/disable STEP V     ;
+24737   
+24738   PROC PRINTTO NEW
+24739     LOG="&outputs/RS5.log";
+24740   RUN;
+
