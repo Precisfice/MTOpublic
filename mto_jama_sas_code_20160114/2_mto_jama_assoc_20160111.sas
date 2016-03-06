@@ -27,6 +27,10 @@ Steps:
 *===============================================;
 *===============================================;
 
+
+%LET NBER = E:/NSCR_Replication_study/NBER;
+Libname NBER "&NBER";
+
 ** Set today's date;
 %let today=%sysfunc(date(),yymmddn8.);
 %put "&today";
@@ -34,27 +38,26 @@ Steps:
 OPTIONS NOFMTERR MPRINT LINESIZE=80;
 
 /* !!!! USER MUST UPDATE DIRECTORY LOCATION FOR FORMATS/OUTPUT FILE AND DATA LOCATION. !!!! */
-libname home "~/mtoproj/m10_data/papers/icpsr_archive/jama/"; 
-%let outdata = ~/mtoproj/m10_data/papers/icpsr_archive/jama/;
+%let outdata = C:/Users/Anolinx/MTO/outputs;
 libname outdata "&outdata."; 
 
-%let impdata = home.mto_jama_imputed_20160111; 
-%let preimpdata = home.mto_jama_preimp_20160111; 
+%let impdata = Nber.mto_jama_imputed_20160111; 
+%let preimpdata = Nber.mto_jama_preimp_20160111; 
 
-%let maindir = ~/mtoproj/m10_pgm/papers/icpsr_archive/jama/; 
+%let maindir = &outdata; 
 
-%let t4_log = &maindir.mto_revision_T4_all_&today..log;
-%let t4_lst = &maindir.mto_revision_T4_all_&today..lst;
+%let t4_log = &maindir/mto_revision_T4_all_&today..log;
+%let t4_lst = &maindir/mto_revision_T4_all_&today..lst;
 
-%let t5_log = &maindir.mto_revision_T5_all_&today..log;
-%let t5_lst = &maindir.mto_revision_T5_all_&today..lst;
+%let t5_log = &maindir/mto_revision_T5_all_&today..log;
+%let t5_lst = &maindir/mto_revision_T5_all_&today..lst;
 
-%let jrr_dat = &outdata.DATA2;
-%let t5_xls = &maindir.mto_revision_T5_all_&today..xls;
-%let t4_xls = &maindir.mto_revision_T4_all_&today..xls;
+%let jrr_dat = &outdata/DATA2;
+%let t5_xls = &maindir/mto_revision_T5_all_&today..xls;
+%let t4_xls = &maindir/mto_revision_T4_all_&today..xls;
 
-%let dat_fem = &outdata.DATA2/female/;
-%let dat_male = &outdata.DATA2/male/;
+%let dat_fem = &outdata/DATA2/female/;
+%let dat_male = &outdata/DATA2/male/;
 
 
 *===============================================;
