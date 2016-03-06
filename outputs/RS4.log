@@ -3,25 +3,36 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-13804  
-13805  * This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
-13806  proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
-13807  by ppid;
-13808  run;
+1153  
+1154  * This section is adapted from the first few lines of Ptsd_MTO_youth.sas ;
+1155  proc sort data = mto.mental_health_yt_20150612 out = mental_health_yt_20101004;
+1156  by ppid;
+1157  run;
 
 NOTE: There were 5101 observations read from the data set MTO.MENTAL_HEALTH_YT_20150612.
 NOTE: The data set WORK.MENTAL_HEALTH_YT_20101004 has 5101 observations and 440 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.16 seconds
-      cpu time            0.07 seconds
+      real time           0.02 seconds
+      cpu time            0.03 seconds
       
 
-13809  
-13810  data mental_health_yt_20101004;
-13811  set mental_health_yt_20101004;
-13812  format _numeric_;
-13813  %include "&folder/Datafix2-mto-youth.sas";
-13840  %include "&folder/agefix-youth.sas";
+1158  
+1159  data mental_health_yt_20101004;
+1160  set mental_health_yt_20101004;
+1161  format _numeric_;
+1162  %include "&folder/Datafix2-mto-youth.sas";
+MPRINT(DATAFIX2):   
+****************************************************************************************** * For 
+onset/recency ages less than 4 reset to 4 * 
+******************************************************************************************;
+MPRINT(DATAFIX2):   array onsetrec YDE6a_D22a YDE6d_D22c YDE13a_D37a YDE13b_D37b1 YDE14b_D38c 
+YMA2a_M3a YMA2d_M3c YMA6a_M6a YMA6d_M6c YMA10a_M18a YMA10b_M18b1 YMA13_M19d YPD5a_PD9a 
+YPD5b_PD9b1 YPD7c_PD10d YGA11a_G26a YGA11b_G26b1 YGA12c_G27c YIE8a_IED18a YIE8b_IED18b1 
+YIE9a_IED22a YCV14b_PT64a YCV14c YOD3a_OD3a YOD3b_OD3b1 YOD4a_OD4a;
+MPRINT(DATAFIX2):   do over onsetrec;
+MPRINT(DATAFIX2):   if 0 <= onsetrec < 4 then onsetrec = 4;
+MPRINT(DATAFIX2):   end;
+1189  %include "&folder/agefix-youth.sas";
 MPRINT(AGEFIX1):   if YDE13a_D37a IN(.,.D,.R) then do;
 MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13a_D37a = 4;
 MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13a_D37a = 12;
@@ -82,39 +93,39 @@ MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3b_OD3b1 = 4;
 MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3b_OD3b1 = 12;
 MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3b_OD3b1 = 13;
 MPRINT(AGEFIX1):   end;
-13891  run;
+1240  run;
 
 NOTE: There were 5101 observations read from the data set WORK.MENTAL_HEALTH_YT_20101004.
 NOTE: The data set WORK.MENTAL_HEALTH_YT_20101004 has 5101 observations and 440 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.03 seconds
+      real time           0.02 seconds
       cpu time            0.03 seconds
       
 
-13892  
-13893  ods pdf file = "&outputs/RS4-MTO_Contents.pdf";
+1241  
+1242  ods pdf file = "&outputs/RS4-MTO_Contents.pdf";
 NOTE: Writing ODS PDF output to DISK destination 
       "C:\Users\Anolinx\MTO\outputs\RS4-MTO_Contents.pdf", printer "PDF".
-13894  Title "MTO Contents";
-13895  proc contents data =mental_health_yt_20101004 ;
-13896  run;
+1243  Title "MTO Contents";
+1244  proc contents data =mental_health_yt_20101004 ;
+1245  run;
 
 NOTE: PROCEDURE CONTENTS used (Total process time):
       real time           0.23 seconds
       cpu time            0.23 seconds
       
 
-13897  ods pdf close;
+1246  ods pdf close;
 NOTE: ODS PDF printed 20 pages to C:\Users\Anolinx\MTO\outputs\RS4-MTO_Contents.pdf.
-13898  
-13899  /* end of STEP IV */
-13900  
-13901  /*  STEP V -- Compare MTO vs NCS-R age distributions
-13902   ****************************************************/
-13903   *                        add/remove forward slash --^ ;
-13904   *                        to enable/disable STEP V     ;
-13905  
-13906  PROC PRINTTO NEW
-13907    LOG="&outputs/RS5.log";
-13908  RUN;
+1247  
+1248  /* end of STEP IV */
+1249  
+1250  /*  STEP V -- Compare MTO vs NCS-R age distributions
+1251   ****************************************************/
+1252   *                        add/remove forward slash --^ ;
+1253   *                        to enable/disable STEP V     ;
+1254  
+1255  PROC PRINTTO NEW
+1256    LOG="&outputs/RS5.log";
+1257  RUN;
 

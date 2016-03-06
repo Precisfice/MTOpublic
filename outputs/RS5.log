@@ -3,63 +3,64 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-13909  
-13910  * Additionally, examine the age distribution for questions ;
-13911  * of generalizability.  How does the pts_smpl=1 population ;
-13912  * differ from the full NCS-R sample? ;
-13913  ods pdf file = "&outputs/RS5-Age_MTO_vs_NCSR.pdf";
+1258  
+1259  * Additionally, examine the age distribution for questions ;
+1260  * of generalizability.  How does the pts_smpl=1 population ;
+1261  * differ from the full NCS-R sample? ;
+1262  ods pdf file = "&outputs/RS5-Age_MTO_vs_NCSR.pdf";
 NOTE: Writing ODS PDF output to DISK destination 
       "C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf", printer "PDF".
-13914  title "Age distributions in NCSR and MTO barely overlap";
-13915  proc sort data=NCSR.ncsr;
-13916    by pts_smpl;
+1263  title "Age distributions in NCSR and MTO barely overlap";
+1264  proc sort data=NCSR.ncsr;
+1265    by pts_smpl;
 
-NOTE: There were 9282 observations read from the data set NCSR.NCSR.
-NOTE: The data set NCSR.NCSR has 9282 observations and 4213 variables.
+NOTE: Input data set is already sorted, no sorting done.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.35 seconds
-      cpu time            0.36 seconds
+      real time           0.00 seconds
+      cpu time            0.00 seconds
       
 
-13917  proc means data=NCSR.ncsr;
-13918    var age;
-13919    by pts_smpl;
-13920  run;
+1266  proc means data=NCSR.ncsr;
+1267    var age;
+1268    by pts_smpl;
+1269  run;
 
-NOTE: There were 9282 observations read from the data set NCSR.NCSR.
+ERROR: Format AGE not found or couldn't be loaded for variable AGE.
+NOTE: The SAS System stopped processing this step because of errors.
 NOTE: PROCEDURE MEANS used (Total process time):
-      real time           0.14 seconds
-      cpu time            0.14 seconds
+      real time           0.00 seconds
+      cpu time            0.00 seconds
       
+1270  
+1271  * Plot a histogram to show the age density clearly, ;
+1272  * both for pts_smpl=1 and pts_smpl=0 groups.        ;
+1273  ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
+1274  
+1275  %macro plot_age_dens;
+1276  %IF &workstation = Seattle %THEN %DO;
+1277  proc sgplot data=NCSR.ncsr;
+1278    histogram age / group=pts_smpl filltype=gradient transparency=0.5
+1279                    nbins=75 name='est';
+1280    density age / group=pts_smpl;
+1281    xaxis display=(nolabel) min=15 max=90;
+1282    yaxis grid;
+1283    keylegend 'est' / location=inside across=1 position=topright;
+1284  run;
+1285  %END;
+1286  %IF &workstation = SLC %THEN %DO;
+1287  proc sgplot data=NCSR.ncsr;
+1288    histogram age/ nbins=75 name='est';
+1289    density age;
+1290    xaxis display=(nolabel) min=15 max=90;
+1291    yaxis grid;
+1292    keylegend 'est' / location=inside across=1 position=topright;
+1293    by pts_smpl;
+1294  run;
+1295  %END;
+1296  %mend;
+1297  %plot_age_dens;
 
-13921  
-13922  * Plot a histogram to show the age density clearly, ;
-13923  * both for pts_smpl=1 and pts_smpl=0 groups.        ;
-13924  ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
-13925  
-13926  %macro plot_age_dens;
-13927  %IF &workstation = Seattle %THEN %DO;
-13928  proc sgplot data=NCSR.ncsr;
-13929    histogram age / group=pts_smpl filltype=gradient transparency=0.5
-13930                    nbins=75 name='est';
-13931    density age / group=pts_smpl;
-13932    xaxis display=(nolabel) min=15 max=90;
-13933    yaxis grid;
-13934    keylegend 'est' / location=inside across=1 position=topright;
-13935  run;
-13936  %END;
-13937  %IF &workstation = SLC %THEN %DO;
-13938  proc sgplot data=NCSR.ncsr;
-13939    histogram age/ nbins=75 name='est';
-13940    density age;
-13941    xaxis display=(nolabel) min=15 max=90;
-13942    yaxis grid;
-13943    keylegend 'est' / location=inside across=1 position=topright;
-13944    by pts_smpl;
-13945  run;
-13946  %END;
-13947  %mend;
-13948  %plot_age_dens;
+
 MPRINT(PLOT_AGE_DENS):   proc sgplot data=NCSR.ncsr;
 MPRINT(PLOT_AGE_DENS):   histogram age/ nbins=75 name='est';
 MPRINT(PLOT_AGE_DENS):   density age;
@@ -69,39 +70,287 @@ MPRINT(PLOT_AGE_DENS):   keylegend 'est' / location=inside across=1 position=top
 MPRINT(PLOT_AGE_DENS):   by pts_smpl;
 MPRINT(PLOT_AGE_DENS):   run;
 
+ERROR: Format AGE not found or couldn't be loaded for variable AGE.
+NOTE: The SAS System stopped processing this step because of errors.
 NOTE: PROCEDURE SGPLOT used (Total process time):
-      real time           0.74 seconds
-      cpu time            0.29 seconds
+      real time           0.00 seconds
+      cpu time            0.00 seconds
       
-NOTE: There were 9282 observations read from the data set NCSR.NCSR.
+1298  ods pdf close;
+NOTE: ODS PDF printed no output. 
+      (This sometimes results from failing to place a RUN statement before the ODS PDF CLOSE 
+      statement.)
+1299  
+1300  * TODO: Plot a similar histogram demonstrating the negligible overlap ;
+1301  *       of the age distributions of MTO and NCS-R.                    ;
+1302  
+1303  /* end of STEP V */
+1304  
+1305  /*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
+1306   * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
+1307   *       essential parts for our investigation of PTSD.  At present, his code is very
+1308   *       general, and probably does a lot of extra work that makes the program run
+1309   *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
+1310   *       do inside our bootstrapping loop!
+1311   ***********************************************************************************/
+1312   *                                                       add/remove forward slash --^ ;
+1313   *                                                       to enable/disable STEP Z     ;
+1314  *%include
+1314! "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+1315  /* end of STEP Z */
+1316  
+1317  /*  STEP VI -- Bootstrap the voucher effects
+1318   ********************************************/
+1319   *                add/remove forward slash --^ ;
+1320   *                to enable/disable STEP VI    ;
+1321  /*
+1322  PROC PRINTTO NEW
+1323    LOG="&outputs/RS6.log";
+1324  RUN;
+1325  */
+1326  * Draw 10^5 different sets of imputation coefficients from the posterior      ;
+1327  * density implied by the original coefficients of the JAMA article, taken     ;
+1328  * together with their variance-covariance matrix received from Nancy Sampson. ;
+1329  * Demonstrate that the mean and covariance matrix for these samples match     ;
+1330  * closely the desired values.   ;
+1331  
 
-13949  ods pdf close;
-NOTE: ODS PDF printed 3 pages to C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf.
-13950  
-13951  * TODO: Plot a similar histogram demonstrating the negligible overlap ;
-13952  *       of the age distributions of MTO and NCS-R.                    ;
-13953  
-13954  /* end of STEP V */
-13955  
-13956  /*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
-13957   * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
-13958   *       essential parts for our investigation of PTSD.  At present, his code is very
-13959   *       general, and probably does a lot of extra work that makes the program run
-13960   *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
-13961   *       do inside our bootstrapping loop!
-13962   ***********************************************************************************/
-13963   *                                                       add/remove forward slash --^ ;
-13964   *                                                       to enable/disable STEP Z     ;
-13965  *%include
-13965! "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-13966  /* end of STEP Z */
-13967  
-13968  /*  STEP VI -- Bootstrap the voucher effects
-13969   ********************************************/
-13970   *                add/remove forward slash --^ ;
-13971   *                to enable/disable STEP VI    ;
-13972  
-13973  PROC PRINTTO NEW
-13974    LOG="&outputs/RS6.log";
-13975  RUN;
 
+1332  proc iml;
+NOTE: IML Ready
+1333    title1 "Sampling from joint posterior of PTSD model coefficients";
+1334    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
+1335    load their_beta their_cov CovarNames;
+NOTE: Opening storage library WORK.IMLSTOR
+1336    call randseed(2016);
+1337    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
+NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
+NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
+1338    * Simply overwrite the first sample with the original beta vector ;
+1339    betas_posterior_samples[1,] = their_beta;
+1340    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+1341    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
+1341! vectors"
+1342     colname=CovarNames rowname=sample_labels];
+1343    SampleMean = mean(betas_posterior_samples);
+1344    SampleCov = cov(betas_posterior_samples);
+1345    compare_means = SampleMean // their_beta;
+1346    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
+1347    print SampleCov[colname=CovarNames rowname=CovarNames];
+1348    cov_diff = SampleCov - their_cov;
+1349    print cov_diff[colname=CovarNames rowname=CovarNames];
+1350    store betas_posterior_samples;
+1351  run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+1352  
+1353  * Define the %mtoptsd macro needed by impdata20x.sas, which is    ;
+1354  * %included by the bootstrap loop below.                          ;
+1355  * --------------------------------------------------------------- ;
+1356  * Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.    ;
+1357  * It computes the several PTSD criteria that were operationalized ;
+1358  * in the MTO Youth Final Survey, and also cross-walks from NCSR   ;
+1359  * to MTO survey question variables, by renaming MTO variables to  ;
+1360  * their NCSR equivalents.                                         ;
+1361  * This enables the PTSD imputation model estimated in NCSR to be  ;
+1362  * applied AS-IS to MTO data, without renaming its RHS variables.  ;
+1363  * (It is a dual-purpose macro intended for both A=adult and       ;
+1364  * Y=youth data sets -- hence its 2nd argument.)                   ;
+1365  %macro mtoptsd(datain, pfx, dataout);
+1366  
+1367     * MTO Adult questionnaire PTSD data ;
+1368     data &dataout;
+1369     set &datain;
+1370  
+1371     * Criteria A1 ;
+1372     if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or
+1372! &pfx.CV5_PT17 = 1 or
+1373        &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or
+1373! &pfx.CV10_PT23 = 1 or
+1374        &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
+1375     else f_mh_pts_a1 = 0;
+1376  
+1377     * Criteria C1 ;
+1378     if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269
+1378!  = 1,
+1379            &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271
+1379!  = 1,
+1380            &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;
+1380!   * Yes ;
+1381     else f_mh_pts_c1 = 0;
+1382  
+1383     * Criteria D1 ;
+1384     if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or
+1384! &pfx.CV29_PT274 = 1)
+1385         then f_mh_pts_d1 = 1;  * Yes ;
+1386     else f_mh_pts_d1 = 0;
+1387  
+1388     if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
+1389     else mto_ptsd_sample = 0;
+1390  
+1391     array PTVAR &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
+1392                 &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
+1393                 &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271
+1394                 &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
+1395                 &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272
+1395! &pfx.CV28_PT273
+1396                 &pfx.CV29_PT274 &pfx.CV30_PT275;
+1397     do over PTVAR;
+1398        if PTVAR ^= 1 then PTVAR = 0;
+1399     end;
+1400  
+1401     * Gender ;
+1402     if f_svy_gender = 'F' then sexf = 1;
+1403     else sexf = 0;
+1404  
+1405     * Race ;
+1406     rhisp = 0;
+1407     rwh = 0;
+1408     rblk = 0;
+1409     roth = 0;
+1410     if f_svy_ethnic = 1 then rhisp = 1;
+1411     else do;
+1412        if f_svy_race = 1 then rblk = 1;
+1413        else if f_svy_race = 2 then rwh = 1;
+1414        else if f_svy_race IN(3,4,5) then roth = 1;
+1415     end;
+1416  
+1417     in_mto = 1;
+1418  
+1419     if 0 <= f_svy_age_iw <= 18 then age = 18;
+1420     else age = f_svy_age_iw;
+1421  
+1422     * Create corresponding NCSR variables ;
+1423     if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
+1424     else PT211 = 0;
+1425  
+1426     if &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1 then PT212 = 1;
+1427     else PT212 = 0;
+1428  
+1429     if &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1 then PT213 = 1;
+1430     else PT213 = 0;
+1431  
+1432     if &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1 then PT214 = 1;
+1433     else PT214 = 0;
+1434  
+1435     if &pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1 then PT233 = 1;
+1436     else PT233 = 0;
+1437  
+1438     if &pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1 then PT237 = 1;
+1439     else PT237 = 0;
+1440  
+1441     if &pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1 then PT209 = 1;
+1442     else PT209 = 0;
+1443  
+1444     format _numeric_;
+1445     rename &pfx.CV1_PT13 = PT41
+1446            &pfx.CV2_PT14 = PT42
+1447            &pfx.CV3_PT15 = PT43
+1448            &pfx.CV4_PT16 = PT44
+1449            &pfx.CV5_PT17 = PT45
+1450            &pfx.CV6_PT18 = PT46
+1451            &pfx.CV7_PT20 = PT48
+1452            &pfx.CV8_PT22 = PT50
+1453            &pfx.CV9_PT22_1 = PT50_1
+1454            &pfx.CV10_PT23 = PT51
+1455            &pfx.CV11_PT27 = PT55;
+1456     run;
+1457  
+1458  %mend mtoptsd;
+1459  
+1460  * Iterate over the betas_posterior_samples, constructing a model    ;
+1461  * formula for each one and passing it to the impdata20x.sas script. ;
+1462  * Collect the resulting voucher effect estimates with their CIs.    ;
+1463  
+1464  libname OUTPUTS "&outputs";
+NOTE: Libref OUTPUTS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: C:\Users\Anolinx\MTO\outputs
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           0.36 seconds
+      cpu time            0.35 seconds
+      
+
+1465  proc iml;
+NOTE: IML Ready
+1466    *title1 "Constructing PTSD imputation model formulas";
+1467    *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
+1468    load betas_posterior_samples CovarNames;
+NOTE: Opening storage library WORK.IMLSTOR
+1469    CovarNames[loc(CovarNames='Intercept')] = "1";
+1470    reps = 5;
+1471    create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
+1472    do imod = 1 to reps;
+1473      coefs = betas_posterior_samples[imod,];
+1474      * convert coefs to explicitly (+/-) signed strings ;
+1475      signs = repeat(" ",1,ncol(coefs));
+1476      signs[loc(coefs>=0)] = "+";
+1477      coefs = catx("", signs, coefs);
+1478      * generate formula terms, then concatenate them ;
+1479      terms = catx("*",coefs,CovarNames`);
+1480      formula = rowcatc(terms);
+1481      *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
+1482      *print formula;
+1483      *title1;
+1484      do seed = 101 to 103;
+1485      submit formula seed; * the 'formula' parameter allows substitution below;
+1486        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+1487        %let seedused=&seed;
+1488        %include "&reanalysis/impdata20x.sas";
+1489      endsubmit;
+1490      * Extract the desired effect estimate and its CI ;
+1491      use ORs;
+1492      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
+1493      close ORs;
+1494      effrow = loc(compbl(Effect)='ra_grp_exp'
+1495                       & _Imputation_=.);
+1496      OddsRatioEst = OddsRatioEst[effrow];
+1497      LowerCL = LowerCL[effrow];
+1498      UpperCL = UpperCL[effrow];
+1499      append var {imod seed OddsRatioEst LowerCL UpperCL};
+1500      end;
+1500!          * seed_1 loop ;
+1501    end;
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+1501!        * imod loop ;
+1502    close OUTPUTS.orci;
+NOTE: The data set OUTPUTS.ORCI has 15 observations and 5 variables.
+1503  run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+1504  quit;
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           1:16.79
+      cpu time            1:09.21
+      

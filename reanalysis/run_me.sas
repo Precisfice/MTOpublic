@@ -249,7 +249,7 @@ ods pdf close;
 /* end of STEP II */
 
 /*  STEP III -- Compare coefficients
- ************************************
+ ************************************/
  *        add/remove forward slash --^ ;
  *        to enable/disable STEP III   ;
 
@@ -363,7 +363,7 @@ ods pdf close;
 /* end of STEP III */
 
 /*  STEP IV -- Prepare the MTO data
- ***********************************
+ ***********************************/
  *       add/remove forward slash --^ ;
  *       to enable/disable STEP IV    ;
 
@@ -392,7 +392,7 @@ ods pdf close;
 /* end of STEP IV */
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
- ****************************************************
+ ****************************************************/
  *                        add/remove forward slash --^ ;
  *                        to enable/disable STEP V     ;
 
@@ -605,13 +605,14 @@ run;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Collect the resulting voucher effect estimates with their CIs.    ;
 
+libname OUTPUTS "&outputs";
 proc iml;
   *title1 "Constructing PTSD imputation model formulas";
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-  reps = 2;
-  create orci var {imod seed OddsRatioEst LowerCL UpperCL};
+  reps = 5;
+  create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
   do imod = 1 to reps;
     coefs = betas_posterior_samples[imod,];
     * convert coefs to explicitly (+/-) signed strings ;
@@ -624,7 +625,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-	do seed = 101 to 102;
+	do seed = 101 to 103;
     submit formula seed; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
       %let seedused=&seed;
@@ -642,7 +643,7 @@ proc iml;
     append var {imod seed OddsRatioEst LowerCL UpperCL};
     end; * seed_1 loop ;
   end; * imod loop ;
-  close orci;
+  close OUTPUTS.orci;
 run;
 quit;
 
