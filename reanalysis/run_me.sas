@@ -612,7 +612,6 @@ proc iml;
   CovarNames[loc(CovarNames='Intercept')] = "1";
   reps = 5;
   create orci var {i OddsRatioEst LowerCL UpperCL};
-  or_ci = repeat(., reps, 3); * Allocate reps x 3 matrix for ORs, CI ;
   do i = 1 to reps;
     coefs = betas_posterior_samples[i,];
     * convert coefs to explicitly (+/-) signed strings ;
@@ -635,21 +634,15 @@ proc iml;
     close ORs;
     effrow = loc(compbl(Effect)='ra_grp_exp'
                      & _Imputation_=.);
-    or_ci[i,1] = OddsRatioEst[effrow];
-    or_ci[i,2] = LowerCL[effrow];
-    or_ci[i,3] = UpperCL[effrow];
-    OddsRatioEst=or_ci[i,1];
-    LowerCL =or_ci[i,2];
-    UpperCL =or_ci[i,3];
+    OddsRatioEst = OddsRatioEst[effrow];
+    LowerCL = LowerCL[effrow];
+    UpperCL = UpperCL[effrow];
     append var {i OddsRatioEst LowerCL UpperCL};
   end;
   close orci;
-  rownames = ("Rep1":"Rep1000")[1:reps];
-  title1 "Collected effect estimates";
-  print or_ci[colname={'Odds Ratio' 'Lower CL' 'Upper CL'}
-              rowname=rownames];
 run;
 quit;
+
 /* end of STEP VI */
 
 /* --- References ---
