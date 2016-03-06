@@ -1,53 +1,8 @@
 /* Perform the 20x multiple imputation of missing covariates
  ************************************************************/
 
-/*To do: Adapt Matt Sciandra's imputation code*/
-
-/* Run the PTSD imputation model on the resulting dataset
- *********************************************************/
-
-/*%LET VARLISTC = ad_age edcat x_f_ad_edinsch racecat x_f_ad_nevmarr*/
-/*x_f_ad_parentu18 x_f_ad_working x_f_c2_hosp x_f_c2_lowbw ch_age x_f_ch_schplay*/
-/*x_f_ch_specmed x_f_hh_afdc x_f_hh_car x_f_hh_disabl x_f_hh_noteens hhsizecat*/
-/*x_f_hh_victim x_f_hood_5y x_f_hood_chat x_f_hood_nbrkid x_f_hood_nofamily*/
-/*x_f_hood_nofriend x_f_hood_unsafenit x_f_hood_verydissat x_f_hous_fndapt*/
-/*x_f_hous_mov3tm x_f_hous_movdrgs x_f_hous_movschl x_f_hous_sec8bef inccat*/
-/*ra_site ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new*/
-/*ycv6_pt18_new ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new*/
-/*ycv11_pt27_new x_f_ch_male mov_drugs x_f_ch_bl_age617 large_family*/
-/*exclude_lrgfam hardtoreach exclude_htr;*/
-
-/* Let us impute only those vars we actually need for our later work,
-   which I identify starting from a keep= option in Ptsd_MTO_youth.sas
-   and from this omitting all non-missing variables. */
-/*%LET varimp = YCV1_PT13 YCV2_PT14 YCV3_PT15 YCV4_PT16 YCV5_PT17*/
-/*              YCV6_PT18 YCV7_PT20 YCV8_PT22 YCV9_PT22_1 YCV10_PT23*/
-/*              YCV11_PT27 YCV13_PT62 YCV14_PT64 YCV14b_PT64a*/
-/*              YCV14c YCV22_PT261 YCV15_PT269 YCV16_PT270 YCV17_PT271 */
-/*              YCV18_PT272 YCV19_PT273 YCV20_PT274 YCV21_PT275*/
-/*              YCV24_PT269 YCV25_PT270 YCV26_PT271 YCV27_PT272 */
-/*              YCV28_PT273 YCV29_PT274 YCV30_PT275;*/
-/**/
-/**/
-/*%LET NBER = E:\NSCR_Replication_study\NBER;*/
-/*Libname NBER "&NBER";*/
-/**/
-/*data preimpdata0;*/
-/*set NBER.Mto_jama_preimp_20160111;*/
-/*format _numeric_;*/
-/*%include "&folder\Datafix2-mto-youth.sas";*/
-/*%include "&folder\agefix-youth.sas";*/
-/*run;*/
-
-/*PROC MI data = NBER.Mto_jama_preimp_20160111 nimpute = 5 out=impdata0 SEED=524232;*/
-/*class &VARLISTC;*/
-/*FCS reg (&varimp=&VARLISTC); */
-/*var &varimp &VARLISTC;*/
-/*run;*/
-
-*%include "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-
-%mtoptsd(MTO.Mto_jama_imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
+%LET seedused = jama; * Select which imputed dataset to work on ;
+%mtoptsd(MTO.Mto_&seedused._imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 /* This stretch of code allows this script to run in a 'standalone' mode
    for testing and refactoring purposes.  In its intended application
