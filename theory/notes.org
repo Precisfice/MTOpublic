@@ -30,26 +30,108 @@
   1. [X] Verify that the MS/LS code cannot have reproduced JAMA voucher ORs
      - [X] Verify that C1 and D1 criteria YCV* inputs are missing from their post-imputation output
        The PROC CONTENTS shows it's missing all YCV Qs after YCV11!
-  2. [ ] Demonstrate that successful pass-thru of A1 Qs can be achieved without the '_NEW' renaming
+  2. [-] Demonstrate that successful pass-thru of A1 Qs can be achieved without the '_NEW' renaming
      My hypothesis is that this '_NEW' detritus reflects some kind of last-minute NBER panicky
      programming-to-deadline in the face of format-related problems that the NBER attributed (not
      very credibly IMO) to some poorly-understood difference between SAS 9.3 and 9.4.  It represents
      an awful lot of extra machinery to deal with, and just simply an awful lot of extra /typing/
      for us to do.  Removing this bug-not-feature of the code (if possible) will go a long way
      toward speeding our work this weekend! 
-     - [ ] Stash existing changes
-     - [ ] Re-run current HEAD to verify f_mh_pts_a1 and its inputs appear in /Fnlpred_ptsd_youth/
+     - [X] Stash existing changes
+     - [X] Re-run current HEAD to verify f_mh_pts_a1 and its inputs appear in /Fnlpred_ptsd_youth/
+       _THEY DON'T_
+     - [X] Reapply the stashed changes ,and continue from there
+       Now I'm getting 0 rows in _Mto jama imputed_!
+     - [X] Rollback and begin a new 'zapnew' branch
+       I've rolled back to commit 832ebe, which is the last commit before fd440 "Sketch 'repro.sas'"
+       Unfortunately, I find that the resulting _Mto jama imputed_ is different.  Almost surely, one
+       cause for this is that the RNG values drawn get reassigned with 11 fewer variables to impute.
+       Consequently, I think I have to check this stuff in, and return the the master branch without
+       a merge.
+     - [X] What in the world are the '*_new_old' variables for?
+       This seems to be /purely administrative/, supporting a PROC FREQ type of assessment or check.
      - [ ] Expunge '_NEW' from the code
+       - [ ] Initially, demonstrate this can be done for a /single/ var in the A1 criteria
+       - [ ] Expand to all A1 vars
      - [ ] Verify f_mh_pts_a1 still appears in /Fnlpred_ptsd_youth/
      - [ ] Check in this refactoring
   3. [ ] Pass thru C1 and D1 YCV vars
+     - [ ] Verify C1 & D1 vars are present in _mto jama imputed_
      - [ ] Verify /f_mh_pts_c1/ and its inputs appear in _Fnlpred ptsd youth_
      - [ ] Verify /f_mh_pts_d1/ and its inputs appear in _Fnlpred ptsd youth_
-  4. [ ] Identify the next bug
-     - [ ] Did we get /OddsRatios/?
-     - [ ] /f_mh_pts_rec_yt/ 'recency' present in _Flpred ptsd youth_?
-     - [ ] /mto_ptsd_sample/ indicator present in _Flpred ptsd youth_?
-  5. [ ] Restore ability to generate regular OUTPUT _MAX TIME: 30 mins_
-     Unlike the 9.4M2 graphics, which are a mere nicety, the ability to write plain output during
-     debugging loops would seem /close to being/ (if not quite truly) a _minimal_ requirement.
-     Let's see if we can correct the current situation, where only ODS PDFs seem to be writable.
+  4. [X] Revert to 'master' branch, and find which commit killed _impdata_
+     So far, fd44032 looks fine.  The culprit is /093f755/ -- Add ptsdvars 14b,14c,22
+  5. [X] Checkout master, and attempt to find/reverse harmful changes since _fd44032_
+  6. [X] Run 2_..sas for once!
+     - [X] Are there any voucher effects on PTSD?
+       Yes!  The dir-adapted 2_..sas file and several key T4/5 log/lst outputs have been checked in.
+     - [X] What is the provenance of _f mh pts y yt_ variable?  What about its /meaning/?
+       The /meaning/ seems to be 12-month prevalence, judging from the label.
+       Regarding _provenance_, it appears this is left as an 'exercise for the reader' via the code
+       in directory /appendix_d_cidi_disorder_code/.
+  7. [X] Have a decent walk + dinner
+  8. [X] Work out which files in the cascade of 1_..sas contain the needed PTSD A1, C1 & D1 criteria
+  9. [X] Identify the next bug
+     - [X] Did we get /OddsRatios/?
+     - [X] /f_mh_pts_rec_yt/ 'recency' present in _Flpred ptsd youth_?
+       No.  Does it have to be?
+     - [X] /mto_ptsd_sample/ indicator present in _Flpred ptsd youth_?
+  10. [ ] Restore ability to generate regular OUTPUT _MAX TIME: 30 mins_
+      Unlike the 9.4M2 graphics, which are a mere nicety, the ability to write plain output during
+      debugging loops would seem /close to being/ (if not quite truly) a _minimal_ requirement.
+      Let's see if we can correct the current situation, where only ODS PDFs seem to be writable.
+  11. [ ] Compare with original /mto_jama_impute_20160111.sas7bdat/ file!
+      - [ ] Implement a basic tabular assessment that check on whatever is the current concern
+
+* Notes on further concerns arising in the course of 3/5/2016 work
+  1. I've discovered 3/5/2016 that even missing /ymh_pts_event_count/ is being IMPUTED!  It's almost
+     as if they turned an imputation firehose (flamethrower?) on the data.
+* Plan for Sunday 3/6/2016
+  1. [X] Try running _run me.sas_ with low reps
+     - [X] Ensure that %mtoptsd is same in 'repro.sas' and 'run_me.sas'
+     - [X] Get _impdata20x.sas_ to run stanalone with hard-coded &formula
+     - [X] Run _run me.sas_ with few reps
+       - [X] Solve problem with collecting elements of the /or_ci/ matrix
+	 There _was_ no such problem -- it was that my fancy '&formula' idiom failed.
+     - [X] Rename _impdata20x.sas_! *DECIDED AGAINST*
+       This name seems no longer appropriate, since this script doesn't do any imputation, or at
+       least whatever imputation it /does/ do isn't done 20 times!
+       No, I'm going back on that now.  From the perspective of the /client code/, _impdata20s.sas_
+       might as well be doing the imputation itself.  Thus, the name is actually a decent expression
+       of the _interface_ presented.  What more can you ask of a /name/?
+  2. [ ] Improve performance & clarity
+     Of note, this work has been done on an i7-4770 @ 3.4GHz running Windows 10 Pro.  So this is no
+     slouch of a system!  My own raggedy box will sure run these analyses much more slowly.
+     - [ ] Add a timing printout to the Output
+     - [ ] Eliminate all PROC CONTENTS calls inside the simulation loop
+     - [ ] Does the code run faster with log window closed?
+     - [ ] Enquire with Sergey if there are any other UI drains on performance we might easily avoid
+  3. [X] Parametrize _1..sas_ by SEED (default=524232), and attach seed to MTO.imputed<SEED> output
+  4. [X] Build a 2-factor bootstrap table in _run me.sas_, over both /seed_1/ and /i = 1..reps/
+     - [X] Add i to the ORs table if not yet there
+     - [X] Add a loop over a hard-coded range of /seed_1/ choices (101 .. 103, to start!)
+  5. [X] Script generation of many MTO.impdata<seed> tables
+     - [X] Check the cost to run %mtoptsd on one of these files
+       Egad!  It's a DATA step that takes all of 0.16 seconds to run, according to the log!  (And in
+       fact, only 0.12 seconds of CPU time.)
+     - [X] Make them persistent in MTO library regardless of time cost?
+       _ABSOLUTELY NOT!_  That is such a trivial cost vs the 4-5 seconds of total _impdata20x_ time,
+       that filling a directory with another pile of files is /just not worth it/!
+  6. [X] Expand 'Step Z'
+     Judging from the timestamps on the mto_<seed>_imputed.sas7bdat files, the late-night run
+     managed almost exactly 10 imputations per hour, corroborating the 6 mins/imputation I had been
+     experiencing at the workstation.
+
+* Plan for Monday 3/7/2016
+  1. [X] Create a larger 'orci' table
+     - [X] Run with imod=1..10 and seed=101..120
+       Wow!  This is reasonably fast.  Ran thru 10*20=200 iterations in 20 minutes, again
+       corroborating the ~5 sec _impdata20x.sas_ run-times I'd been experiencing.
+     - [X] Modify the bootstrap loop to EDIT an already-CREATEd 'orci' table
+     - [X] Extend to imod=30
+     - [X] Add another 10 seeds 121..130 (should take ~1hr if last night's experience holds)
+     - [X] Also be sure to write /as a SAS data set/ the full set of coefficient samples!
+     - [X] Expand 'orci' to include the (imod=1:30)x(seed=121:130) rectangle
+  2. [X] Push to GitHub
+  3. [ ] Analyses (incl. /graphics/) in R
+
