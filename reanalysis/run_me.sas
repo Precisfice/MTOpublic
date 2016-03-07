@@ -622,7 +622,7 @@ proc iml;
   if exist("OUTPUTS.orci") then
     edit OUTPUTS.orci;
   else create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
-  do imod = 11 to 20;
+  do imod = 21 to 30;
     coefs = betas_posterior_samples[imod,];
     * convert coefs to explicitly (+/-) signed strings ;
     signs = repeat(" ",1,ncol(coefs));
