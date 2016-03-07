@@ -3,16 +3,16 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-1258  
-1259  * Additionally, examine the age distribution for questions ;
-1260  * of generalizability.  How does the pts_smpl=1 population ;
-1261  * differ from the full NCS-R sample? ;
-1262  ods pdf file = "&outputs/RS5-Age_MTO_vs_NCSR.pdf";
+1268  
+1269  * Additionally, examine the age distribution for questions ;
+1270  * of generalizability.  How does the pts_smpl=1 population ;
+1271  * differ from the full NCS-R sample? ;
+1272  ods pdf file = "&outputs/RS5-Age_MTO_vs_NCSR.pdf";
 NOTE: Writing ODS PDF output to DISK destination 
       "C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf", printer "PDF".
-1263  title "Age distributions in NCSR and MTO barely overlap";
-1264  proc sort data=NCSR.ncsr;
-1265    by pts_smpl;
+1273  title "Age distributions in NCSR and MTO barely overlap";
+1274  proc sort data=NCSR.ncsr;
+1275    by pts_smpl;
 
 NOTE: Input data set is already sorted, no sorting done.
 NOTE: PROCEDURE SORT used (Total process time):
@@ -20,45 +20,45 @@ NOTE: PROCEDURE SORT used (Total process time):
       cpu time            0.00 seconds
       
 
-1266  proc means data=NCSR.ncsr;
-1267    var age;
-1268    by pts_smpl;
-1269  run;
+1276  proc means data=NCSR.ncsr;
+1277    var age;
+1278    by pts_smpl;
+1279  run;
 
 ERROR: Format AGE not found or couldn't be loaded for variable AGE.
 NOTE: The SAS System stopped processing this step because of errors.
 NOTE: PROCEDURE MEANS used (Total process time):
       real time           0.00 seconds
-      cpu time            0.00 seconds
+      cpu time            0.01 seconds
       
-1270  
-1271  * Plot a histogram to show the age density clearly, ;
-1272  * both for pts_smpl=1 and pts_smpl=0 groups.        ;
-1273  ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
-1274  
-1275  %macro plot_age_dens;
-1276  %IF &workstation = Seattle %THEN %DO;
-1277  proc sgplot data=NCSR.ncsr;
-1278    histogram age / group=pts_smpl filltype=gradient transparency=0.5
-1279                    nbins=75 name='est';
-1280    density age / group=pts_smpl;
-1281    xaxis display=(nolabel) min=15 max=90;
-1282    yaxis grid;
-1283    keylegend 'est' / location=inside across=1 position=topright;
-1284  run;
-1285  %END;
-1286  %IF &workstation = SLC %THEN %DO;
+1280  
+1281  * Plot a histogram to show the age density clearly, ;
+1282  * both for pts_smpl=1 and pts_smpl=0 groups.        ;
+1283  ods graphics / reset attrpriority=color width=5in height=3in imagename='NCSR_age';
+1284  
+1285  %macro plot_age_dens;
+1286  %IF &workstation = Seattle %THEN %DO;
 1287  proc sgplot data=NCSR.ncsr;
-1288    histogram age/ nbins=75 name='est';
-1289    density age;
-1290    xaxis display=(nolabel) min=15 max=90;
-1291    yaxis grid;
-1292    keylegend 'est' / location=inside across=1 position=topright;
-1293    by pts_smpl;
+1288    histogram age / group=pts_smpl filltype=gradient transparency=0.5
+1289                    nbins=75 name='est';
+1290    density age / group=pts_smpl;
+1291    xaxis display=(nolabel) min=15 max=90;
+1292    yaxis grid;
+1293    keylegend 'est' / location=inside across=1 position=topright;
 1294  run;
 1295  %END;
-1296  %mend;
-1297  %plot_age_dens;
+1296  %IF &workstation = SLC %THEN %DO;
+1297  proc sgplot data=NCSR.ncsr;
+1298    histogram age/ nbins=75 name='est';
+1299    density age;
+1300    xaxis display=(nolabel) min=15 max=90;
+1301    yaxis grid;
+1302    keylegend 'est' / location=inside across=1 position=topright;
+1303    by pts_smpl;
+1304  run;
+1305  %END;
+1306  %mend;
+1307  %plot_age_dens;
 
 
 MPRINT(PLOT_AGE_DENS):   proc sgplot data=NCSR.ncsr;
@@ -76,1514 +76,390 @@ NOTE: PROCEDURE SGPLOT used (Total process time):
       real time           0.00 seconds
       cpu time            0.00 seconds
       
-1298  ods pdf close;
+1308  ods pdf close;
 NOTE: ODS PDF printed no output. 
       (This sometimes results from failing to place a RUN statement before the ODS PDF CLOSE 
       statement.)
-1299  
-1300  * TODO: Plot a similar histogram demonstrating the negligible overlap ;
-1301  *       of the age distributions of MTO and NCS-R.                    ;
-1302  
-1303  /* end of STEP V */
-1304  
-1305  /*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
-1306   * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
-1307   *       essential parts for our investigation of PTSD.  At present, his code is very
-1308   *       general, and probably does a lot of extra work that makes the program run
-1309   *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
-1310   *       do inside our bootstrapping loop!
-1311   ***********************************************************************************/
-1312   *                                                       add/remove forward slash --^ ;
-1313   *                                                       to enable/disable STEP Z     ;
-1314  *%include
-1314! "C:/Users/Anolinx/MTO/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-1315  /* end of STEP Z */
-1316  
-1317  /*  STEP VI -- Bootstrap the voucher effects
-1318   ********************************************/
-1319   *                add/remove forward slash --^ ;
-1320   *                to enable/disable STEP VI    ;
-1321  /*
-1322  PROC PRINTTO NEW
-1323    LOG="&outputs/RS6.log";
-1324  RUN;
-1325  */
-1326  * Draw 10^5 different sets of imputation coefficients from the posterior      ;
-1327  * density implied by the original coefficients of the JAMA article, taken     ;
-1328  * together with their variance-covariance matrix received from Nancy Sampson. ;
-1329  * Demonstrate that the mean and covariance matrix for these samples match     ;
-1330  * closely the desired values.   ;
-1331  
+1309  
+1310  * TODO: Plot a similar histogram demonstrating the negligible overlap ;
+1311  *       of the age distributions of MTO and NCS-R.                    ;
+1312  
+1313  /* end of STEP V */
+1314  
+1315  /*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
+1316   * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
+1317   *       essential parts for our investigation of PTSD.  At present, his code is very
+1318   *       general, and probably does a lot of extra work that makes the program run
+1319   *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
+1320   *       do inside our bootstrapping loop!
+1321   *       HOWEVER, it is important to make only minimal changes to that program until
+1322   *       we have successfully reproduced the original model coefficients.
+1323   ***********************************************************************************
+1324   *                                                       add/remove forward slash --^ ;
+1325   *                                                       to enable/disable STEP Z     ;
+1326  %macro multi_seed;
+1327      %do seed_1 = 121 %to 130;
+1328          %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+1329          dm 'clear log';
+1330      %end;
+1331  %mend; * multi_seed ;
+1332  %multi_seed;
+1333  /* end of STEP Z */
+1334  
+1335  /*  STEP VI -- Bootstrap the voucher effects
+1336   ********************************************/
+1337   *                add/remove forward slash --^ ;
+1338   *                to enable/disable STEP VI    ;
+1339  /*
+1340  PROC PRINTTO NEW
+1341    LOG="&outputs/RS6.log";
+1342  RUN;
+1343  */
+1344  * Draw 10^5 different sets of imputation coefficients from the posterior      ;
+1345  * density implied by the original coefficients of the JAMA article, taken     ;
+1346  * together with their variance-covariance matrix received from Nancy Sampson. ;
+1347  * Demonstrate that the mean and covariance matrix for these samples match     ;
+1348  * closely the desired values.   ;
+1349  
 
 
-1332  proc iml;
+1350  proc iml;
 NOTE: IML Ready
-1333    title1 "Sampling from joint posterior of PTSD model coefficients";
-1334    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
-1335    load their_beta their_cov CovarNames;
+1351    title1 "Sampling from joint posterior of PTSD model coefficients";
+1352    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
+1353    load their_beta their_cov CovarNames;
 NOTE: Opening storage library WORK.IMLSTOR
-1336    call randseed(2016);
-1337    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
+1354    call randseed(2016);
+1355    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
 NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
 NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
-1338    * Simply overwrite the first sample with the original beta vector ;
-1339    betas_posterior_samples[1,] = their_beta;
-1340    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
-1341    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
-1341! vectors"
-1342     colname=CovarNames rowname=sample_labels];
-1343    SampleMean = mean(betas_posterior_samples);
-1344    SampleCov = cov(betas_posterior_samples);
-1345    compare_means = SampleMean // their_beta;
-1346    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
-1347    print SampleCov[colname=CovarNames rowname=CovarNames];
-1348    cov_diff = SampleCov - their_cov;
-1349    print cov_diff[colname=CovarNames rowname=CovarNames];
-1350    store betas_posterior_samples;
-1351  run;
+1356    * Simply overwrite the first sample with the original beta vector ;
+1357    betas_posterior_samples[1,] = their_beta;
+1358    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+1359    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
+1359! vectors"
+1360     colname=CovarNames rowname=sample_labels];
+1361    SampleMean = mean(betas_posterior_samples);
+1362    SampleCov = cov(betas_posterior_samples);
+1363    compare_means = SampleMean // their_beta;
+1364    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
+1365    print SampleCov[colname=CovarNames rowname=CovarNames];
+1366    cov_diff = SampleCov - their_cov;
+1367    print cov_diff[colname=CovarNames rowname=CovarNames];
+1368    store betas_posterior_samples;
+1369  run;
 NOTE: Module MAIN is undefined in IML; cannot be RUN.
-1352  
-1353  * Define the %mtoptsd macro needed by impdata20x.sas, which is    ;
-1354  * %included by the bootstrap loop below.                          ;
-1355  * --------------------------------------------------------------- ;
-1356  * Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.    ;
-1357  * It computes the several PTSD criteria that were operationalized ;
-1358  * in the MTO Youth Final Survey, and also cross-walks from NCSR   ;
-1359  * to MTO survey question variables, by renaming MTO variables to  ;
-1360  * their NCSR equivalents.                                         ;
-1361  * This enables the PTSD imputation model estimated in NCSR to be  ;
-1362  * applied AS-IS to MTO data, without renaming its RHS variables.  ;
-1363  * (It is a dual-purpose macro intended for both A=adult and       ;
-1364  * Y=youth data sets -- hence its 2nd argument.)                   ;
-1365  %macro mtoptsd(datain, pfx, dataout);
-1366  
-1367     * MTO Adult questionnaire PTSD data ;
-1368     data &dataout;
-1369     set &datain;
 1370  
-1371     * Criteria A1 ;
-1372     if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or
-1372! &pfx.CV5_PT17 = 1 or
-1373        &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or
-1373! &pfx.CV10_PT23 = 1 or
-1374        &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
-1375     else f_mh_pts_a1 = 0;
-1376  
-1377     * Criteria C1 ;
-1378     if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269
-1378!  = 1,
-1379            &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271
-1379!  = 1,
-1380            &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;
-1380!   * Yes ;
-1381     else f_mh_pts_c1 = 0;
-1382  
-1383     * Criteria D1 ;
-1384     if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or
-1384! &pfx.CV29_PT274 = 1)
-1385         then f_mh_pts_d1 = 1;  * Yes ;
-1386     else f_mh_pts_d1 = 0;
-1387  
-1388     if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
-1389     else mto_ptsd_sample = 0;
-1390  
-1391     array PTVAR &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
-1392                 &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
-1393                 &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271
-1394                 &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
-1395                 &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272
-1395! &pfx.CV28_PT273
-1396                 &pfx.CV29_PT274 &pfx.CV30_PT275;
-1397     do over PTVAR;
-1398        if PTVAR ^= 1 then PTVAR = 0;
-1399     end;
+1371  * Define the %mtoptsd macro needed by impdata20x.sas, which is    ;
+1372  * %included by the bootstrap loop below.                          ;
+1373  * --------------------------------------------------------------- ;
+1374  * Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.    ;
+1375  * It computes the several PTSD criteria that were operationalized ;
+1376  * in the MTO Youth Final Survey, and also cross-walks from NCSR   ;
+1377  * to MTO survey question variables, by renaming MTO variables to  ;
+1378  * their NCSR equivalents.                                         ;
+1379  * This enables the PTSD imputation model estimated in NCSR to be  ;
+1380  * applied AS-IS to MTO data, without renaming its RHS variables.  ;
+1381  * (It is a dual-purpose macro intended for both A=adult and       ;
+1382  * Y=youth data sets -- hence its 2nd argument.)                   ;
+1383  %macro mtoptsd(datain, pfx, dataout);
+1384  
+1385     * MTO Adult questionnaire PTSD data ;
+1386     data &dataout;
+1387     set &datain;
+1388  
+1389     * Criteria A1 ;
+1390     if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or
+1390! &pfx.CV5_PT17 = 1 or
+1391        &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or
+1391! &pfx.CV10_PT23 = 1 or
+1392        &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
+1393     else f_mh_pts_a1 = 0;
+1394  
+1395     * Criteria C1 ;
+1396     if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269
+1396!  = 1,
+1397            &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271
+1397!  = 1,
+1398            &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;
+1398!   * Yes ;
+1399     else f_mh_pts_c1 = 0;
 1400  
-1401     * Gender ;
-1402     if f_svy_gender = 'F' then sexf = 1;
-1403     else sexf = 0;
-1404  
-1405     * Race ;
-1406     rhisp = 0;
-1407     rwh = 0;
-1408     rblk = 0;
-1409     roth = 0;
-1410     if f_svy_ethnic = 1 then rhisp = 1;
-1411     else do;
-1412        if f_svy_race = 1 then rblk = 1;
-1413        else if f_svy_race = 2 then rwh = 1;
-1414        else if f_svy_race IN(3,4,5) then roth = 1;
-1415     end;
-1416  
-1417     in_mto = 1;
+1401     * Criteria D1 ;
+1402     if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or
+1402! &pfx.CV29_PT274 = 1)
+1403         then f_mh_pts_d1 = 1;  * Yes ;
+1404     else f_mh_pts_d1 = 0;
+1405  
+1406     if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
+1407     else mto_ptsd_sample = 0;
+1408  
+1409     array PTVAR &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
+1410                 &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
+1411                 &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV15_PT269 &pfx.CV16_PT270 &pfx.CV17_PT271
+1412                 &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
+1413                 &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272
+1413! &pfx.CV28_PT273
+1414                 &pfx.CV29_PT274 &pfx.CV30_PT275;
+1415     do over PTVAR;
+1416        if PTVAR ^= 1 then PTVAR = 0;
+1417     end;
 1418  
-1419     if 0 <= f_svy_age_iw <= 18 then age = 18;
-1420     else age = f_svy_age_iw;
-1421  
-1422     * Create corresponding NCSR variables ;
-1423     if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
-1424     else PT211 = 0;
-1425  
-1426     if &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1 then PT212 = 1;
-1427     else PT212 = 0;
-1428  
-1429     if &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1 then PT213 = 1;
-1430     else PT213 = 0;
-1431  
-1432     if &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1 then PT214 = 1;
-1433     else PT214 = 0;
+1419     * Gender ;
+1420     if f_svy_gender = 'F' then sexf = 1;
+1421     else sexf = 0;
+1422  
+1423     * Race ;
+1424     rhisp = 0;
+1425     rwh = 0;
+1426     rblk = 0;
+1427     roth = 0;
+1428     if f_svy_ethnic = 1 then rhisp = 1;
+1429     else do;
+1430        if f_svy_race = 1 then rblk = 1;
+1431        else if f_svy_race = 2 then rwh = 1;
+1432        else if f_svy_race IN(3,4,5) then roth = 1;
+1433     end;
 1434  
-1435     if &pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1 then PT233 = 1;
-1436     else PT233 = 0;
-1437  
-1438     if &pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1 then PT237 = 1;
-1439     else PT237 = 0;
-1440  
-1441     if &pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1 then PT209 = 1;
-1442     else PT209 = 0;
+1435     in_mto = 1;
+1436  
+1437     if 0 <= f_svy_age_iw <= 18 then age = 18;
+1438     else age = f_svy_age_iw;
+1439  
+1440     * Create corresponding NCSR variables ;
+1441     if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
+1442     else PT211 = 0;
 1443  
-1444     format _numeric_;
-1445     rename &pfx.CV1_PT13 = PT41
-1446            &pfx.CV2_PT14 = PT42
-1447            &pfx.CV3_PT15 = PT43
-1448            &pfx.CV4_PT16 = PT44
-1449            &pfx.CV5_PT17 = PT45
-1450            &pfx.CV6_PT18 = PT46
-1451            &pfx.CV7_PT20 = PT48
-1452            &pfx.CV8_PT22 = PT50
-1453            &pfx.CV9_PT22_1 = PT50_1
-1454            &pfx.CV10_PT23 = PT51
-1455            &pfx.CV11_PT27 = PT55;
-1456     run;
-1457  
-1458  %mend mtoptsd;
-1459  
-1460  * Iterate over the betas_posterior_samples, constructing a model    ;
-1461  * formula for each one and passing it to the impdata20x.sas script. ;
-1462  * Collect the resulting voucher effect estimates with their CIs.    ;
-1463  
-1464  libname OUTPUTS "&outputs";
+1444     if &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1 then PT212 = 1;
+1445     else PT212 = 0;
+1446  
+1447     if &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1 then PT213 = 1;
+1448     else PT213 = 0;
+1449  
+1450     if &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1 then PT214 = 1;
+1451     else PT214 = 0;
+1452  
+1453     if &pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1 then PT233 = 1;
+1454     else PT233 = 0;
+1455  
+1456     if &pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1 then PT237 = 1;
+1457     else PT237 = 0;
+1458  
+1459     if &pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1 then PT209 = 1;
+1460     else PT209 = 0;
+1461  
+1462     format _numeric_;
+1463     rename &pfx.CV1_PT13 = PT41
+1464            &pfx.CV2_PT14 = PT42
+1465            &pfx.CV3_PT15 = PT43
+1466            &pfx.CV4_PT16 = PT44
+1467            &pfx.CV5_PT17 = PT45
+1468            &pfx.CV6_PT18 = PT46
+1469            &pfx.CV7_PT20 = PT48
+1470            &pfx.CV8_PT22 = PT50
+1471            &pfx.CV9_PT22_1 = PT50_1
+1472            &pfx.CV10_PT23 = PT51
+1473            &pfx.CV11_PT27 = PT55;
+1474     run;
+1475  
+1476  %mend mtoptsd;
+1477  
+1478  * Iterate over the betas_posterior_samples, constructing a model    ;
+1479  * formula for each one and passing it to the impdata20x.sas script. ;
+1480  * Collect the resulting voucher effect estimates with their CIs.    ;
+1481  
+1482  libname OUTPUTS "&outputs";
 NOTE: Libref OUTPUTS was successfully assigned as follows: 
       Engine:        V9 
       Physical Name: C:\Users\Anolinx\MTO\outputs
 NOTE: Exiting IML.
 NOTE: Storage library WORK.IMLSTOR closed.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           0.36 seconds
-      cpu time            0.35 seconds
+      real time           0.35 seconds
+      cpu time            0.34 seconds
       
 
-1465  proc iml;
+1483  proc iml;
 NOTE: IML Ready
-1466    *title1 "Constructing PTSD imputation model formulas";
-1467    *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
-1468    load betas_posterior_samples CovarNames;
+1484    *title1 "Constructing PTSD imputation model formulas";
+1485    *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
+1486    load betas_posterior_samples CovarNames;
 NOTE: Opening storage library WORK.IMLSTOR
-1469    CovarNames[loc(CovarNames='Intercept')] = "1";
-1470    reps = 5;
-1471    create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
-1472    do imod = 1 to reps;
-1473      coefs = betas_posterior_samples[imod,];
-1474      * convert coefs to explicitly (+/-) signed strings ;
-1475      signs = repeat(" ",1,ncol(coefs));
-1476      signs[loc(coefs>=0)] = "+";
-1477      coefs = catx("", signs, coefs);
-1478      * generate formula terms, then concatenate them ;
-1479      terms = catx("*",coefs,CovarNames`);
-1480      formula = rowcatc(terms);
-1481      *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
-1482      *print formula;
-1483      *title1;
-1484      do seed = 101 to 103;
-1485      submit formula seed; * the 'formula' parameter allows substitution below;
-1486        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-1487        %let seedused=&seed;
-1488        %include "&reanalysis/impdata20x.sas";
-1489      endsubmit;
-1490      * Extract the desired effect estimate and its CI ;
-1491      use ORs;
-1492      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
-1493      close ORs;
-1494      effrow = loc(compbl(Effect)='ra_grp_exp'
-1495                       & _Imputation_=.);
-1496      OddsRatioEst = OddsRatioEst[effrow];
-1497      LowerCL = LowerCL[effrow];
-1498      UpperCL = UpperCL[effrow];
-1499      append var {imod seed OddsRatioEst LowerCL UpperCL};
-1500      end;
-1500!          * seed_1 loop ;
-1501    end;
+1487    CovarNames[loc(CovarNames='Intercept')] = "1";
+1488    if exist("OUTPUTS.orci") then
+1489      edit OUTPUTS.orci;
+1490    else create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
+1491    do imod = 30 to 30;
+1492      coefs = betas_posterior_samples[imod,];
+1493      * convert coefs to explicitly (+/-) signed strings ;
+1494      signs = repeat(" ",1,ncol(coefs));
+1495      signs[loc(coefs>=0)] = "+";
+1496      coefs = catx("", signs, coefs);
+1497      * generate formula terms, then concatenate them ;
+1498      terms = catx("*",coefs,CovarNames`);
+1499      formula = rowcatc(terms);
+1500      *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
+1501      *print formula;
+1502      *title1;
+1503      do seed = 121 to 130;
+1504        submit formula seed; * the 'formula' parameter allows substitution below;
+1505          %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+1506          %let seedused=&seed;
+1507          %include "&reanalysis/impdata20x.sas";
+1508        endsubmit;
+1509        * Extract the desired effect estimate and its CI ;
+1510        use ORs;
+1511        read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
+1512        close ORs;
+1513        effrow = loc(compbl(Effect)='ra_grp_exp'
+1514                         & _Imputation_=.);
+1515        OddsRatioEst = OddsRatioEst[effrow];
+1516        LowerCL = LowerCL[effrow];
+1517        UpperCL = UpperCL[effrow];
+1518        append var {imod seed OddsRatioEst LowerCL UpperCL};
+1519      end;
+1519!          * seed_1 loop ;
+1520    end;
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 168 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 168 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 168 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 168 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
+NOTE: The data set WORK.ORS has 42 observations and 6 variables.
+NOTE: The data set WORK.PARMEST has 168 observations and 9 variables.
 NOTE: The data set WORK.ORS has 42 observations and 6 variables.
 NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
 NOTE: The data set WORK.ORS has 42 observations and 6 variables.
 NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
 NOTE: The data set WORK.ORS has 42 observations and 6 variables.
 NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-1501!        * imod loop ;
-1502    close OUTPUTS.orci;
-NOTE: The data set OUTPUTS.ORCI has 15 observations and 5 variables.
-1503  run;
+1520!        * imod loop ;
+1521    close OUTPUTS.orci;
+NOTE: The data set OUTPUTS.ORCI has 900 observations and 5 variables.
+1522  run;
 NOTE: Module MAIN is undefined in IML; cannot be RUN.
-1504  quit;
+1523  quit;
 NOTE: Exiting IML.
 NOTE: Storage library WORK.IMLSTOR closed.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           1:16.79
-      cpu time            1:09.21
+      real time           52.30 seconds
+      cpu time            47.60 seconds
       
 
-1505  
-1506  /* end of STEP VI */
-1507  
-1508  /* --- References ---
-1509  1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility
-1509! Interventions
-1510     for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during
-1510! Adolescence.
-1511     JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
-1512  
-1513      */
+1524  
+1525  /* end of STEP VI */
+1526  
+1527  /* --- References ---
+1528  1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility
+1528! Interventions
+1529     for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during
+1529! Adolescence.
+1530     JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
+1531  
+1532      */
 
-1514  %macro multi_seed;
-1515      %do seed_1 = 104 %to 105;
-1516          %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-1517      %end;
-1518  %mend; * multi_seed ;
-1519  %multi_seed;
-MPRINT(MULTI_SEED):   ************************************************;
-MPRINT(MULTI_SEED):   ********** Step 1. Set up SAS for use **********;
-MPRINT(MULTI_SEED):   ************************************************;
-MPRINT(MULTI_SEED):   ** Set directories, libraries, and datasets;
-MPRINT(MULTI_SEED):   * Location of formats programs and output location for log/results;
-MPRINT(MULTI_SEED):   * Data file location;
-MPRINT(MULTI_SEED):   libname mto "E:/NSCR_Replication_study";
-NOTE: Libref MTO refers to the same physical library as NCSR.
-NOTE: Libref MTO was successfully assigned as follows: 
+1533  libname OUTPUTS "&outputs";
+NOTE: Libref OUTPUTS was successfully assigned as follows: 
       Engine:        V9 
-      Physical Name: E:\NSCR_Replication_study
-MPRINT(MULTI_SEED):   * Input data file: pre-imputation dataset (one observation for each youth);
-MPRINT(MULTI_SEED):   Libname NBER "E:/NSCR_Replication_study/NBER";
-NOTE: Libref NBER was successfully assigned as follows: 
+      Physical Name: C:\Users\Anolinx\MTO\outputs
+1534  proc iml;
+NOTE: IML Ready
+1535    title1 "Sampling from joint posterior of PTSD model coefficients";
+1536    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
+1537    load their_beta their_cov CovarNames;
+NOTE: Opening storage library WORK.IMLSTOR
+1538    call randseed(2016);
+1539    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
+NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
+NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
+1540    * Simply overwrite the first sample with the original beta vector ;
+1541    betas_posterior_samples[1,] = their_beta;
+1542    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+1543    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
+1543! vectors"
+1544     colname=CovarNames rowname=sample_labels];
+1545    * Write out betas_posterior_samples ;
+1546    create OUTPUTS.betas_samples from betas_posterior_samples;
+1547    append from betas_posterior_samples;
+1548    close OUTPUTS.betas_samples;
+NOTE: The data set OUTPUTS.BETAS_SAMPLES has 100000 observations and 24 variables.
+1549    SampleMean = mean(betas_posterior_samples);
+1550    SampleCov = cov(betas_posterior_samples);
+1551    compare_means = SampleMean // their_beta;
+1552    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
+1553    print SampleCov[colname=CovarNames rowname=CovarNames];
+1554    cov_diff = SampleCov - their_cov;
+1555    print cov_diff[colname=CovarNames rowname=CovarNames];
+1556    store betas_posterior_samples;
+1557  run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+1558  libname OUTPUTS "&outputs";
+NOTE: Libref OUTPUTS was successfully assigned as follows: 
       Engine:        V9 
-      Physical Name: E:\NSCR_Replication_study\NBER
-MPRINT(MULTI_SEED):   * Output data file: post-imputation dataset (20 observations for each 
-youth, 1 for each of the imputations run);
-MPRINT(MULTI_SEED):   * NB: The choice of seed is parametrized here by DCN+ARW to permit 
-sensitivity analyses ;
-ERROR: Attempt to %GLOBAL a name (SEED_1) which exists in a local environment.
-MPRINT(SET_SEED_1):   * Default to the seed used in JAMA paper ;
-MPRINT(SET_SEED_1):   * Name of output for arbitrary seed choice ;
-Imputed output file will be named: MTO.mto_103_imputed
-MPRINT(MULTI_SEED):  ;
-SEED_1 = 103
-MPRINT(MULTI_SEED):   * Set options;
-MPRINT(MULTI_SEED):   ODS RESULTS OFF;
-MPRINT(MULTI_SEED):   OPTIONS NOFMTERR MPRINT LINESIZE=80;
-MPRINT(MULTI_SEED):   * Note: formats are available for most variables on the 
-input data file (see mto_jama_formats_20160109.sas), but applying them before 
-the imputation will generate values that are not consistent with those 
-generated by a version of the program that does not apply them before the 
-imputation;
-MPRINT(MULTI_SEED):   
-************************************************************;
-MPRINT(MULTI_SEED):   ********** Step 2. Define macros used in the code 
-**********;
-MPRINT(MULTI_SEED):   
-************************************************************;
-MPRINT(MULTI_SEED):   **** Step 2a. Variable concatenator ****;
-MPRINT(MULTI_SEED):   **** Step 2b. Macro for imputation of all the variables 
-with missing data, excluding mental disorders ****;
-MPRINT(MULTI_SEED):   **************************************************;
-MPRINT(MULTI_SEED):   ********** Step 3. Prepare data for use **********;
-MPRINT(MULTI_SEED):   **************************************************;
-MPRINT(MULTI_SEED):   **** Step 3a. Read in pre-imputation data and 
-recode/create new variables as necessary ****;
-MPRINT(MULTI_SEED):   DATA mto1_all (drop=i);
-MPRINT(MULTI_SEED):   set NBER.Mto_jama_preimp_20160111;
-NOTE: Data file NBER.MTO_JAMA_PREIMP_20160111.DATA is in a format that is 
-      native to another host, or the file encoding does not match the session 
-      encoding. Cross Environment Data Access will be used, which might require 
-      additional CPU resources and might reduce performance.
-MPRINT(MULTI_SEED):   IF ra_grp_exp = 1 OR ra_grp_s8 = 1 THEN intervention = 1;
-MPRINT(MULTI_SEED):   ELSE intervention = 0;
-MPRINT(MULTI_SEED):   * CAT VAR FOR CTR/S8/EXP ;
-MPRINT(MULTI_SEED):   group = '1) CONTROL';
-MPRINT(MULTI_SEED):   IF ra_grp_exp = 1 OR ra_grp_s8= 1 THEN group = '2) INT    
-';
-MPRINT(MULTI_SEED):   * set N=2 missing gender cases to 0;
-MPRINT(MULTI_SEED):   IF x_f_ch_male=. THEN x_f_ch_male=0;
-MPRINT(MULTI_SEED):   * DUMMY FOR AGES 13-17 ;
-MPRINT(MULTI_SEED):   IF x_f_ch_age13 = 1 OR x_f_ch_age14 = 1 OR x_f_ch_age15 = 
-1 OR x_f_ch_age16 = 1 OR x_f_ch_age17 = 1 THEN x_f_age1317 = 1;
-MPRINT(MULTI_SEED):   ELSE x_f_age1317 = 0;
-MPRINT(MULTI_SEED):   * NEW RACE CODING (RENAME MATTS VARIABLES ;
-MPRINT(MULTI_SEED):   nonhisp_black = ymh_cov_ad_ethrace_black_nonhisp ;
-MPRINT(MULTI_SEED):   hisp_any = ymh_cov_ad_ethrace_hisp_anyrace;
-MPRINT(MULTI_SEED):   nonhisp_other = ymh_cov_ad_ethrace_other_nonhisp ;
-MPRINT(MULTI_SEED):   nonhisp_white = ymh_cov_ad_ethrace_ref;
-MPRINT(MULTI_SEED):   * NEW AD_ED CODING PROVIDED BY MATT (8/28/2012) Updated 
-(9/10/2012) ;
-MPRINT(MULTI_SEED):   if x_f_ad_edged=0 and x_f_ad_edgradhs=0 then 
-x_f_ad_edref=1;
-MPRINT(MULTI_SEED):   else if x_f_ad_edged=1 or x_f_ad_edgradhs=1 then 
-x_f_ad_edref=0;
-MPRINT(MULTI_SEED):   * MAKE NESTED VERSIONS OF EDUCATION ;
-MPRINT(MULTI_SEED):   IF x_f_ad_edged^=. AND x_f_ad_edgradhs^=. AND 
-x_f_ad_edref^=. THEN DO;
-MPRINT(MULTI_SEED):   IF x_f_ad_edref = 1 THEN educ_miss_ref = 1;
-MPRINT(MULTI_SEED):   ELSE educ_miss_ref = 0;
-MPRINT(MULTI_SEED):   IF x_f_ad_edref = 1 OR x_f_ad_edged = 1 THEN 
-educ_miss_ref_ged = 1;
-MPRINT(MULTI_SEED):   ELSE educ_miss_ref_ged = 0;
-MPRINT(MULTI_SEED):   END;
-MPRINT(MULTI_SEED):   * MAKE NESTED VERSIONS OF ADULT AGE (NOTE: no missings 
-for the following age variables used so ELSE statement is okay);
-MPRINT(MULTI_SEED):   IF x_f_ad_le_35 = 1 THEN ad_age_le35 = 1;
-MPRINT(MULTI_SEED):   ELSE ad_age_le35 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ad_le_35 = 1 OR x_f_ad_36_40 = 1 THEN ad_age_le40 
-= 1;
-MPRINT(MULTI_SEED):   ELSE ad_age_le40 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ad_le_35 = 1 OR x_f_ad_36_40 = 1 OR x_f_ad_41_45 = 
-1 THEN ad_age_le45 = 1;
-MPRINT(MULTI_SEED):   ELSE ad_age_le45 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ad_le_35 = 1 OR x_f_ad_36_40 = 1 OR x_f_ad_41_45 = 
-1 OR x_f_ad_46_50 = 1 THEN ad_age_le50 = 1;
-MPRINT(MULTI_SEED):   ELSE ad_age_le50 = 0;
-MPRINT(MULTI_SEED):   * MAKE NESTED VERSIONS OF CHILD AGE (NOTE: no missings 
-for the following age variables used so ELSE statement is okay);
-MPRINT(MULTI_SEED):   IF x_f_ch_age13 = 1 THEN ch_age_lt14 = 1;
-MPRINT(MULTI_SEED):   ELSE ch_age_lt14 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ch_age13 = 1 OR x_f_ch_age14 = 1 THEN ch_age_lt15 
-= 1;
-MPRINT(MULTI_SEED):   ELSE ch_age_lt15 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ch_age13 = 1 OR x_f_ch_age14 = 1 OR x_f_ch_age15 = 
-1 THEN ch_age_lt16 = 1;
-MPRINT(MULTI_SEED):   ELSE ch_age_lt16 = 0;
-MPRINT(MULTI_SEED):   IF x_f_ch_age13 = 1 OR x_f_ch_age14 = 1 OR x_f_ch_age15 = 
-1 OR x_f_ch_age16 = 1 THEN ch_age_lt17 = 1;
-MPRINT(MULTI_SEED):   ELSE ch_age_lt17 = 0;
-MPRINT(MULTI_SEED):   IF x_f_hh_size2 = x_f_hh_size3 = x_f_hh_size4 = 0 THEN 
-hhsize_5plus = 1;
-MPRINT(MULTI_SEED):   ELSE hhsize_5plus = 0;
-MPRINT(MULTI_SEED):   IF x_f_hh_size4 = 1 OR hhsize_5plus = 1 THEN hhsize_4plus 
-= 1;
-MPRINT(MULTI_SEED):   else hhsize_4plus = 0;
-MPRINT(MULTI_SEED):   IF x_f_hh_size3 = 1 OR hhsize_4plus = 1 THEN hhsize_3plus 
-= 1;
-MPRINT(MULTI_SEED):   ELSE hhsize_3plus = 0;
-MPRINT(MULTI_SEED):   * YOUTH PTSD ITEMS ;
-MPRINT(MULTI_SEED):   array rawvar {11} ycv1_pt13 ycv2_pt14 ycv3_pt15 ycv4_pt16 
-ycv5_pt17 ycv6_pt18 ycv7_pt20 ycv8_pt22 ycv9_pt22_1 ycv10_pt23 ycv11_pt27;
-MPRINT(MULTI_SEED):   array newvar {11} ycv1_pt13_new ycv2_pt14_new 
-ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new ycv7_pt20_new 
-ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
-MPRINT(MULTI_SEED):   do i = 1 to dim(rawvar);
-MPRINT(MULTI_SEED):   IF rawvar{i} = 1 THEN newvar{i} = 1;
-MPRINT(MULTI_SEED):   IF rawvar{i} = 5 THEN newvar{i} = 0;
-MPRINT(MULTI_SEED):   end;
-MPRINT(MULTI_SEED):   IF flag_paper_jama=0 THEN ymh_cd_3x_y=.;
-MPRINT(MULTI_SEED):   * short names for dx vars ;
-MPRINT(MULTI_SEED):   deph = f_mh_deph_y_yt;
-MPRINT(MULTI_SEED):   bip = ymh_bipolar_i_ii_y;
-MPRINT(MULTI_SEED):   pds = f_mh_pds_y_yt;
-MPRINT(MULTI_SEED):   pts = f_mh_pts_y_yt;
-MPRINT(MULTI_SEED):   odd = f_mh_odd_y_yt;
-MPRINT(MULTI_SEED):   ied = f_mh_ied_y_yt;
-MPRINT(MULTI_SEED):   cd = ymh_cd_3x_y;
-MPRINT(MULTI_SEED):   * just in case ;
-MPRINT(MULTI_SEED):   mood = MAX(deph,bip);
-MPRINT(MULTI_SEED):   anx = MAX(pds,pts);
-MPRINT(MULTI_SEED):   dis = MAX(odd,ied,cd);
-MPRINT(MULTI_SEED):   * new dummies 1. Large family Y/N f_svy_tot_yt_elig>3 2. 
-Excluded because of large family y/n: f_svy_sample2007="EY" (n=188) 3. The 701 
-hard-to-reach people can be identified by f_svy_phase2_elig=1. 246 4. the 455 
-who were excluded can be identified by f_svy_phase2_elig=1 & 
-f_svy_phase2_sel=0. NOTE: none of the raw variables have any missings or 
-invalid values, so ELSE statement is okay to use;
-MPRINT(MULTI_SEED):   IF f_svy_tot_yt_elig>3 THEN large_family=1;
-MPRINT(MULTI_SEED):   ELSE large_family=0;
-MPRINT(MULTI_SEED):   IF f_svy_sample2007="EY" THEN exclude_lrgfam=1;
-MPRINT(MULTI_SEED):   ELSE exclude_lrgfam=0;
-MPRINT(MULTI_SEED):   IF f_svy_phase2_elig=1 THEN hardtoreach=1;
-MPRINT(MULTI_SEED):   ELSE hardtoreach=0;
-MPRINT(MULTI_SEED):   IF f_svy_phase2_elig=1 AND f_svy_phase2_sel=0 THEN 
-exclude_htr=1;
-MPRINT(MULTI_SEED):   ELSE exclude_htr=0;
-MPRINT(MULTI_SEED):   *f_svy_final_disp="NS-P2";
-MPRINT(MULTI_SEED):   * Refused or declined to be interviewed;
-MPRINT(MULTI_SEED):   IF f_svy_final_disp IN ("NI-RR","NI-RI") THEN 
-interview_decline=1;
-MPRINT(MULTI_SEED):   ELSE interview_decline=0;
-MPRINT(MULTI_SEED):   * Incapacitated or were in the hospital or in prison;
-MPRINT(MULTI_SEED):   IF f_svy_final_disp IN ("NI-IC" ,"NI-PC") THEN 
-incapacitated=1;
-MPRINT(MULTI_SEED):   ELSE incapacitated=0;
-MPRINT(MULTI_SEED):   * Never found (among those we tried to go after);
-MPRINT(MULTI_SEED):   IF f_svy_final_disp="NI-TR" THEN never_found=1;
-MPRINT(MULTI_SEED):   ELSE never_found=0;
-MPRINT(MULTI_SEED):   IF f_svy_final_disp="NI-DC" THEN dead=1;
-MPRINT(MULTI_SEED):   ELSE dead=0;
-MPRINT(MULTI_SEED):   * note: convert -1 values (structural missings) to 
-missing;
-MPRINT(MULTI_SEED):   IF x_f_c2_hosp=-1 THEN DO;
-MPRINT(MULTI_SEED):   hosp_str=1;
-MPRINT(MULTI_SEED):   x_f_c2_hosp=.;
-MPRINT(MULTI_SEED):   END;
-MPRINT(MULTI_SEED):   IF x_f_c2_lowbw=-1 THEN DO;
-MPRINT(MULTI_SEED):   lowbw_str=1;
-MPRINT(MULTI_SEED):   x_f_c2_lowbw=.;
-MPRINT(MULTI_SEED):   END;
-MPRINT(MULTI_SEED):   IF x_f_c2_read=-1 THEN DO;
-MPRINT(MULTI_SEED):   read_str=1;
-MPRINT(MULTI_SEED):   x_f_c2_read=.;
-MPRINT(MULTI_SEED):   END;
-MPRINT(MULTI_SEED):   *rename "move away because of gang and drugs" variable, 
-because variable name is too long;
-MPRINT(MULTI_SEED):   mov_drugs=f_svy_bl_mov_drug_gang_nomiss;
-MPRINT(MULTI_SEED):   IF f_svy_final_disp IN ("IW-P2","IW-PF","IW-TF") THEN 
-notinterviewed=0;
-MPRINT(MULTI_SEED):   ELSE notinterviewed=1;
-MPRINT(MULTI_SEED):   RUN;
-
-NOTE: Format GROUP was not found or could not be loaded.
-NOTE: Format LPV was not found or could not be loaded.
-NOTE: Format TRV was not found or could not be loaded.
-NOTE: Format CONTROL was not found or could not be loaded.
-NOTE: Format SITE was not found or could not be loaded.
-NOTE: Format JAMA was not found or could not be loaded.
-NOTE: Format PH2ELIG was not found or could not be loaded.
-NOTE: Format PH2SEL was not found or could not be loaded.
-NOTE: Format MOV1DRG was not found or could not be loaded.
-NOTE: Format BLACKNH was not found or could not be loaded.
-NOTE: Format HISP was not found or could not be loaded.
-NOTE: Format OTHRACE was not found or could not be loaded.
-NOTE: Format WHITENH was not found or could not be loaded.
-NOTE: Format INC7X was not found or could not be loaded.
-NOTE: Format INC9X was not found or could not be loaded.
-NOTE: Format INC12X was not found or could not be loaded.
-NOTE: Format INC17X was not found or could not be loaded.
-NOTE: Format SINGLE was not found or could not be loaded.
-NOTE: Format DEPHYR was not found or could not be loaded.
-NOTE: Format BIP12X was not found or could not be loaded.
-NOTE: Format PDSYR was not found or could not be loaded.
-NOTE: Format PTSYR was not found or could not be loaded.
-NOTE: Format ODDYR was not found or could not be loaded.
-NOTE: Format IED was not found or could not be loaded.
-NOTE: Format CD3X was not found or could not be loaded.
-NOTE: Format PTSEV1X was not found or could not be loaded.
-NOTE: Format PTSEV2X was not found or could not be loaded.
-NOTE: Format PTSEV3X was not found or could not be loaded.
-NOTE: Format XLT35Y was not found or could not be loaded.
-NOTE: Format X3640Y was not found or could not be loaded.
-NOTE: Format X4145Y was not found or could not be loaded.
-NOTE: Format X4650Y was not found or could not be loaded.
-NOTE: Format XGED was not found or could not be loaded.
-NOTE: Format XHS was not found or could not be loaded.
-NOTE: Format XENROL was not found or could not be loaded.
-NOTE: Format XNVRMAR was not found or could not be loaded.
-NOTE: Format XLT18Y was not found or could not be loaded.
-NOTE: Format XWORK was not found or could not be loaded.
-NOTE: Format XTANF was not found or could not be loaded.
-NOTE: Format XCAR was not found or could not be loaded.
-NOTE: Format XDISAB was not found or could not be loaded.
-NOTE: Format XNOTEEN was not found or could not be loaded.
-NOTE: Format X2HHLD was not found or could not be loaded.
-NOTE: Format X3HHLD was not found or could not be loaded.
-NOTE: Format X4HHLD was not found or could not be loaded.
-NOTE: Format XVICTIM was not found or could not be loaded.
-NOTE: Format XNBHD5Y was not found or could not be loaded.
-NOTE: Format XCHAT was not found or could not be loaded.
-NOTE: Format XTELL was not found or could not be loaded.
-NOTE: Format XNOFAM was not found or could not be loaded.
-NOTE: Format XNOFND was not found or could not be loaded.
-NOTE: Format XUNSAFE was not found or could not be loaded.
-NOTE: Format XDISSAT was not found or could not be loaded.
-NOTE: Format XAPT was not found or could not be loaded.
-NOTE: Format XMOVED was not found or could not be loaded.
-NOTE: Format XDRUGS was not found or could not be loaded.
-NOTE: Format XMOVSCH was not found or could not be loaded.
-NOTE: Format XSEC8X was not found or could not be loaded.
-NOTE: Format BALT was not found or could not be loaded.
-NOTE: Format BOS was not found or could not be loaded.
-NOTE: Format CHI was not found or could not be loaded.
-NOTE: Format LA was not found or could not be loaded.
-NOTE: Format XAGE13Y was not found or could not be loaded.
-NOTE: Format XAGE14Y was not found or could not be loaded.
-NOTE: Format XAGE15Y was not found or could not be loaded.
-NOTE: Format XAGE16Y was not found or could not be loaded.
-NOTE: Format XAGE17Y was not found or could not be loaded.
-NOTE: Format GENDER was not found or could not be loaded.
-NOTE: Format BL617X was not found or could not be loaded.
-NOTE: Format XSCH was not found or could not be loaded.
-NOTE: Format XMED was not found or could not be loaded.
-NOTE: Format XHOSP was not found or could not be loaded.
-NOTE: Format XLOW was not found or could not be loaded.
-NOTE: Format XREAD was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T83F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T84F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T86F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T87F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T89F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T90F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T92F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T93F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T94F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T95F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T96F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T97F was not found or could not be loaded.
-NOTE: Format T98F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T99F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T100F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T20F was not found or could not be loaded.
-NOTE: Format T20F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T102F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T103F was not found or could not be loaded.
-NOTE: Format T104F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T105F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T106F was not found or could not be loaded.
-NOTE: Format T107F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T108F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T109F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T111F was not found or could not be loaded.
-NOTE: Format T112F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T113F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T114F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T115F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T116F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T117F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T118F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T119F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T120F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T121F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T122F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T123F was not found or could not be loaded.
-NOTE: Format T123F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T124F was not found or could not be loaded.
-NOTE: Format T125F was not found or could not be loaded.
-NOTE: Format T127F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T129F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T130F was not found or could not be loaded.
-NOTE: Format T131F was not found or could not be loaded.
-NOTE: Format T131F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T132F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format CV12F was not found or could not be loaded.
-NOTE: Format CV12F was not found or could not be loaded.
-NOTE: Format T126F was not found or could not be loaded.
-NOTE: Missing values were generated as a result of performing an operation on 
-      missing values.
-      Each place is given by: (Number of times) at (Line):(Column).
-      817 at 1962:9   817 at 1963:8   817 at 1964:8   
-NOTE: There were 3689 observations read from the data set 
-      NBER.MTO_JAMA_PREIMP_20160111.
-NOTE: The data set WORK.MTO1_ALL has 3689 observations and 547 variables.
-NOTE: DATA statement used (Total process time):
-      real time           3.70 seconds
-      cpu time            0.26 seconds
+      Physical Name: C:\Users\Anolinx\MTO\outputs
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           4:30.77
+      cpu time            14.92 seconds
       
 
-MPRINT(MULTI_SEED):   **** Step 3b. Limit file to non-deceased youth and 
-complete additional pre-imputation recodes ****;
-MPRINT(MULTI_SEED):   DATA mto1 (WHERE=(f_svy_final_disp^="NI-DC"));
-MPRINT(MULTI_SEED):   SET mto1_all;
-MPRINT(MULTI_SEED):   *recode categoricals*;
-MPRINT(MULTI_SEED):   IF ad_age_le35=1 THEN ad_age=1;
-MPRINT(MULTI_SEED):   ELSE IF ad_age_le40=1 THEN ad_age=2;
-MPRINT(MULTI_SEED):   ELSE IF ad_age_le45=1 THEN ad_age=3;
-MPRINT(MULTI_SEED):   ELSE IF ad_age_le50=1 THEN ad_age=4;
-MPRINT(MULTI_SEED):   ELSE ad_age=5;
-MPRINT(MULTI_SEED):   IF x_f_ad_edged=1 THEN edcat=1;
-MPRINT(MULTI_SEED):   ELSE IF x_f_ad_edgradhs=1 THEN edcat=2;
-MPRINT(MULTI_SEED):   ELSE IF x_f_ad_edref=1 THEN edcat=3;
-MPRINT(MULTI_SEED):   IF nonhisp_black=1 THEN racecat=1;
-MPRINT(MULTI_SEED):   IF hisp_any=1 THEN racecat=2;
-MPRINT(MULTI_SEED):   IF nonhisp_other=1 THEN racecat=3;
-MPRINT(MULTI_SEED):   IF nonhisp_white=1 THEN racecat=4;
-MPRINT(MULTI_SEED):   IF ch_age_lt14=1 THEN ch_age=1;
-MPRINT(MULTI_SEED):   ELSE IF ch_age_lt15=1 THEN ch_age=2;
-MPRINT(MULTI_SEED):   ELSE IF ch_age_lt16=1 THEN ch_age=3;
-MPRINT(MULTI_SEED):   ELSE IF ch_age_lt17=1 THEN ch_age=4;
-MPRINT(MULTI_SEED):   ELSE ch_age=5;
-MPRINT(MULTI_SEED):   IF hhsize_5plus=1 THEN hhsizecat=4;
-MPRINT(MULTI_SEED):   ELSE IF hhsize_4plus=1 THEN hhsizecat=3;
-MPRINT(MULTI_SEED):   ELSE IF hhsize_3plus=1 THEN hhsizecat=2;
-MPRINT(MULTI_SEED):   ELSE hhsizecat=1;
-MPRINT(MULTI_SEED):   IF ymh_cov_hh_inc_le7k=1 THEN inccat=1;
-MPRINT(MULTI_SEED):   ELSE IF ymh_cov_hh_inc_le9k=1 THEN inccat=2;
-MPRINT(MULTI_SEED):   ELSE IF ymh_cov_hh_inc_le12k=1 THEN inccat=3;
-MPRINT(MULTI_SEED):   ELSE IF ymh_cov_hh_inc_le17k=1 THEN inccat=4;
-MPRINT(MULTI_SEED):   ELSE IF ymh_cov_hh_inc_le7k^=. THEN inccat=5;
-MPRINT(MULTI_SEED):   RUN;
+1559  proc iml;
+NOTE: IML Ready
+1560    title1 "Sampling from joint posterior of PTSD model coefficients";
+1561    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
+1562    load their_beta their_cov CovarNames;
+NOTE: Opening storage library WORK.IMLSTOR
+1563    call randseed(2016);
+1564    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
+NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
+NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
+1565    * Simply overwrite the first sample with the original beta vector ;
+1566    betas_posterior_samples[1,] = their_beta;
+1567    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+1568    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
+1568! vectors"
+1569     colname=CovarNames rowname=sample_labels];
+1570    * Write out betas_posterior_samples ;
+1571    create OUTPUTS.betas_samples from betas_posterior_samples colname=CovarNames;
+                                                                  -------
+                                                                  22
+                                                                  202
+ERROR 22-322: Syntax error, expecting one of the following: (|, [.  
 
-NOTE: Format GROUP was not found or could not be loaded.
-NOTE: Format LPV was not found or could not be loaded.
-NOTE: Format TRV was not found or could not be loaded.
-NOTE: Format CONTROL was not found or could not be loaded.
-NOTE: Format SITE was not found or could not be loaded.
-NOTE: Format JAMA was not found or could not be loaded.
-NOTE: Format PH2ELIG was not found or could not be loaded.
-NOTE: Format PH2SEL was not found or could not be loaded.
-NOTE: Format MOV1DRG was not found or could not be loaded.
-NOTE: Format BLACKNH was not found or could not be loaded.
-NOTE: Format HISP was not found or could not be loaded.
-NOTE: Format OTHRACE was not found or could not be loaded.
-NOTE: Format WHITENH was not found or could not be loaded.
-NOTE: Format INC7X was not found or could not be loaded.
-NOTE: Format INC9X was not found or could not be loaded.
-NOTE: Format INC12X was not found or could not be loaded.
-NOTE: Format INC17X was not found or could not be loaded.
-NOTE: Format SINGLE was not found or could not be loaded.
-NOTE: Format DEPHYR was not found or could not be loaded.
-NOTE: Format BIP12X was not found or could not be loaded.
-NOTE: Format PDSYR was not found or could not be loaded.
-NOTE: Format PTSYR was not found or could not be loaded.
-NOTE: Format ODDYR was not found or could not be loaded.
-NOTE: Format IED was not found or could not be loaded.
-NOTE: Format CD3X was not found or could not be loaded.
-NOTE: Format PTSEV1X was not found or could not be loaded.
-NOTE: Format PTSEV2X was not found or could not be loaded.
-NOTE: Format PTSEV3X was not found or could not be loaded.
-NOTE: Format XLT35Y was not found or could not be loaded.
-NOTE: Format X3640Y was not found or could not be loaded.
-NOTE: Format X4145Y was not found or could not be loaded.
-NOTE: Format X4650Y was not found or could not be loaded.
-NOTE: Format XGED was not found or could not be loaded.
-NOTE: Format XHS was not found or could not be loaded.
-NOTE: Format XENROL was not found or could not be loaded.
-NOTE: Format XNVRMAR was not found or could not be loaded.
-NOTE: Format XLT18Y was not found or could not be loaded.
-NOTE: Format XWORK was not found or could not be loaded.
-NOTE: Format XTANF was not found or could not be loaded.
-NOTE: Format XCAR was not found or could not be loaded.
-NOTE: Format XDISAB was not found or could not be loaded.
-NOTE: Format XNOTEEN was not found or could not be loaded.
-NOTE: Format X2HHLD was not found or could not be loaded.
-NOTE: Format X3HHLD was not found or could not be loaded.
-NOTE: Format X4HHLD was not found or could not be loaded.
-NOTE: Format XVICTIM was not found or could not be loaded.
-NOTE: Format XNBHD5Y was not found or could not be loaded.
-NOTE: Format XCHAT was not found or could not be loaded.
-NOTE: Format XTELL was not found or could not be loaded.
-NOTE: Format XNOFAM was not found or could not be loaded.
-NOTE: Format XNOFND was not found or could not be loaded.
-NOTE: Format XUNSAFE was not found or could not be loaded.
-NOTE: Format XDISSAT was not found or could not be loaded.
-NOTE: Format XAPT was not found or could not be loaded.
-NOTE: Format XMOVED was not found or could not be loaded.
-NOTE: Format XDRUGS was not found or could not be loaded.
-NOTE: Format XMOVSCH was not found or could not be loaded.
-NOTE: Format XSEC8X was not found or could not be loaded.
-NOTE: Format BALT was not found or could not be loaded.
-NOTE: Format BOS was not found or could not be loaded.
-NOTE: Format CHI was not found or could not be loaded.
-NOTE: Format LA was not found or could not be loaded.
-NOTE: Format XAGE13Y was not found or could not be loaded.
-NOTE: Format XAGE14Y was not found or could not be loaded.
-NOTE: Format XAGE15Y was not found or could not be loaded.
-NOTE: Format XAGE16Y was not found or could not be loaded.
-NOTE: Format XAGE17Y was not found or could not be loaded.
-NOTE: Format GENDER was not found or could not be loaded.
-NOTE: Format BL617X was not found or could not be loaded.
-NOTE: Format XSCH was not found or could not be loaded.
-NOTE: Format XMED was not found or could not be loaded.
-NOTE: Format XHOSP was not found or could not be loaded.
-NOTE: Format XLOW was not found or could not be loaded.
-NOTE: Format XREAD was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T81F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T82F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T83F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T84F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T86F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T87F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T89F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T90F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T91F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T92F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T93F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T94F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T95F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T96F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T97F was not found or could not be loaded.
-NOTE: Format T98F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T99F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T100F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T20F was not found or could not be loaded.
-NOTE: Format T20F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T85F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T102F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T103F was not found or could not be loaded.
-NOTE: Format T104F was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T105F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T106F was not found or could not be loaded.
-NOTE: Format T107F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T108F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T109F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T110F was not found or could not be loaded.
-NOTE: Format T111F was not found or could not be loaded.
-NOTE: Format T112F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T113F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T114F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T115F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T116F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T117F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T118F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T119F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T120F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T121F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T88F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T1F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T122F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T123F was not found or could not be loaded.
-NOTE: Format T123F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T124F was not found or could not be loaded.
-NOTE: Format T125F was not found or could not be loaded.
-NOTE: Format T127F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format T128F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T129F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T130F was not found or could not be loaded.
-NOTE: Format T131F was not found or could not be loaded.
-NOTE: Format T131F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format TNUM was not found or could not be loaded.
-NOTE: Format T132F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T4F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format T101F was not found or could not be loaded.
-NOTE: Format CV12F was not found or could not be loaded.
-NOTE: Format CV12F was not found or could not be loaded.
-NOTE: Format T126F was not found or could not be loaded.
-NOTE: There were 3689 observations read from the data set WORK.MTO1_ALL.
-NOTE: The data set WORK.MTO1 has 3671 observations and 553 variables.
-NOTE: DATA statement used (Total process time):
-      real time           0.13 seconds
-      cpu time            0.12 seconds
+ERROR 202-322: The option or parameter is not recognized and will be ignored.
+
+1572    append from betas_posterior_samples;
+ERROR: No data set is currently open for output.
+
+ statement : APPEND at line 1572 column 3
+1573    close OUTPUTS.betas_samples;
+NOTE: Cannot close OUTPUTS.BETAS_SAMPLES; it is not open.
+1574    SampleMean = mean(betas_posterior_samples);
+1575    SampleCov = cov(betas_posterior_samples);
+1576    compare_means = SampleMean // their_beta;
+1577    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
+1578    print SampleCov[colname=CovarNames rowname=CovarNames];
+1579    cov_diff = SampleCov - their_cov;
+1580    print cov_diff[colname=CovarNames rowname=CovarNames];
+1581    store betas_posterior_samples;
+1582  run;
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+1583  libname OUTPUTS "&outputs";
+NOTE: Libref OUTPUTS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: C:\Users\Anolinx\MTO\outputs
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           6:17.38
+      cpu time            24.59 seconds
       
-
-MPRINT(MULTI_SEED):   
-****************************************************************************;
-MPRINT(MULTI_SEED):   ********** Step 4. Call imputation macro for each 
-treatment group **********;
-MPRINT(MULTI_SEED):   
-****************************************************************************;
-MPRINT(MULTI_SEED):   PROC PRINTTO NEW 
-LOG="C:/Users/Anolinx/MTO/outputs/02_mto_jama_runimputedata.log" 
-PRINT="C:/Users/Anolinx/MTO/outputs/02_mto_jama_runimputedata.lst";
-MPRINT(MULTI_SEED):   RUN;
-
