@@ -481,6 +481,7 @@ RUN;
 * Demonstrate that the mean and covariance matrix for these samples match     ;
 * closely the desired values.   ;
 
+libname OUTPUTS "&outputs";
 proc iml;
   title1 "Sampling from joint posterior of PTSD model coefficients";
   title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
@@ -492,6 +493,9 @@ proc iml;
   sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
   print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient vectors"
    colname=CovarNames rowname=sample_labels];
+  create OUTPUTS.betas_samples from betas_posterior_samples[colname=CovarNames];
+  append from betas_posterior_samples;
+  close OUTPUTS.betas_samples;
   SampleMean = mean(betas_posterior_samples);
   SampleCov = cov(betas_posterior_samples);
   compare_means = SampleMean // their_beta;
@@ -613,7 +617,6 @@ run;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Collect the resulting voucher effect estimates with their CIs.    ;
 
-libname OUTPUTS "&outputs";
 proc iml;
   *title1 "Constructing PTSD imputation model formulas";
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
