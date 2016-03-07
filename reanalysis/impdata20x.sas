@@ -1,7 +1,7 @@
 /* Perform the 20x multiple imputation of missing covariates
  ************************************************************/
-PROC PRINTTO;
-RUN;
+*PROC PRINTTO;
+*RUN;
 *%symdel seedused;
 %MACRO set_seedused;
 	%GLOBAL seedused;
@@ -28,7 +28,7 @@ RUN;
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************
+ ************************************************************************/
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 

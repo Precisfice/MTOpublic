@@ -454,7 +454,7 @@ ods pdf close;
  *       do inside our bootstrapping loop!
  *       HOWEVER, it is important to make only minimal changes to that program until
  *       we have successfully reproduced the original model coefficients.
- ***********************************************************************************/
+ ***********************************************************************************
  *                                                       add/remove forward slash --^ ;
  *                                                       to enable/disable STEP Z     ;
 %macro multi_seed;
@@ -619,7 +619,7 @@ proc iml;
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-  reps = 5;
+  reps = 10;
   create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
   do imod = 1 to reps;
     coefs = betas_posterior_samples[imod,];
@@ -633,7 +633,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-	do seed = 101 to 103;
+	do seed = 101 to 120;
     submit formula seed; * the 'formula' parameter allows substitution below;
       %let formula=&formula; * sets a &formula macro for impdata20x.sas;
       %let seedused=&seed;
