@@ -2,7 +2,13 @@
  ************************************************************/
 *PROC PRINTTO;
 *RUN;
-*%symdel seedused;
+%MACRO receive_seed_1_with_default;
+	%GLOBAL seed_1;
+	%IF (&seed_1=) %THEN %LET seed_1 = 524232; * Default to the seed used in JAMA paper ;
+%MEND receive_seed_1_with_default;
+
+%receive_seed_1_with_default;
+%PUT SEED_1 = &seed_1;
 %MACRO set_seedused;
 	%GLOBAL seedused;
 	%GLOBAL imputed;

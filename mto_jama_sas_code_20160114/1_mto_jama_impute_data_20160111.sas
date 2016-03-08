@@ -77,11 +77,8 @@ Libname NBER "&NBER";
 %let preimp = NBER.Mto_jama_preimp_20160111;
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
 * NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
-%MACRO set_seed_1;
-	%GLOBAL seed_1;
+%MACRO set_impdata_filename_per_seed_1;
 	%GLOBAL imputed;
-	%IF (&seed_1=) %THEN %LET seed_1 = 524232; * Default to the seed used in JAMA paper ;
-
 	%IF &seed_1=524232 %THEN %DO;
 		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
 		%END;
@@ -90,10 +87,9 @@ Libname NBER "&NBER";
 		%END;
 
 	%PUT Imputed output file will be named: &imputed;
-%MEND set_seed_1;
+%MEND set_impdata_filename_per_seed_1
 
-%set_seed_1;
-%PUT SEED_1 = &seed_1;
+%set_impdata_filename_per_seed_1;
 
 * Set options;
 ODS RESULTS OFF;
