@@ -167,7 +167,6 @@ you will run the logistic regression to predict each mental disorder with just t
 %LET incvars = inccat;
 %LET sitevars = ra_site;
 %LET convars= x_f_ch_male mov_drugs x_f_ch_bl_age617 large_family exclude_lrgfam hardtoreach exclude_htr;
-<<<<<<< HEAD
 * NB: 'tevars' was called 'ptsdvars' in the original NBER code ;
 %LET tevars = ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new 
 		ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
@@ -422,21 +421,13 @@ DATA mto1_all (drop=i);
 	IF x_f_hh_size3 = 1 OR hhsize_4plus = 1 THEN hhsize_3plus = 1; ELSE hhsize_3plus = 0;
 
 	* YOUTH PTSD ITEMS ;
-	* Can we just NOT do this ... ;
-	/*
 	array rawvar {11} ycv1_pt13 ycv2_pt14 ycv3_pt15 ycv4_pt16 ycv5_pt17 ycv6_pt18 ycv7_pt20 ycv8_pt22 ycv9_pt22_1 ycv10_pt23 ycv11_pt27;
 	array newvar {11} ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
 	do i = 1 to dim(rawvar);
 		IF rawvar{i} = 1 THEN newvar{i} = 1;
 		IF rawvar{i} = 5 THEN newvar{i} = 0;
 	end;
-	*/
-	* ... and instead simply recode 5-->0 in-place? ;
-	array var5for0 {11} ycv1_pt13 ycv2_pt14 ycv3_pt15 ycv4_pt16 ycv5_pt17 ycv6_pt18 ycv7_pt20 ycv8_pt22 ycv9_pt22_1 ycv10_pt23 ycv11_pt27;
- 	do i = 1 to dim(var5for0);
-		IF var5for0{i} = 1 THEN var5for0{i} = 1;
-	end;
- 
+  
 	IF flag_paper_jama=0 THEN ymh_cd_3x_y=.; 
 
 	* short names for dx vars ;
@@ -589,39 +580,8 @@ DATA impdata;
 
 	 *recode number of traumatic events after imputations;
 	 ymh_pts_event_count=.;ymh_pts_event_ge1=.;ymh_pts_event_ge2=.;ymh_pts_event_ge3=.;
-	 /* It appears this is the only place the *_new variable recoding is actually used.
-	    Surely, there is a better way to accomplish this sum than filling the data table
-	    with a bunch of new variables.  Can't SAS count the number of times a variable
-	    is equal to 1?  With IML, surely; but this is SAS, so just do it plain & stupid:
-	 */
-	 /*
 	 ymh_pts_event_count = SUM(ycv1_pt13_new,ycv2_pt14_new,ycv3_pt15_new,ycv4_pt16_new,ycv5_pt17_new,ycv6_pt18_new,
 						ycv7_pt20_new,ycv8_pt22_new,ycv9_pt22_1_new,ycv10_pt23_new,ycv11_pt27_new);
-	 */
-	 ymh_pts_event_count = 0;
-     IF ycv1_pt13   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Beaten as child ;
-     IF ycv2_pt14   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Beaten by romantic partner ;
-     IF ycv3_pt15   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Beaten by other person ;
-     IF ycv4_pt16   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Mugged ;
-     IF ycv5_pt17   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Raped ;
-     IF ycv6_pt18   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Sexually assaulted ;
-     IF ycv7_pt20   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Unexpected family death ;
-     IF ycv8_pt22   = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Loved one traumatic exper. ;
-     IF ycv9_pt22_1 = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Child witness to fights ;
-     IF ycv10_pt23  = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Saw death or dead body ;
-     IF ycv11_pt27  = 1 THEN ymh_pts_event_count = ymh_pts_event_count + 1; * Other traumatic experience ;
-	 IF ycv1_pt13=. OR
-	    ycv2_pt14=. OR
-	    ycv3_pt15=. OR
-	    ycv4_pt16=. OR
-	    ycv5_pt17=. OR
-	    ycv6_pt18=. OR
-	    ycv7_pt20=. OR
-	    ycv8_pt22=. OR
-	    ycv9_pt22_1=. OR
-	    ycv10_pt23=. OR
-	    ycv11_pt27=. THEN
-	    ymh_pts_event_count = .;
 
 	 IF ymh_pts_event_count^=. THEN DO;
 		 IF ymh_pts_event_count > 0 THEN ymh_pts_event_ge1 = 1; ELSE ymh_pts_event_ge1 = 0;

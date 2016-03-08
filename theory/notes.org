@@ -133,5 +133,8 @@
      - [X] Also be sure to write /as a SAS data set/ the full set of coefficient samples!
      - [X] Expand 'orci' to include the (imod=1:30)x(seed=121:130) rectangle
   2. [X] Push to GitHub
-  3. [ ] Analyses (incl. /graphics/) in R
+  3. [X] Figure out what happened with the last merge commit on _1..sas_
+     I suspect somehow we *merged* the 'zapnew' branch instead of uploading it as a truly separate
+     one!  /Horrors!/
+  4. [ ] Analyses (incl. /graphics/) in R
 
