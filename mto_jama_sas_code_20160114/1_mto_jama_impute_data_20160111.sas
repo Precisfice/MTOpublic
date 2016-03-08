@@ -71,10 +71,6 @@ STEPS:
 %let pgmdir = C:/Users/Anolinx/MTO/outputs;
 * Data file location;
 libname mto "E:/NSCR_Replication_study";
-* Input data file: pre-imputation dataset (one observation for each youth);
-%LET NBER = E:/NSCR_Replication_study/NBER;
-Libname NBER "&NBER";
-%let preimp = NBER.Mto_jama_preimp_20160111;
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
 * NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
 %MACRO set_impdata_filename_per_seed_1;

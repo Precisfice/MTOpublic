@@ -10,7 +10,11 @@
 %receive_seed_1_with_default;
 %PUT SEED_1 = &seed_1;
 
-%mtoptsd(&imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
+* Input data file: pre-imputation dataset (one observation for each youth);
+%LET NBER = E:/NSCR_Replication_study/NBER;
+Libname NBER "&NBER";
+%let preimp = NBER.Mto_jama_preimp_20160111;
+%mtoptsd(preimp_xwalk,Y, &preimp); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 /* This stretch of code allows this script to run in a 'standalone' mode
    for testing and refactoring purposes.  In its intended application
@@ -31,7 +35,7 @@
 %PUT Formula: &formula;
 
 data pred_ptsd_youth;
-set impdata;
+set preimp_xwalk;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
 RHISP = hisp_any;
@@ -80,14 +84,10 @@ end;
 run;
 
 /* Invoke a slightly modified version of Matt Sciandra's imputation code
- * TODO: Ultimately, we might hope to extract from Matt Sciandra's imputation code
- *       just those essential parts for our investigation of PTSD.  At present, his
- *       code is very general, and probably does a lot of extra work that makes the
- *       program run quite slowly -- taking ~6 minutes to run  This severely limits
- *       the performance of our bootstrapping loop, allowing just ~10 bootstrapped
- *       OR/CI results per minute!
- *       HOWEVER, it is important to make only minimal changes to that program until
- *       we have successfully reproduced the original model coefficients.
+   TODO: Consider setting macro variable 'imputed' here, before %INCLUDEing
+         the 1_..sas file.  Lifting from '1_..sas' file the burden of setting
+         this variable would help restore it closer to its original form as
+         delivered by NBER.
  */
 %let folder = C:/Users/Anolinx/MTO; * repeat this def to enable standalone testing ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
