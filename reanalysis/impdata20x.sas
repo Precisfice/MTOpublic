@@ -9,23 +9,6 @@
 
 %receive_seed_1_with_default;
 %PUT SEED_1 = &seed_1;
-%MACRO set_seedused;
-	%GLOBAL seedused;
-	%GLOBAL imputed;
-	%IF (&seedused=) %THEN %LET seedused = 524232; * Default to the seed used in JAMA paper ;
-
-	%IF &seedused=524232 %THEN %DO;
-		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
-		%END;
-	%ELSE %DO;
-		%LET imputed = MTO.mto_&seedused._imputed; * Name of output for arbitrary seed choice ;
-		%END;
-
-	%PUT Imputed output file will be named: &imputed;
-%MEND set_seedused;
-
-%set_seedused;
-%PUT SEEDUSED = &seedused;
 
 %mtoptsd(&imputed,Y, impdata); * Crosswalk MTO-->NCSR PTSD varnames ;
 

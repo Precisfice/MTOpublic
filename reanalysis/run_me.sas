@@ -640,7 +640,7 @@ proc iml;
     do seed = 101 to 130;
       submit formula seed; * the 'formula' parameter allows substitution below;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-        %let seedused=&seed;
+        %let seed_1=&seed;
         %include "&reanalysis/impdata20x.sas";
       endsubmit;
       * Extract the desired effect estimate and its CI ;
