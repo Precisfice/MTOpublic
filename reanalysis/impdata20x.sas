@@ -79,6 +79,19 @@ end;
 
 run;
 
+/* Invoke a slightly modified version of Matt Sciandra's imputation code
+ * TODO: Ultimately, we might hope to extract from Matt Sciandra's imputation code
+ *       just those essential parts for our investigation of PTSD.  At present, his
+ *       code is very general, and probably does a lot of extra work that makes the
+ *       program run quite slowly -- taking ~6 minutes to run  This severely limits
+ *       the performance of our bootstrapping loop, allowing just ~10 bootstrapped
+ *       OR/CI results per minute!
+ *       HOWEVER, it is important to make only minimal changes to that program until
+ *       we have successfully reproduced the original model coefficients.
+ */
+%let folder = C:/Users/Anolinx/MTO; * repeat this def to enable standalone testing ;
+%include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 
 /* Obtain a voucher effect on PTSD
  **********************************/

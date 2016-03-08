@@ -446,26 +446,6 @@ ods pdf close;
 
 /* end of STEP V */
 
-/*  STEP_Z -- Invoke a slightly modified version of Matt Sciandra's imputation code
- * TODO: Ultimately, we hope to extract from Matt Sciandra's imputation code just the
- *       essential parts for our investigation of PTSD.  At present, his code is very
- *       general, and probably does a lot of extra work that makes the program run
- *       quite slowly -- taking 3-4 minutes to run  Obviously, that won't
- *       do inside our bootstrapping loop!
- *       HOWEVER, it is important to make only minimal changes to that program until
- *       we have successfully reproduced the original model coefficients.
- ***********************************************************************************
- *                                                       add/remove forward slash --^ ;
- *                                                       to enable/disable STEP Z     ;
-%macro multi_seed;
-	%do seed_1 = 121 %to 130;
-		%include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-		dm 'clear log';
-	%end;
-%mend; * multi_seed ;
-%multi_seed;
-/* end of STEP Z */
-
 /*  STEP VI -- Bootstrap the voucher effects
  ********************************************/
  *                add/remove forward slash --^ ;
