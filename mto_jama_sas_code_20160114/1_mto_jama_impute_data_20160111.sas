@@ -73,19 +73,19 @@ STEPS:
 libname mto "E:/NSCR_Replication_study";
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
 * NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
-%MACRO set_impdata_filename_per_seed_1;
+%MACRO set_impdata_filename_per_mi_seed;
 	%GLOBAL imputed;
-	%IF &seed_1=524232 %THEN %DO;
+	%IF &mi_seed=524232 %THEN %DO;
 		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
 		%END;
 	%ELSE %DO;
-		%LET imputed = MTO.mto_&seed_1._imputed; * Name of output for arbitrary seed choice ;
+		%LET imputed = MTO.mto_&mi_seed._imputed; * Name of output for arbitrary seed choice ;
 		%END;
 
 	%PUT Imputed output file will be named: &imputed;
-%MEND set_impdata_filename_per_seed_1
+%MEND set_impdata_filename_per_mi_seed
 
-%set_impdata_filename_per_seed_1;
+%set_impdata_filename_per_mi_seed;
 
 * Set options;
 ODS RESULTS OFF;
@@ -281,7 +281,7 @@ DATA mtoimp&i;
 RUN;
 
 %IF &i=1 %THEN %DO;
-PROC MI DATA=mtoimp&i NIMPUTE=20 OUT=mtoimp&pnum SEED=&seed_1;
+PROC MI DATA=mtoimp&i NIMPUTE=20 OUT=mtoimp&pnum SEED=&mi_seed;
  CLASS &varlistc &varimp;
  MONOTONE LOGISTIC (&varimp = &varlistc);
  VAR &varlistc &varimp;
@@ -289,28 +289,28 @@ RUN;
 %END;
 %ELSE %DO;
  %IF &varimp=edcat %THEN %DO;
- PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&seed_1 ROUND=1 MINIMUM=1 MAXIMUM=3;
+ PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&mi_seed ROUND=1 MINIMUM=1 MAXIMUM=3;
   CLASS &varlistc ;
   MONOTONE REGRESSION (&varimp = &varlistc);
   VAR &varlistc &varimp;
  RUN; 
  %END;
  %ELSE %IF &varimp=racecat %THEN %DO;
- PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&seed_1 ROUND=1 MINIMUM=1 MAXIMUM=4;
+ PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&mi_seed ROUND=1 MINIMUM=1 MAXIMUM=4;
   CLASS &varlistc ;
   MONOTONE REGRESSION (&varimp = &varlistc);
   VAR &varlistc &varimp;
  RUN; 
  %END;
  %ELSE %IF &varimp=inccat %THEN %DO;
- PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&seed_1 ROUND=1 MINIMUM=1 MAXIMUM=5;
+ PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&mi_seed ROUND=1 MINIMUM=1 MAXIMUM=5;
   CLASS &varlistc ;
   MONOTONE REGRESSION (&varimp = &varlistc);
   VAR &varlistc &varimp;
  RUN; 
  %END;
  %ELSE %DO;
- PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&seed_1;
+ PROC MI DATA=mtoimp&i NIMPUTE=1 OUT=mtoimp&pnum SEED=&mi_seed;
   CLASS &varlistc &varimp;
   MONOTONE LOGISTIC (&varimp = &varlistc);
   VAR &varlistc &varimp;
@@ -328,20 +328,20 @@ RUN;
 
 %END;
 
- PROC MI DATA=mtoimp&pnum1 NIMPUTE=1 OUT=mtoimp_final SEED=&seed_1;
+ PROC MI DATA=mtoimp&pnum1 NIMPUTE=1 OUT=mtoimp_final SEED=&mi_seed;
   CLASS &varlistc &dxvars;
   MONOTONE LOGISTIC (&dxvars = &varlistc);
   VAR &varlistc &dxvars;
  RUN; 
 
  *impute controls in prevalence tables that were not part of analysis models;
- PROC MI DATA=mtoimp_final NIMPUTE=1 OUT=mtoimp_final1 SEED=&seed_1;
+ PROC MI DATA=mtoimp_final NIMPUTE=1 OUT=mtoimp_final1 SEED=&mi_seed;
   CLASS &varlistc &dxvars ymh_cov_ad_single_mother;
   MONOTONE LOGISTIC (ymh_cov_ad_single_mother=  &varlistc &dxvars);
   VAR &varlistc &dxvars ymh_cov_ad_single_mother;
  RUN; 
  
- PROC MI DATA=mtoimp_final1 NIMPUTE=1 OUT=mtoimp_final2 SEED=&seed_1 MINIMUM=0 MAXIMUM=1;
+ PROC MI DATA=mtoimp_final1 NIMPUTE=1 OUT=mtoimp_final2 SEED=&mi_seed MINIMUM=0 MAXIMUM=1;
   CLASS &varlistc &dxvars ymh_cov_ad_single_mother ;
   MONOTONE REGRESSION (f_c9010t_perpov_bl = &varlistc &dxvars ymh_cov_ad_single_mother);
   VAR &varlistc &dxvars ymh_cov_ad_single_mother f_c9010t_perpov_bl;

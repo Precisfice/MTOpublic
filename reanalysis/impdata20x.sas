@@ -2,13 +2,13 @@
  ************************************************************/
 *PROC PRINTTO;
 *RUN;
-%MACRO receive_seed_1_with_default;
-	%GLOBAL seed_1;
-	%IF (&seed_1=) %THEN %LET seed_1 = 524232; * Default to the seed used in JAMA paper ;
-%MEND receive_seed_1_with_default;
+%MACRO receive_mi_seed_with_default;
+	%GLOBAL mi_seed;
+	%IF (&mi_seed=) %THEN %LET mi_seed = 524232; * Default to the seed used in JAMA paper ;
+%MEND receive_mi_seed_with_default;
 
-%receive_seed_1_with_default;
-%PUT SEED_1 = &seed_1;
+%receive_mi_seed_with_default;
+%PUT MI_SEED = &mi_seed;
 
 * Input data file: pre-imputation dataset (one observation for each youth);
 %LET NBER = E:/NSCR_Replication_study/NBER;
