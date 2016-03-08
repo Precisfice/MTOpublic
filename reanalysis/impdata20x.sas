@@ -10,6 +10,11 @@
 %receive_mi_seed_with_default;
 %PUT MI_SEED = &mi_seed;
 
+* repeat defs + reinclude to enable standalone testing ;
+%let folder = C:/Users/Anolinx/MTO;
+%let reanalysis = &folder/reanalysis;
+%include "&reanalysis/mtoptsd_macro.sas";
+
 * Input data file: pre-imputation dataset (one observation for each youth);
 %LET NBER = E:/NSCR_Replication_study/NBER;
 Libname NBER "&NBER";
@@ -89,7 +94,6 @@ run;
          this variable would help restore it closer to its original form as
          delivered by NBER.
  */
-%let folder = C:/Users/Anolinx/MTO; * repeat this def to enable standalone testing ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 
