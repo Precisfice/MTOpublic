@@ -37,23 +37,23 @@ libname mto "&mto";
 
 /*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  */ 
-%include "&reanalysis/RS1_prep_NCSR_data.sas";
+*%include "&reanalysis/RS1_prep_NCSR_data.sas";
 
 /*  STEP II -- Estimate PTSD imputation models
  */
-%include "&reanalysis/RS2_estimate_PTSD_imp_models.sas";
+*%include "&reanalysis/RS2_estimate_PTSD_imp_models.sas";
 
 /*  STEP III -- Compare coefficients
  */
-%include "&reanalysis/RS3_compare_coefs.sas";
+%include "&reanalysis/RS3_compare_coefficients.sas";
 
 /*  STEP IV -- Prepare the MTO data
  */
-%include "&reanalysis/RS4_prep_MTO_data.sas"; * Is this totally useless now? ;
+*%include "&reanalysis/RS4_prep_MTO_data.sas"; * Is this totally useless now? ;
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
  */
-%include "&reanalysis/RS5_contrast_age_dists.sas";
+*%include "&reanalysis/RS5_contrast_age_dists.sas";
 
 /*  STEP VI -- Bootstrap the voucher effects
  */
@@ -62,7 +62,7 @@ PROC PRINTTO NEW
   LOG="&outputs/RS6.log";
 RUN;
 */
-%include "&reanalysis/RS6_bootstrap_ORs.sas";
+*%include "&reanalysis/RS6_bootstrap_ORs.sas";
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions

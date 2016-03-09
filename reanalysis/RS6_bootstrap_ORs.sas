@@ -46,7 +46,7 @@ proc iml;
   if exist("OUTPUTS.orci") then
     edit OUTPUTS.orci;
   else create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
-  do imod = 21 to 30;
+  do imod = 2 to 2;
     coefs = betas_posterior_samples[imod,];
     * convert coefs to explicitly (+/-) signed strings ;
     signs = repeat(" ",1,ncol(coefs));
@@ -58,7 +58,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = 101 to 130;
+    do seed = 524233 to 524233;
       submit formula seed; * the 'formula' parameter allows substitution below;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
         %let mi_seed=&seed;

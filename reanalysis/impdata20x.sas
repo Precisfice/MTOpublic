@@ -19,7 +19,7 @@
 %LET NBER = E:/NSCR_Replication_study/NBER;
 Libname NBER "&NBER";
 %let preimp = NBER.Mto_jama_preimp_20160111;
-%mtoptsd(preimp_xwalk,Y, &preimp); * Crosswalk MTO-->NCSR PTSD varnames ;
+%mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 /* This stretch of code allows this script to run in a 'standalone' mode
    for testing and refactoring purposes.  In its intended application
@@ -105,7 +105,7 @@ run;
 		%END;
 
 	%PUT Imputed output file will be named: &imputed;
-%MEND set_impdata_filename_per_mi_seed
+%MEND set_impdata_filename_per_mi_seed;
 
 %set_impdata_filename_per_mi_seed;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
@@ -114,7 +114,7 @@ dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 /* Obtain a voucher effect on PTSD
  **********************************/
 
-%LET dep = f_mh_pts_rec_yt;
+%LET dep = f_mh_pts_y_yt;
 %LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
 
 /* This PROC comes from 'MTO_table4_alt.sas'; we comment out
