@@ -94,6 +94,20 @@ run;
          this variable would help restore it closer to its original form as
          delivered by NBER.
  */
+* NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
+%MACRO set_impdata_filename_per_mi_seed;
+	%GLOBAL imputed;
+	%IF &mi_seed=524232 %THEN %DO;
+		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
+		%END;
+	%ELSE %DO;
+		%LET imputed = MTO.mto_&mi_seed._imputed; * Name of output for arbitrary seed choice ;
+		%END;
+
+	%PUT Imputed output file will be named: &imputed;
+%MEND set_impdata_filename_per_mi_seed
+
+%set_impdata_filename_per_mi_seed;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 

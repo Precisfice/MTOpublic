@@ -72,20 +72,9 @@ STEPS:
 * Data file location;
 libname mto "E:/NSCR_Replication_study";
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
-* NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
-%MACRO set_impdata_filename_per_mi_seed;
-	%GLOBAL imputed;
-	%IF &mi_seed=524232 %THEN %DO;
-		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
-		%END;
-	%ELSE %DO;
-		%LET imputed = MTO.mto_&mi_seed._imputed; * Name of output for arbitrary seed choice ;
-		%END;
-
-	%PUT Imputed output file will be named: &imputed;
-%MEND set_impdata_filename_per_mi_seed
-
-%set_impdata_filename_per_mi_seed;
+/* For purposes of our reanalysis, macro variable 'imputed' is now set in 'impdata20x.sas'
+%let imputed = mto.mto_jama_imputed_&today.;
+*/
 
 * Set options;
 ODS RESULTS OFF;
