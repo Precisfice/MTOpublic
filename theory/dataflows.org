@@ -1,0 +1,17 @@
+* MTO data flow diagram
+#+BEGIN_SRC dot :file dataflow.pdf :exports results :cmdline -Tpdf:cairo
+digraph g {
+  node [fontname="Courier"]
+  preimp [label="Mto_jama_preimp\n_20160111.sas7bdat\n(from NBER)"]
+  preimp_xwalk [label=preimp_xwalk]
+  pred_ptsd_youth [label=pred_ptsd_youth]
+  preimp -> preimp_xwalk [label="%mtoptsd macro from\lPtsd_MTO_youth.sas" fontname="Courier"]
+  preimp_xwalk -> pred_ptsd_youth [label="data pred_ptsd_youth;\lset preimp_xwalk;\lAge = f_svy_age_iw;\lSEXF = 1-x_f_ch_male;\lRHISP = hisp_any;\lRBLK = nonhisp_black;\lROTH = nonhisp_other;\lpred_prob = exp(&formula)/(1+exp(&formula));"]
+  pred_ptsd_youth -> fnlpred_ptsd_youth [label="data fnlpred_ptsd_youth;\lset pred_ptsd_youth;\lptsd_random = ranuni(1234567);\lif mto_ptsd_sample = 1 and 0 < ptsd_random <= pred_prob then f_mh_pts_evr_yt = 1;\lelse f_mh_pts_evr_yt = 0;\l<calculate recency>\l"]
+  fnlpred_ptsd_youth -> mto_jama_imputed [label="1_mto_jama_impute\n_data_20160111.sas"]
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:dataflow.pdf]]
+
