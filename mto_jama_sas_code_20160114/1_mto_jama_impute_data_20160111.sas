@@ -148,19 +148,8 @@ you will run the logistic regression to predict each mental disorder with just t
 %LET incvars = inccat;
 %LET sitevars = ra_site;
 %LET convars= x_f_ch_male mov_drugs x_f_ch_bl_age617 large_family exclude_lrgfam hardtoreach exclude_htr;
-* NB: 'tevars' was called 'ptsdvars' in the original NBER code ;
-%LET tevars = ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new 
+%LET ptsdvars = ycv1_pt13_new ycv2_pt14_new ycv3_pt15_new ycv4_pt16_new ycv5_pt17_new ycv6_pt18_new 
 		ycv7_pt20_new ycv8_pt22_new ycv9_pt22_1_new ycv10_pt23_new ycv11_pt27_new;
-* These are the 10 vars informing PTSD Criteria C1 ;
-%LET c1vars = YCV21_PT275 YCV30_PT275 YCV15_PT269 YCV24_PT269
-              YCV16_PT270 YCV25_PT270 YCV17_PT271 YCV26_PT271
-              YCV18_PT272 YCV27_PT272;
-* These are the 4 vars informing PTSD Criteria D1 ;
-%LET d1vars = YCV19_PT273 YCV28_PT273 YCV20_PT274 YCV29_PT274;
-* These 3 vars are required for calculating 'recency' of PTSD ;
-%LET recvars = YCV14B_PT64A YCV14C YCV22_PT261;
-* NB: 'ptsdvars' has been expanded vs original NBER code, to include now *all* PTSD-related questions ;
-%LET ptsdvars = &tevars &c1vars &d1vars &recvars;
 %LET dxvars= f_mh_deph_y_yt ymh_bipolar_i_ii_y f_mh_pds_y_yt f_mh_pts_y_yt f_mh_odd_y_yt f_mh_ied_y_yt ymh_cd_3x_y;
 
 DATA mto2 (WHERE=(&grp=1));
