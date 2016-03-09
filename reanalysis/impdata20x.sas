@@ -121,7 +121,7 @@ dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
  * the original clustering of stderrs, since we lack the TRACT
  * variable pending delivery of the RAD.
  */
-PROC SURVEYLOGISTIC DATA = fnlpred_ptsd_youth ;
+PROC SURVEYLOGISTIC DATA = &imputed ;
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
