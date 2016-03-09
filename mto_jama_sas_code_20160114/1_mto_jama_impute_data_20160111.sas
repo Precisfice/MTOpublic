@@ -71,8 +71,10 @@ STEPS:
 %let pgmdir = C:/Users/Anolinx/MTO/outputs;
 * Data file location;
 libname mto "E:/NSCR_Replication_study";
+/* For purposes of reanalysis, macro vars 'preimp' and 'imputed' are now set in 'impdata20x.sas'
+* Input data file: pre-imputation dataset (one observation for each youth);
+%let preimp = mto.mto_jama_preimp_20160111;
 * Output data file: post-imputation dataset (20 observations for each youth, 1 for each of the imputations run);
-/* For purposes of our reanalysis, macro variable 'imputed' is now set in 'impdata20x.sas'
 %let imputed = mto.mto_jama_imputed_&today.;
 */
 
