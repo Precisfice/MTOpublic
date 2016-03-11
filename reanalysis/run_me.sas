@@ -27,6 +27,7 @@
     %LET outputs = &folder/outputs;
     %LET ncsr = E:/NSCR_Replication_study;
     %LET mto = E:/NSCR_Replication_study;
+    %LET NBER = &mto/NBER;
   %END;
 %mend;
 
@@ -34,6 +35,7 @@
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
+Libname NBER "&NBER";
 
 /*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  */ 
@@ -49,7 +51,7 @@ libname mto "&mto";
 
 /*  STEP IV -- Prepare the MTO data
  */
-*%include "&reanalysis/RS4_prep_MTO_data.sas"; * Is this totally useless now? ;
+*%include "&reanalysis/RS4_prep_MTO_data.sas";
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
  */

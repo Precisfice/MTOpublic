@@ -1,3 +1,18 @@
+* Notes on order of imputation
+  It has emerged that our original reproduction attempt using the NBER data & code placed
+  the imputation too far 'upstream' in the flow of data processing.  A sketch of the new
+  sequence of data processing and analytic steps is now diagrammed below.
+  In these text notes, I attempt to collect evidence to support this conjectured sequence.
+  - [X] Review of NBER documentation
+    I find no clear guidance on precisely when the various accessory scripts might be run.
+  - [X] Revisit original documentation forwarded by Nancy Sampson
+    The _Ptsd mto youth.sas_ script makes the order of operations very clear:
+    1. Datafix2-mto.sas
+    2. agefix-youth.sas
+    3. %mtoptsd (i.e., generate age/sex/race then 'cross-walk' to NCSR variable names)
+    4. Generate /pred_prob/ of _lifetime_ ("ever-") PTSD using the NCSR-based formula
+    5. "Calculate Recency of PTSD for DSM" to obtain 12-month incidence
+
 * MTO data flow diagram
 #+BEGIN_SRC dot :file dataflow.pdf :exports results :cmdline -Tpdf:cairo
 digraph g {

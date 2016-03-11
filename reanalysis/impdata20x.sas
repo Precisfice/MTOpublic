@@ -18,7 +18,7 @@
 * Input data file: pre-imputation dataset (one observation for each youth);
 %LET NBER = E:/NSCR_Replication_study/NBER;
 Libname NBER "&NBER";
-%let preimp = NBER.Mto_jama_preimp_20160111;
+%let preimp = NBER.Mto_jama_preimp_fixed;
 %mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
 /* This stretch of code allows this script to run in a 'standalone' mode
