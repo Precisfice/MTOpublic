@@ -13,6 +13,7 @@ proc iml;
     varname = repeat(NumNames[i], ncol(count), 1);
     append;
   end;
+  delete all where (count < 10);
   close OUTPUTS.preimp_numdesc;
 
   varname = 'make_space_for_very_long_var_names';
@@ -24,4 +25,5 @@ proc iml;
     varname = repeat(CharNames[i], ncol(count), 1);
     append;
   end;
+  delete all where (count < 10);
   close OUTPUTS.preimp_chardesc;
