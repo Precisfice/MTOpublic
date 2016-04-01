@@ -39,18 +39,20 @@ Libname NBER "&NBER";
 */
 %PUT Formula: &formula;
 
+
 data pred_ptsd_youth;
 set preimp_xwalk;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
-RHISP = hisp_any;
-RBLK = nonhisp_black;
-ROTH = nonhisp_other;
+RHISP = ymh_cov_ad_ethrace_hisp_anyrace;
+RBLK = ymh_cov_ad_ethrace_black_nonhisp;
+ROTH = ymh_cov_ad_ethrace_other_nonhisp;
 pred_prob = exp(&formula)/(1+exp(&formula));
 run;
 
 /* Impute lifetime PTSD, then calculate 'recency' to assign 12-month diagnosis
  ******************************************************************************/
+
 
 /* The code in this section was copied from the end of Ptsd_MTO_youth.sas,
  * with modifications as noted (+++) to support additional analyses.
@@ -83,7 +85,19 @@ if 0 <= pts_rec < 4 then pts_rec = 4;
 
 if f_mh_pts_evr_yt = 1 then do;
     f_mh_pts_aoo_yt = pts_ons;            
-    f_mh_pts_rec_yt = pts_rec;            
+    f_mh_pts_rec_yt = pts_rec;
+
+/* 12 month PTSD MTO Youth */
+/* Cases where HCV14b_PT64a or HCV14c = interview age or HCV22_PT261 is Yes */
+
+if f_mh_pts_evr_yt = 1 and
+   (
+      (f_svy_age_iw NOT IN(.D,.R,.) and
+          (YCV14b_PT64a = f_svy_age_iw or YCV14c = f_svy_age_iw)
+      ) or
+      YCV22_PT261 = 1 
+   ) then f_mh_pts_y_yt = 1;
+else f_mh_pts_y_yt = 0;
 end;
 
 run;
@@ -109,7 +123,7 @@ run;
 
 %set_impdata_filename_per_mi_seed;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
+*dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 
 /* Obtain a voucher effect on PTSD
  **********************************/
@@ -121,6 +135,8 @@ dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
  * the original clustering of stderrs, since we lack the TRACT
  * variable pending delivery of the RAD.
  */
+
+
 PROC SURVEYLOGISTIC DATA = &imputed ;
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
@@ -129,3 +145,7 @@ PROC SURVEYLOGISTIC DATA = &imputed ;
    ODS OUTPUT parameterestimates=parmest  
               OddsRatios = ors;   
 RUN;
+
+/*data outputs.ors_April1;*/
+/*Set Ors;*/
+/*run;*/
