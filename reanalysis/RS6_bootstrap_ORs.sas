@@ -44,22 +44,23 @@ proc iml;
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
   if (^exist("OUTPUTS.orci")) then do;
-    formula = subpad(" ",1,320); * enough for longest conceivable formula? ;
-    create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL formula
+    /* SAS/IML is behaving as if it had some limit of 256 chars 
+     * for character matrix elements, at least when APPENDing
+     * to a data set.  So in order to record the formula for
+     * later checking, I simply split it into 2 parts, being
+     * sure to allocate plenty of extra room.
+     */
+    formula_head = subpad(" ",1,255);
+    formula_tail = subpad(" ",1,50);
+    create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL
      Intercept Age SEXF RHISP RBLK ROTH PT41 PT42 PT43 PT44 PT45 PT46 PT48
-     PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237};
+     PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237
+     formula_head formula_tail};
     close OUTPUTS.orci;
-    submit;
-      data OUTPUTS.orci;
-        set OUTPUTS.orci;
-        length formula $ 320;
-        format formula $320.;
-      run;
-    endsubmit;
   end;
-  do imod = 1 to 2;
+  do imod = 1 to 1;
     coefs = betas_posterior_samples[imod,];
-    coefs = round(coefs, 0.0001);
+    coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
     Age    = coefs[2];
     SEXF   = coefs[3];
@@ -94,7 +95,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = 524232 to 524233;
+    do seed = 524233 to 524233;
       /**/
       submit formula seed; * the 'formula' parameter allows substitution below;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
@@ -111,6 +112,8 @@ proc iml;
       OddsRatioEst = OddsRatioEst[effrow];
       LowerCL = LowerCL[effrow];
       UpperCL = UpperCL[effrow];
+      formula_head = substr(formula, 1, 255);
+      formula_tail = substr(formula, 256);
       edit OUTPUTS.orci;
         append;
       close OUTPUTS.orci;
