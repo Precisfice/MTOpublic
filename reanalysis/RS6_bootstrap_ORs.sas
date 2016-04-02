@@ -43,12 +43,56 @@ proc iml;
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
+<<<<<<< HEAD
 /*  if exist("OUTPUTS.orci") then*/
 /*    edit OUTPUTS.orci;*/
 /*  else */
 /*	create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};*/
   do imod = 5 to 5;
+=======
+  if (^exist("OUTPUTS.orci")) then do;
+    /* SAS/IML is behaving as if it had some limit of 256 chars 
+     * for character matrix elements, at least when APPENDing
+     * to a data set.  So in order to record the formula for
+     * later checking, I simply split it into 2 parts, being
+     * sure to allocate plenty of extra room.
+     */
+    formula_head = subpad(" ",1,255);
+    formula_tail = subpad(" ",1,50);
+    create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL
+     Intercept Age SEXF RHISP RBLK ROTH PT41 PT42 PT43 PT44 PT45 PT46 PT48
+     PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237
+     formula_head formula_tail};
+    close OUTPUTS.orci;
+  end;
+  do imod = 1 to 1;
+>>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
     coefs = betas_posterior_samples[imod,];
+    coefs = round(coefs, 0.0001); * to constrain formula length ;
+    Intercept = coefs[1];
+    Age    = coefs[2];
+    SEXF   = coefs[3];
+    RHISP  = coefs[4];
+    RBLK   = coefs[5];
+    ROTH   = coefs[6];
+    PT41   = coefs[7];
+    PT42   = coefs[8];
+    PT43   = coefs[9];
+    PT44   = coefs[10];
+    PT45   = coefs[11];
+    PT46   = coefs[12];
+    PT48   = coefs[13];
+    PT50   = coefs[14];
+    PT50_1 = coefs[15];
+    PT51   = coefs[16];
+    PT55   = coefs[17];
+    PT209  = coefs[18];
+    PT211  = coefs[19];
+    PT212  = coefs[20];
+    PT213  = coefs[21];
+    PT214  = coefs[22];
+    PT233  = coefs[23];
+    PT237  = coefs[24];
     * convert coefs to explicitly (+/-) signed strings ;
     signs = repeat(" ",1,ncol(coefs));
     signs[loc(coefs>=0)] = "+";
@@ -59,12 +103,18 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
+<<<<<<< HEAD
     do seed = 524238 to 524238;
+=======
+    do seed = 524233 to 524233;
+      /**/
+>>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
       submit formula seed; * the 'formula' parameter allows substitution below;
         %LET formula=&formula; * sets a &formula macro for impdata20x.sas;
         %LET mi_seed=&seed;
         %include "&reanalysis/impdata20x.sas";
       endsubmit;
+      /**/
       * Extract the desired effect estimate and its CI ;
 /*	  create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};*/
 /*      use ORs;*/
@@ -99,7 +149,14 @@ proc iml;
       OddsRatioEst = OddsRatioEst[effrow];
       LowerCL = LowerCL[effrow];
       UpperCL = UpperCL[effrow];
-      append var {imod seed OddsRatioEst LowerCL UpperCL};
+      formula_head = substr(formula, 1, 255);
+      formula_tail = substr(formula, 256);
+      edit OUTPUTS.orci;
+        append;
+      close OUTPUTS.orci;
     end; * mi_seed loop ;
   end; * imod loop ;
+<<<<<<< HEAD
   close OUTPUTS.orci;
+=======
+>>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8

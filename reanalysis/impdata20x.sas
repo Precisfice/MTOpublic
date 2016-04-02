@@ -1,7 +1,7 @@
 /* Perform the 20x multiple imputation of missing covariates
  ************************************************************/
-*PROC PRINTTO;
-*RUN;
+PROC PRINTTO;
+RUN;
 %MACRO receive_mi_seed_with_default;
 	%GLOBAL mi_seed;
 	%IF (&mi_seed=) %THEN %LET mi_seed = 524232; * Default to the seed used in JAMA paper ;
@@ -11,17 +11,22 @@
 %PUT MI_SEED = &mi_seed;
 
 * repeat defs + reinclude to enable standalone testing ;
-%let folder = C:/Users/Anolinx/MTO;
-%let reanalysis = &folder/reanalysis;
+*%let folder = C:/Users/Anolinx/MTO;
+*%let reanalysis = &folder/reanalysis;
 %include "&reanalysis/mtoptsd_macro.sas";
 
 * Input data file: pre-imputation dataset (one observation for each youth);
+<<<<<<< HEAD
 %LET NBER = E:/NSCR_Replication_study/NBER;
 %LET ncsr = E:/NSCR_Replication_study;
 Libname NBER "&NBER";
 LIBNAME NCSR "&ncsr";
 libname OUTPUTS "&outputs";
 
+=======
+*%LET NBER = E:/NSCR_Replication_study/NBER;
+*Libname NBER "&NBER";
+>>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
 %let preimp = NBER.Mto_jama_preimp_fixed;
 %mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
@@ -30,7 +35,7 @@ libname OUTPUTS "&outputs";
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************/
+ ************************************************************************
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 
@@ -121,6 +126,19 @@ if f_mh_pts_evr_yt = 1 and
    ) then f_mh_pts_y_yt = 1;
 else f_mh_pts_y_yt = 0;
 end;
+
+* The following lines taken from NBER 'Appendix-D' 12month-mto-youth.sas ;
+/* 12 month PTSD MTO Youth */
+/* Cases where HCV14b_PT64a or HCV14c = interview age or HCV22_PT261 is Yes */
+
+if f_mh_pts_evr_yt = 1 and
+   (
+      (f_svy_age_iw NOT IN(.D,.R,.) and
+          (YCV14b_PT64a = f_svy_age_iw or YCV14c = f_svy_age_iw)
+      ) or
+      YCV22_PT261 = 1 
+   ) then f_mh_pts_y_yt = 1;
+else f_mh_pts_y_yt = 0;
 
 run;
 
