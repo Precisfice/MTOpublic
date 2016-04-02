@@ -3,8 +3,8 @@
 /*  STEP 0 -- Define folders to match your directory setup
  **********************************************************/
 
-%LET workstation = Seattle;
-*%LET workstation = SLC;
+*%LET workstation = Seattle;
+%LET workstation = SLC;
 
 %macro map_workstation_dirs;
   %GLOBAL folder;     * code from Kessler et al & NBER ;
@@ -12,11 +12,8 @@
   %GLOBAL outputs;    * directory for outputs ;
   %GLOBAL ncsr;       * location of NCSR data files ;
   %GLOBAL mto;        * location of MTO data files ;
-<<<<<<< HEAD
   %GLOBAL NBER;       * location of NBER data filer
-=======
-  %GLOBAL nber;        * location of MTO data files ;
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
+
   %IF &workstation = Seattle %THEN %DO;
     %LET folder = /folders/myfolders;
     %LET reanalysis = &folder/reanalysis;
@@ -42,11 +39,7 @@
 
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
-<<<<<<< HEAD
 Libname NBER "&NBER";
-=======
-Libname NBER "&nber";
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
 libname OUTPUTS "&outputs";
 
 /*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)

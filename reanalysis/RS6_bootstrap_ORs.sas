@@ -4,7 +4,7 @@
 * Demonstrate that the mean and covariance matrix for these samples match     ;
 * closely the desired values.   ;
 
-
+libname OUTPUTS "&outputs";
 proc iml;
   title1 "Sampling from joint posterior of PTSD model coefficients";
   title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
@@ -43,13 +43,6 @@ proc iml;
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-<<<<<<< HEAD
-/*  if exist("OUTPUTS.orci") then*/
-/*    edit OUTPUTS.orci;*/
-/*  else */
-/*	create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};*/
-  do imod = 5 to 5;
-=======
   if (^exist("OUTPUTS.orci")) then do;
     /* SAS/IML is behaving as if it had some limit of 256 chars 
      * for character matrix elements, at least when APPENDing
@@ -65,8 +58,7 @@ proc iml;
      formula_head formula_tail};
     close OUTPUTS.orci;
   end;
-  do imod = 1 to 1;
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
+  do imod = 1 to 2;
     coefs = betas_posterior_samples[imod,];
     coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
@@ -103,47 +95,18 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-<<<<<<< HEAD
-    do seed = 524238 to 524238;
-=======
-    do seed = 524233 to 524233;
+    do seed = 524232 to 524233;
       /**/
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
       submit formula seed; * the 'formula' parameter allows substitution below;
-        %LET formula=&formula; * sets a &formula macro for impdata20x.sas;
-        %LET mi_seed=&seed;
+        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+        %let mi_seed=&seed;
         %include "&reanalysis/impdata20x.sas";
       endsubmit;
       /**/
       * Extract the desired effect estimate and its CI ;
-/*	  create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};*/
-/*      use ORs;*/
-/*      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};*/
-/*      close ORs;*/
-/*	  imod=1;*/
-/*	  seed=1;*/
-/*      effrow = loc(compbl(Effect)='ra_grp_exp'*/
-/*                       & _Imputation_=.);*/
-/*      OddsRatioEst = OddsRatioEst[effrow];*/
-/*      LowerCL = LowerCL[effrow];*/
-/*      UpperCL = UpperCL[effrow];*/
-/*      append var {imod seed OddsRatioEst LowerCL UpperCL};*/
-   end; * mi_seed loop ;
-  end; * imod loop ;
-/*  close OUTPUTS.orci;*/
-Quit;
-
-
-proc iml;
-     use ORs;
+      use ORs;
       read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
-      close ORs; 
-  if exist("OUTPUTS.orci") then
-    edit OUTPUTS.orci;
-  else 
-	create OUTPUTS.orci var {imod seed OddsRatioEst LowerCL UpperCL};
-	  imod=5;
-	  seed=524238;
+      close ORs;
       effrow = loc(compbl(Effect)='ra_grp_exp'
                        & _Imputation_=.);
       OddsRatioEst = OddsRatioEst[effrow];
@@ -156,7 +119,3 @@ proc iml;
       close OUTPUTS.orci;
     end; * mi_seed loop ;
   end; * imod loop ;
-<<<<<<< HEAD
-  close OUTPUTS.orci;
-=======
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8

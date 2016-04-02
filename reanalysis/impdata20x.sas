@@ -11,22 +11,19 @@ RUN;
 %PUT MI_SEED = &mi_seed;
 
 * repeat defs + reinclude to enable standalone testing ;
-*%let folder = C:/Users/Anolinx/MTO;
-*%let reanalysis = &folder/reanalysis;
+%let folder = C:/Users/Anolinx/MTO;
+%let reanalysis = &folder/reanalysis;
 %include "&reanalysis/mtoptsd_macro.sas";
 
 * Input data file: pre-imputation dataset (one observation for each youth);
-<<<<<<< HEAD
+
 %LET NBER = E:/NSCR_Replication_study/NBER;
 %LET ncsr = E:/NSCR_Replication_study;
 Libname NBER "&NBER";
 LIBNAME NCSR "&ncsr";
+%LET outputs = &folder/outputs;
 libname OUTPUTS "&outputs";
 
-=======
-*%LET NBER = E:/NSCR_Replication_study/NBER;
-*Libname NBER "&NBER";
->>>>>>> a1e71b93cc885b83beaaa8c03510e85adf3430b8
 %let preimp = NBER.Mto_jama_preimp_fixed;
 %mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
@@ -57,9 +54,9 @@ f_svy_race /*f_svy_race - Race (1=AfrAm/2=Wht/3=AmInd/4=AsPacIsl/5=Oth) from Rev
 run;
 
 proc sort data = vars;
-by by PPID; run;
+by PPID; run;
 proc sort data = preimp_xwalk;
-by by PPID; run;
+by PPID; run;
 
 data preimp_xwalk2;
 format _numeric_;
@@ -70,10 +67,12 @@ data pred_ptsd_youth;
 set preimp_xwalk2;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
-if 
-RHISP = ymh_cov_ad_ethrace_hisp_anyrace;
-RBLK = ymh_cov_ad_ethrace_black_nonhisp;
-ROTH = ymh_cov_ad_ethrace_other_nonhisp;
+     if f_svy_ethnic = 1 then RHISP = 1; 
+Else if f_svy_ethnic = 2 then RHISP = 0; 
+     if f_svy_race =   1 then RBLK  = 1; 
+Else if f_svy_race ne  1 then RBLK  = 0; 
+     if f_svy_race =   5 then ROTH  = 1; 
+Else if f_svy_race ne  5 then ROTH  = 0; 
 pred_prob = exp(&formula)/(1+exp(&formula));
 run;
 
@@ -186,6 +185,6 @@ PROC SURVEYLOGISTIC DATA = &imputed ;
               OddsRatios = ors;   
 RUN;
 
-/*data outputs.ors_April1;*/
-/*Set Ors;*/
-/*run;*/
+data outputs.ors_April2;
+Set Ors;
+run;

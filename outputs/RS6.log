@@ -3,238 +3,160 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-23551  
-23552  * Draw 10^5 different sets of imputation coefficients from the posterior      ;
-23553  * density implied by the original coefficients of the JAMA article, taken     ;
-23554  * together with their variance-covariance matrix received from Nancy Sampson. ;
-23555  * Demonstrate that the mean and covariance matrix for these samples match     ;
-23556  * closely the desired values.   ;
-23557  
-23558  proc iml;
+14986  %include "&reanalysis/RS6_bootstrap_ORs.sas";
+NOTE: Libref OUTPUTS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: C:\Users\Anolinx\MTO\outputs
 NOTE: IML Ready
-23559    title1 "Sampling from joint posterior of PTSD model coefficients";
-23560    title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
-23561    load their_beta their_cov CovarNames;
 NOTE: Opening storage library WORK.IMLSTOR
-23562    call randseed(2016);
-23563    betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
 NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
 NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
-23564    * Simply overwrite the first sample with the original beta vector ;
-23565    betas_posterior_samples[1,] = their_beta;
-23566    sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
-23567    print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient
-23567! vectors"
-23568     colname=CovarNames rowname=sample_labels];
-23569    SampleMean = mean(betas_posterior_samples);
-23570    SampleCov = cov(betas_posterior_samples);
-23571    compare_means = SampleMean // their_beta;
-23572    print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
-23573    print SampleCov[colname=CovarNames rowname=CovarNames];
-23574    cov_diff = SampleCov - their_cov;
-23575    print cov_diff[colname=CovarNames rowname=CovarNames];
-23576    store betas_posterior_samples;
-23577  run;
-NOTE: Module MAIN is undefined in IML; cannot be RUN.
-23578  
-23579  * Define the %mtoptsd macro needed by impdata20x.sas, which is    ;
-23580  * %included by the bootstrap loop below.                          ;
-23581  * --------------------------------------------------------------- ;
-23582  * Macro 'mtopdsd' is copied wholesale from Ptsd_MTO_youth.sas.    ;
-23583  * It computes the several PTSD criteria that were operationalized ;
-23584  * in the MTO Youth Final Survey, and also cross-walks from NCSR   ;
-23585  * to MTO survey question variables, by renaming MTO variables to  ;
-23586  * their NCSR equivalents.                                         ;
-23587  * This enables the PTSD imputation model estimated in NCSR to be  ;
-23588  * applied AS-IS to MTO data, without renaming its RHS variables.  ;
-23589  * (It is a dual-purpose macro intended for both A=adult and       ;
-23590  * Y=youth data sets -- hence its 2nd argument.)                   ;
-23591  %macro mtoptsd(datain, pfx, dataout);
-23592  
-23593     * MTO Adult questionnaire PTSD data ;
-23594     data &dataout;
-23595     set &datain;
-23596  
-23597     * Criteria A1 ;
-23598     if &pfx.CV1_PT13 = 1 or &pfx.CV2_PT14 = 1 or &pfx.CV3_PT15 = 1 or &pfx.CV4_PT16 = 1 or
-23598! &pfx.CV5_PT17 = 1 or
-23599        &pfx.CV6_PT18 = 1 or &pfx.CV7_PT20 = 1 or &pfx.CV8_PT22 = 1 or &pfx.CV9_PT22_1 = 1 or
-23599!  &pfx.CV10_PT23 = 1 or
-23600        &pfx.CV11_PT27 = 1 then f_mh_pts_a1 = 1;
-23601     else f_mh_pts_a1 = 0;
-23602  
-23603     * Criteria C1 ;
-23604     if sum(&pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1, &pfx.CV15_PT269 = 1 or
-23604! &pfx.CV24_PT269 = 1,
-23605            &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1, &pfx.CV17_PT271 = 1 or
-23605! &pfx.CV26_PT271 = 1,
-23606            &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1) >= 3 then f_mh_pts_c1 = 1;
-23606!    * Yes ;
-23607     else f_mh_pts_c1 = 0;
-23608  
-23609     * Criteria D1 ;
-23610     if (&pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1) and (&pfx.CV20_PT274 = 1 or
-23610! &pfx.CV29_PT274 = 1)
-23611         then f_mh_pts_d1 = 1;  * Yes ;
-23612     else f_mh_pts_d1 = 0;
-23613  
-23614     if f_mh_pts_a1 = 1 and f_mh_pts_c1 = 1 and f_mh_pts_d1 = 1 then mto_ptsd_sample = 1;
-23615     else mto_ptsd_sample = 0;
-23616  
-23617     array PTVAR &pfx.CV1_PT13 &pfx.CV2_PT14 &pfx.CV3_PT15 &pfx.CV4_PT16 &pfx.CV5_PT17
-23618                 &pfx.CV6_PT18 &pfx.CV7_PT20 &pfx.CV8_PT22 &pfx.CV9_PT22_1 &pfx.CV10_PT23
-23619                 &pfx.CV11_PT27 &pfx.CV13_PT62 &pfx.CV15_PT269 &pfx.CV16_PT270
-23619! &pfx.CV17_PT271
-23620                 &pfx.CV18_PT272 &pfx.CV19_PT273 &pfx.CV20_PT274 &pfx.CV21_PT275
-23621                 &pfx.CV24_PT269 &pfx.CV25_PT270 &pfx.CV26_PT271 &pfx.CV27_PT272
-23621! &pfx.CV28_PT273
-23622                 &pfx.CV29_PT274 &pfx.CV30_PT275;
-23623     do over PTVAR;
-23624        if PTVAR ^= 1 then PTVAR = 0;
-23625     end;
-23626  
-23627     * Gender ;
-23628     if f_svy_gender = 'F' then sexf = 1;
-23629     else sexf = 0;
-23630  
-23631     * Race ;
-23632     rhisp = 0;
-23633     rwh = 0;
-23634     rblk = 0;
-23635     roth = 0;
-23636     if f_svy_ethnic = 1 then rhisp = 1;
-23637     else do;
-23638        if f_svy_race = 1 then rblk = 1;
-23639        else if f_svy_race = 2 then rwh = 1;
-23640        else if f_svy_race IN(3,4,5) then roth = 1;
-23641     end;
-23642  
-23643     in_mto = 1;
-23644  
-23645     if 0 <= f_svy_age_iw <= 18 then age = 18;
-23646     else age = f_svy_age_iw;
-23647  
-23648     * Create corresponding NCSR variables ;
-23649     if &pfx.CV15_PT269 = 1 or &pfx.CV24_PT269 = 1 then PT211 = 1;
-23650     else PT211 = 0;
-23651  
-23652     if &pfx.CV16_PT270 = 1 or &pfx.CV25_PT270 = 1 then PT212 = 1;
-23653     else PT212 = 0;
-23654  
-23655     if &pfx.CV17_PT271 = 1 or &pfx.CV26_PT271 = 1 then PT213 = 1;
-23656     else PT213 = 0;
-23657  
-23658     if &pfx.CV18_PT272 = 1 or &pfx.CV27_PT272 = 1 then PT214 = 1;
-23659     else PT214 = 0;
-23660  
-23661     if &pfx.CV19_PT273 = 1 or &pfx.CV28_PT273 = 1 then PT233 = 1;
-23662     else PT233 = 0;
-23663  
-23664     if &pfx.CV20_PT274 = 1 or &pfx.CV29_PT274 = 1 then PT237 = 1;
-23665     else PT237 = 0;
-23666  
-23667     if &pfx.CV21_PT275 = 1 or &pfx.CV30_PT275 = 1 then PT209 = 1;
-23668     else PT209 = 0;
-23669  
-23670     format _numeric_;
-23671     rename &pfx.CV1_PT13 = PT41
-23672            &pfx.CV2_PT14 = PT42
-23673            &pfx.CV3_PT15 = PT43
-23674            &pfx.CV4_PT16 = PT44
-23675            &pfx.CV5_PT17 = PT45
-23676            &pfx.CV6_PT18 = PT46
-23677            &pfx.CV7_PT20 = PT48
-23678            &pfx.CV8_PT22 = PT50
-23679            &pfx.CV9_PT22_1 = PT50_1
-23680            &pfx.CV10_PT23 = PT51
-23681            &pfx.CV11_PT27 = PT55;
-23682     run;
-23683  
-23684  %mend mtoptsd;
-23685  
-23686  * Iterate over the betas_posterior_samples, constructing a model    ;
-23687  * formula for each one and passing it to the impdata20x.sas script. ;
-23688  * Collect the resulting voucher effect estimates with their CIs.    ;
-23689  
+NOTE: The data set OUTPUTS.BETAS_SAMPLES has 100000 observations and 24 
+      variables.
 NOTE: Exiting IML.
 NOTE: Storage library WORK.IMLSTOR closed.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           0.32 seconds
-      cpu time            0.31 seconds
+      real time           0.34 seconds
+      cpu time            0.34 seconds
       
 
-23690  proc iml;
 NOTE: IML Ready
-23691    *title1 "Constructing PTSD imputation model formulas";
-23692    *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
-23693    load betas_posterior_samples CovarNames;
 NOTE: Opening storage library WORK.IMLSTOR
-23694    CovarNames[loc(CovarNames='Intercept')] = "1";
-23695    reps = 2;
-23696    create orci var {imod seed_1 OddsRatioEst LowerCL UpperCL};
-23697    do imod = 1 to reps;
-23698      coefs = betas_posterior_samples[imod,];
-23699      * convert coefs to explicitly (+/-) signed strings ;
-23700      signs = repeat(" ",1,ncol(coefs));
-23701      signs[loc(coefs>=0)] = "+";
-23702      coefs = catx("", signs, coefs);
-23703      * generate formula terms, then concatenate them ;
-23704      terms = catx("*",coefs,CovarNames`);
-23705      formula = rowcatc(terms);
-23706      *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
-23707      *print formula;
-23708      *title1;
-23709      do seedused = 101 to 102;
-23710      submit formula seedused; * the 'formula' parameter allows substitution below;
-23711        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-23712        %let seedused=&seedused;
-23713        %include "&reanalysis/impdata20x.sas";
-23714      endsubmit;
-23715      * Extract the desired effect estimate and its CI ;
-23716      use ORs;
-23717      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
-23718      close ORs;
-23719      effrow = loc(compbl(Effect)='ra_grp_exp'
-23720                       & _Imputation_=.);
-23721      OddsRatioEst = OddsRatioEst[effrow];
-23722      LowerCL = LowerCL[effrow];
-23723      UpperCL = UpperCL[effrow];
-23724      append var {imod seed_1 OddsRatioEst LowerCL UpperCL};
-23725      end;
-23725!          * seed_1 loop ;
-23726    end;
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: The data set WORK.A1 has 1 observations and 153 variables.
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\contents_mto_jama_imputed.pdf", 
+      printer "PDF".
+NOTE: ODS PDF printed no output. 
+      (This sometimes results from failing to place a RUN statement before the 
+      ODS PDF CLOSE statement.)
 NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 189 observations and 9 variables.
-
- statement : SUBMIT at line 23710 column 5
-23726!        * imod loop ;
-23727    close orci;
-NOTE: The data set WORK.ORCI has 0 observations and 5 variables.
-23728  run;
-NOTE: Module MAIN is undefined in IML; cannot be RUN.
-23729  quit;
+NOTE: The data set WORK.PARMEST has 63 observations and 8 variables.
 NOTE: Exiting IML.
 NOTE: Storage library WORK.IMLSTOR closed.
-NOTE: The SAS System stopped processing this step because of errors.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           1:33.41
-      cpu time            1:34.07
+      real time           10:28.75
+      cpu time            8:47.17
       
-23730  
-23731  /* end of STEP VI */
-23732  
-23733  /* --- References ---
-23734  1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility
-23734! Interventions
-23735     for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during
-23735! Adolescence.
-23736     JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
-23737  
-23738      */
 
-
-23739  /* Perform the 20x multiple imputation of missing covariates
-23740   ************************************************************/
-23741  PROC PRINTTO;
-23742  RUN;
+15212  PROC PRINTTO;
+15213  RUN;
 
