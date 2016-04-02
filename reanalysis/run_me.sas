@@ -12,6 +12,7 @@
   %GLOBAL outputs;    * directory for outputs ;
   %GLOBAL ncsr;       * location of NCSR data files ;
   %GLOBAL mto;        * location of MTO data files ;
+  %GLOBAL NBER;       * location of NBER data filer
   %IF &workstation = Seattle %THEN %DO;
     %LET folder = /folders/myfolders;
     %LET reanalysis = &folder/reanalysis;
@@ -36,6 +37,7 @@
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
 Libname NBER "&NBER";
+libname OUTPUTS "&outputs";
 
 /*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  */ 
@@ -51,7 +53,7 @@ Libname NBER "&NBER";
 
 /*  STEP IV -- Prepare the MTO data
  */
-*%include "&reanalysis/RS4_prep_MTO_data.sas";
+%include "&reanalysis/RS4_prep_MTO_data.sas";
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
  */

@@ -17,7 +17,11 @@
 
 * Input data file: pre-imputation dataset (one observation for each youth);
 %LET NBER = E:/NSCR_Replication_study/NBER;
+%LET ncsr = E:/NSCR_Replication_study;
 Libname NBER "&NBER";
+LIBNAME NCSR "&ncsr";
+libname OUTPUTS "&outputs";
+
 %let preimp = NBER.Mto_jama_preimp_fixed;
 %mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
@@ -39,11 +43,29 @@ Libname NBER "&NBER";
 */
 %PUT Formula: &formula;
 
+data vars;
+set NCSR.Mental_health_yt_20150612;
+format _Numeric_;
+keep PPID 
+f_svy_ethnic /*f_svy_ethnic - Ethnicity (1=Hispanic, 2=Not Hispanic) from Revised Demog File*/
+f_svy_race /*f_svy_race - Race (1=AfrAm/2=Wht/3=AmInd/4=AsPacIsl/5=Oth) from Revised Demog File*/;
+run;
+
+proc sort data = vars;
+by by PPID; run;
+proc sort data = preimp_xwalk;
+by by PPID; run;
+
+data preimp_xwalk2;
+format _numeric_;
+merge preimp_xwalk vars;
+by PPID; run;
 
 data pred_ptsd_youth;
-set preimp_xwalk;
+set preimp_xwalk2;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
+if 
 RHISP = ymh_cov_ad_ethrace_hisp_anyrace;
 RBLK = ymh_cov_ad_ethrace_black_nonhisp;
 ROTH = ymh_cov_ad_ethrace_other_nonhisp;
