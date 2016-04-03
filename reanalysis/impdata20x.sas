@@ -32,7 +32,7 @@ libname OUTPUTS "&outputs";
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************/
+ ************************************************************************
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 
@@ -147,12 +147,6 @@ if f_mh_pts_evr_yt = 1 and
 else f_mh_pts_y_yt = 0;
 run;
 
-ods pdf file = "&outputs/PTSD y_yt from original to final_pred.pdf";
-proc freq data = fnlpred_ptsd_youth ;
-tables  f_mh_pts_y_yt_orig*f_mh_pts_y_yt /norow nocol nocum nopercent missing;
-run;
-ods pdf close; 
-
 
 /* Invoke a slightly modified version of Matt Sciandra's imputation code
    TODO: Consider setting macro variable 'imputed' here, before %INCLUDEing
@@ -193,13 +187,25 @@ PROC SURVEYLOGISTIC DATA = &imputed ;
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
-   WEIGHT f_wt_totsvy ;
+   WEIGHT f_wt_totcore98;
    ODS OUTPUT parameterestimates=parmest  
               OddsRatios = ors;   
 RUN;
 
-data mising;
-set Fnlpred_ptsd_youth; where missing(f_mh_pts_y_yt_orig);
-keep PPID;
-run;
 
+
+/*data Sciandra_imputed;*/
+/*set NBER.Mto_jama_imputed_20160111;*/
+/*format _numeric_;*/
+/*run;*/
+/**/
+/*PROC SURVEYLOGISTIC DATA = Sciandra_imputed  ; */
+/*   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;*/
+/*   DOMAIN _imputation_;*/
+/*   MODEL &dep (EVENT='1') = &controls / COVB; */
+/*   WEIGHT f_wt_totcore98 ;*/
+/*   OUTPUT OUT=preddata PREDICTED=pp;*/
+/*   ODS OUTPUT parameterestimates=parmest  */
+/*              OddsRatios = or   */
+/*              covb=covm  ;*/
+/*RUN;*/
