@@ -32,7 +32,7 @@ libname OUTPUTS "&outputs";
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************
+ ************************************************************************/
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 
@@ -48,7 +48,8 @@ libname OUTPUTS "&outputs";
 data vars;
 set NCSR.Mental_health_yt_20150612;
 format _Numeric_;
-keep PPID 
+ptsd_random=ranuni(1234567);
+keep PPID ptsd_random
 f_svy_ethnic /*f_svy_ethnic - Ethnicity (1=Hispanic, 2=Not Hispanic) from Revised Demog File*/
 f_svy_race /*f_svy_race - Race (1=AfrAm/2=Wht/3=AmInd/4=AsPacIsl/5=Oth) from Revised Demog File*/;
 run;
@@ -60,19 +61,25 @@ by PPID; run;
 
 data preimp_xwalk2;
 format _numeric_;
-merge preimp_xwalk vars;
-by PPID; run;
+merge preimp_xwalk (in=jama)  vars;
+by PPID; if jama; run;
 
 data pred_ptsd_youth;
 set preimp_xwalk2;
+f_mh_pts_y_yt_orig=f_mh_pts_y_yt;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
-     if f_svy_ethnic = 1 then RHISP = 1; 
-Else if f_svy_ethnic = 2 then RHISP = 0; 
-     if f_svy_race =   1 then RBLK  = 1; 
-Else if f_svy_race ne  1 then RBLK  = 0; 
-     if f_svy_race =   5 then ROTH  = 1; 
-Else if f_svy_race ne  5 then ROTH  = 0; 
+ /* Race */
+   rhisp = 0;
+   rwh = 0;
+   rblk = 0;
+   roth = 0;
+   if f_svy_ethnic = 1 then rhisp = 1;
+   else do;
+      if f_svy_race = 1 then rblk = 1;
+      else if f_svy_race = 2 then rwh = 1;
+      else if f_svy_race IN(3,4,5) then roth = 1;
+   end;
 pred_prob = exp(&formula)/(1+exp(&formula));
 run;
 
@@ -88,7 +95,7 @@ data fnlpred_ptsd_youth; *(keep = ppid f_mh_pts_evr_yt f_mh_pts_aoo_yt f_mh_pts_
     ptsd_random pred_prob); * (+++) last 2 vars added ;
 set pred_ptsd_youth;
 /* Calculate lifetime PTSD by comparing random # to predicted probability */
-ptsd_random = ranuni(1234567);
+*ptsd_random = ranuni(1234567);
 if mto_ptsd_sample = 1 and 0 < ptsd_random <= pred_prob then f_mh_pts_evr_yt = 1;
 else f_mh_pts_evr_yt = 0;
 
@@ -138,8 +145,14 @@ if f_mh_pts_evr_yt = 1 and
       YCV22_PT261 = 1 
    ) then f_mh_pts_y_yt = 1;
 else f_mh_pts_y_yt = 0;
-
 run;
+
+ods pdf file = "&outputs/PTSD y_yt from original to final_pred.pdf";
+proc freq data = fnlpred_ptsd_youth ;
+tables  f_mh_pts_y_yt_orig*f_mh_pts_y_yt /norow nocol nocum nopercent missing;
+run;
+ods pdf close; 
+
 
 /* Invoke a slightly modified version of Matt Sciandra's imputation code
    TODO: Consider setting macro variable 'imputed' here, before %INCLUDEing
@@ -185,6 +198,8 @@ PROC SURVEYLOGISTIC DATA = &imputed ;
               OddsRatios = ors;   
 RUN;
 
-data outputs.ors_April2;
-Set Ors;
+data mising;
+set Fnlpred_ptsd_youth; where missing(f_mh_pts_y_yt_orig);
+keep PPID;
 run;
+
