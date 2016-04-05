@@ -58,7 +58,7 @@ proc iml;
      formula_head formula_tail};
     close OUTPUTS.orci;
   end;
-  do imod = 1 to 5;
+  do imod = 1 to 2;
     coefs = betas_posterior_samples[imod,];
     coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
@@ -95,7 +95,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = 524232 to 524237;
+    do seed = 524232 to 524233;
       /**/
       submit formula seed; * the 'formula' parameter allows substitution below;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;

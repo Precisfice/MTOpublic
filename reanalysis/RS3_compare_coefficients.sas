@@ -1,6 +1,6 @@
-PROC PRINTTO NEW
-  LOG="&outputs/RS3.log";
-RUN;
+/*PROC PRINTTO NEW*/
+/*  LOG="&outputs/RS3.log";*/
+/*RUN;*/
 
 * Read coefficients from our replication attempt, along with std errs.    ;
 * These are found starting at column #44 on lines 115-138 of slopes.txt,  ;

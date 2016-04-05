@@ -1,6 +1,6 @@
-PROC PRINTTO NEW
-  LOG="&outputs/RS5.log";
-RUN;
+/*PROC PRINTTO NEW*/
+/*  LOG="&outputs/RS5.log";*/
+/*RUN;*/
 
 * Additionally, examine the age distribution for questions ;
 * of generalizability.  How does the pts_smpl=1 population ;

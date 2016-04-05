@@ -1,6 +1,6 @@
-PROC PRINTTO NEW
-  LOG="&outputs/RS2.log";
-RUN;
+/*PROC PRINTTO NEW*/
+/*  LOG="&outputs/RS2.log";*/
+/*RUN;*/
 
 * Estimate the PTSD imputation model employed by Kessler et al., ;
 * and additionally several variations on that model to abstract  ;

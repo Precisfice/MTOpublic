@@ -183,15 +183,16 @@ run;
  */
 
 
+
 PROC SURVEYLOGISTIC DATA = &imputed ;
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
    WEIGHT f_wt_totcore98;
+   where x_f_ch_male =1;
    ODS OUTPUT parameterestimates=parmest  
-              OddsRatios = ors;   
+              OddsRatios = ors;  
 RUN;
-
 
 
 /*data Sciandra_imputed;*/
@@ -205,6 +206,7 @@ RUN;
 /*   MODEL &dep (EVENT='1') = &controls / COVB; */
 /*   WEIGHT f_wt_totcore98 ;*/
 /*   OUTPUT OUT=preddata PREDICTED=pp;*/
+/*   where x_f_ch_male =1;*/
 /*   ODS OUTPUT parameterestimates=parmest  */
 /*              OddsRatios = or   */
 /*              covb=covm  ;*/

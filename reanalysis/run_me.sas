@@ -64,12 +64,12 @@ libname OUTPUTS "&outputs";
 
 /*  STEP VI -- Bootstrap the voucher effects
  */
-PROC PRINTTO NEW
-  LOG="&outputs/RS6.log";
-RUN;
+/*PROC PRINTTO NEW*/
+/*  LOG="&outputs/RS6.log";*/
+/*RUN;*/
 %include "&reanalysis/RS6_bootstrap_ORs.sas";
-PROC PRINTTO;
-RUN;
+/*PROC PRINTTO;*/
+/*RUN;*/
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
    for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during Adolescence.
