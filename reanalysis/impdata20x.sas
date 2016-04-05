@@ -2,12 +2,14 @@
  ************************************************************/
 PROC PRINTTO;
 RUN;
-%MACRO receive_mi_seed_with_default;
+%MACRO receive_mi_seed_and_imod_with_defaults;
 	%GLOBAL mi_seed;
+	%GLOBAL imod;
 	%IF (&mi_seed=) %THEN %LET mi_seed = 524232; * Default to the seed used in JAMA paper ;
-%MEND receive_mi_seed_with_default;
+	%IF (&imod=) %THEN %LET imod = SATHCF; * For standalone tests with hard-coded formula ;
+%MEND receive_mi_seed_and_imod_with_defaults;
 
-%receive_mi_seed_with_default;
+%receive_mi_seed_and_imod_with_defaults
 %PUT MI_SEED = &mi_seed;
 
 * repeat defs + reinclude to enable standalone testing ;
@@ -149,27 +151,11 @@ run;
 
 
 /* Invoke a slightly modified version of Matt Sciandra's imputation code
-   TODO: Consider setting macro variable 'imputed' here, before %INCLUDEing
-         the 1_..sas file.  Lifting from '1_..sas' file the burden of setting
-         this variable would help restore it closer to its original form as
-         delivered by NBER.
+ * in which the MI seed has been parametrized for sensitivity analysis.
  */
-* NB: The choice of seed is parametrized here by DCN+ARW to permit sensitivity analyses ;
-%MACRO set_impdata_filename_per_mi_seed;
-	%GLOBAL imputed;
-	%IF &mi_seed=524232 %THEN %DO;
-		%LET imputed = MTO.mto_jama_imputed; * Default output name ;
-		%END;
-	%ELSE %DO;
-		%LET imputed = MTO.mto_&mi_seed._imputed; * Name of output for arbitrary seed choice ;
-		%END;
-
-	%PUT Imputed output file will be named: &imputed;
-%MEND set_impdata_filename_per_mi_seed;
-
-%set_impdata_filename_per_mi_seed;
+%LET imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-*dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
+dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 
 /* Obtain a voucher effect on PTSD
  **********************************/
@@ -177,19 +163,15 @@ run;
 %LET dep = f_mh_pts_y_yt;
 %LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
 
-/* This PROC comes from 'MTO_table4_alt.sas'; we comment out
- * the original clustering of stderrs, since we lack the TRACT
- * variable pending delivery of the RAD.
+/* This PROC is identical to that in 'MTO_table4_alt.sas' and also
+ * Matt Sciandra's '2_mto_jama_impute_data_20160111.sas' script.
  */
 
-
-
-PROC SURVEYLOGISTIC DATA = &imputed ;
+PROC SURVEYLOGISTIC DATA = &imputed(where=(x_f_ch_male=1 & f_svy_final_disp^="NI-DC"));
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
    WEIGHT f_wt_totcore98;
-   where x_f_ch_male =1;
    ODS OUTPUT parameterestimates=parmest  
               OddsRatios = ors;  
 RUN;

@@ -97,9 +97,10 @@ proc iml;
     *title1;
     do seed = 524232 to 524233;
       /**/
-      submit formula seed; * the 'formula' parameter allows substitution below;
+      submit formula seed imod;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
         %let mi_seed=&seed;
+        %let imod=&imod;
         %include "&reanalysis/impdata20x.sas";
       endsubmit;
       /**/
