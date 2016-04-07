@@ -2,14 +2,14 @@
  ************************************************************/
 PROC PRINTTO;
 RUN;
-%MACRO receive_mi_seed_and_imod_with_defaults;
+%MACRO receive_mi_seed_imod_w_defaults;
 	%GLOBAL mi_seed;
 	%GLOBAL imod;
 	%IF (&mi_seed=) %THEN %LET mi_seed = 524232; * Default to the seed used in JAMA paper ;
 	%IF (&imod=) %THEN %LET imod = SATHCF; * For standalone tests with hard-coded formula ;
-%MEND receive_mi_seed_and_imod_with_defaults;
+%MEND receive_mi_seed_imod_w_defaults;
 
-%receive_mi_seed_and_imod_with_defaults
+%receive_mi_seed_imod_w_defaults;
 %PUT MI_SEED = &mi_seed;
 
 * repeat defs + reinclude to enable standalone testing ;
@@ -155,41 +155,3 @@ run;
  */
 %LET imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
-
-/* Obtain a voucher effect on PTSD
- **********************************/
-
-%LET dep = f_mh_pts_y_yt;
-%LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
-
-/* This PROC is identical to that in 'MTO_table4_alt.sas' and also
- * Matt Sciandra's '2_mto_jama_impute_data_20160111.sas' script.
- */
-
-PROC SURVEYLOGISTIC DATA = &imputed(where=(x_f_ch_male=1 & f_svy_final_disp^="NI-DC"));
-   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
-   DOMAIN _imputation_;
-   MODEL &dep (EVENT='1') = &controls / COVB; 
-   WEIGHT f_wt_totcore98;
-   ODS OUTPUT parameterestimates=parmest  
-              OddsRatios = ors;  
-RUN;
-
-
-/*data Sciandra_imputed;*/
-/*set NBER.Mto_jama_imputed_20160111;*/
-/*format _numeric_;*/
-/*run;*/
-/**/
-/*PROC SURVEYLOGISTIC DATA = Sciandra_imputed  ; */
-/*   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;*/
-/*   DOMAIN _imputation_;*/
-/*   MODEL &dep (EVENT='1') = &controls / COVB; */
-/*   WEIGHT f_wt_totcore98 ;*/
-/*   OUTPUT OUT=preddata PREDICTED=pp;*/
-/*   where x_f_ch_male =1;*/
-/*   ODS OUTPUT parameterestimates=parmest  */
-/*              OddsRatios = or   */
-/*              covb=covm  ;*/
-/*RUN;*/

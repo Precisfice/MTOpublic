@@ -58,7 +58,7 @@ proc iml;
      formula_head formula_tail};
     close OUTPUTS.orci;
   end;
-  do imod = 1 to 2;
+  do imod = 1 to 1;
     coefs = betas_posterior_samples[imod,];
     coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
@@ -95,7 +95,7 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = 524232 to 524233;
+    do seed = 524200 to 524300;
       /**/
       submit formula seed imod;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
@@ -105,7 +105,57 @@ proc iml;
       endsubmit;
       /**/
       * Extract the desired effect estimate and its CI ;
-      use ORs;
+    
+    end; * mi_seed loop ;
+  end; * imod loop ;
+
+dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
+
+
+
+/* Obtain a voucher effect on PTSD
+ **********************************/
+
+%LET dep = f_mh_pts_y_yt;
+%LET controls = ra_grp_exp ra_grp_s8; * i.e., modnum=1 ;
+
+/* This PROC is identical to that in 'MTO_table4_alt.sas' and also
+ * Matt Sciandra's '2_mto_jama_impute_data_20160111.sas' script.
+ */
+
+PROC SURVEYLOGISTIC DATA = &imputed(where=(x_f_ch_male=1 & f_svy_final_disp^="NI-DC")); /*Zero excluded because f_svy_final_disp="NI-DC"*/
+   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
+   DOMAIN _imputation_;
+   MODEL &dep (EVENT='1') = &controls / COVB; 
+   WEIGHT f_wt_totcore98;
+   ODS OUTPUT parameterestimates=parmest  
+              OddsRatios = ors;  
+
+
+RUN;
+
+
+/*& f_svy_final_disp^="NI-DC"*/
+
+/*data Sciandra_imputed;*/
+/*set NBER.Mto_jama_imputed_20160111;*/
+/*format _numeric_;*/
+/*run;*/
+/**/
+/*PROC SURVEYLOGISTIC DATA = Sciandra_imputed  ; */
+/*   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;*/
+/*   DOMAIN _imputation_;*/
+/*   MODEL &dep (EVENT='1') = &controls / COVB; */
+/*   WEIGHT f_wt_totcore98 ;*/
+/*   OUTPUT OUT=preddata PREDICTED=pp;*/
+/*   where x_f_ch_male =1;*/
+/*   ODS OUTPUT parameterestimates=parmest  */
+/*              OddsRatios = or   */
+/*              covb=covm  ;*/
+/*RUN;*/
+
+
+  use ORs;
       read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
       close ORs;
       effrow = loc(compbl(Effect)='ra_grp_exp'
@@ -118,5 +168,4 @@ proc iml;
       edit OUTPUTS.orci;
         append;
       close OUTPUTS.orci;
-    end; * mi_seed loop ;
-  end; * imod loop ;
+
