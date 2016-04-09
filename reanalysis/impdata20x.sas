@@ -34,7 +34,7 @@ libname OUTPUTS "&outputs";
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************
+ ************************************************************************/
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 
@@ -155,3 +155,5 @@ run;
  */
 %LET imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
+dm 'clear log'; 
+* Otherwise, log may fill up, and user is prompted to empty it ;

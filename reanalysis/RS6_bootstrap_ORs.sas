@@ -38,6 +38,9 @@ proc iml;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Collect the resulting voucher effect estimates with their CIs.    ;
 
+%Macro nesting_loops(howmanymods, lowerseed, upperseed);
+%do 	imod = 1          %to &howmanymods;
+	%do seed = &lowerseed %to &upperseed;
 proc iml;
   *title1 "Constructing PTSD imputation model formulas";
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
@@ -58,7 +61,7 @@ proc iml;
      formula_head formula_tail};
     close OUTPUTS.orci;
   end;
-  do imod = 1 to 1;
+  
     coefs = betas_posterior_samples[imod,];
     coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
@@ -95,23 +98,20 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = 524200 to 524300;
-      /**/
+    
+      
       submit formula seed imod;
         %let formula=&formula; * sets a &formula macro for impdata20x.sas;
         %let mi_seed=&seed;
         %let imod=&imod;
         %include "&reanalysis/impdata20x.sas";
       endsubmit;
-      /**/
-      * Extract the desired effect estimate and its CI ;
-    
-    end; * mi_seed loop ;
-  end; * imod loop ;
+      
+    %end; * mi_seed loop ;
+  %end; * imod loop ;
+%MEND nesting_loops;
 
-dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
-
-
+%nesting_loops(howmanymods=1, lowerseed=524200, upperseed=524400);
 
 /* Obtain a voucher effect on PTSD
  **********************************/
@@ -122,20 +122,45 @@ dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
 /* This PROC is identical to that in 'MTO_table4_alt.sas' and also
  * Matt Sciandra's '2_mto_jama_impute_data_20160111.sas' script.
  */
-
-PROC SURVEYLOGISTIC DATA = &imputed(where=(x_f_ch_male=1 & f_svy_final_disp^="NI-DC")); /*Zero excluded because f_svy_final_disp="NI-DC"*/
+	%MACRO obtain_voucher_effect(imputed=);
+PROC SURVEYLOGISTIC DATA = MTO.&imputed(where=(x_f_ch_male=1 & f_svy_final_disp^="NI-DC")); /*Zero excluded because f_svy_final_disp="NI-DC"*/
    STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
    DOMAIN _imputation_;
    MODEL &dep (EVENT='1') = &controls / COVB; 
    WEIGHT f_wt_totcore98;
-   ODS OUTPUT parameterestimates=parmest  
-              OddsRatios = ors;  
-
-
+   ODS OUTPUT parameterestimates=parmest&imputed  
+              OddsRatios = ors&imputed;  
 RUN;
+	%MEND obtain_voucher_effect;
+
+%obtain_voucher_effect(imputed=Cached_1_524232_imputed);
+%obtain_voucher_effect(imputed=Cached_2_524232_imputed);
+%obtain_voucher_effect(imputed=Cached_1_524233_imputed);
+%obtain_voucher_effect(imputed=Cached_2_524233_imputed);
 
 
-/*& f_svy_final_disp^="NI-DC"*/
+
+proc means data =fnlpred_ptsd_youth;
+var pred_prob;
+run;
+
+
+
+* Extract the desired effect estimate and its CI ;
+      use ORs;
+      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
+      close ORs;
+      effrow = loc(compbl(Effect)='ra_grp_exp'
+                       & _Imputation_=.);
+      OddsRatioEst = OddsRatioEst[effrow];
+      LowerCL = LowerCL[effrow];
+      UpperCL = UpperCL[effrow];
+      formula_head = substr(formula, 1, 255);
+      formula_tail = substr(formula, 256);
+      edit OUTPUTS.orci;
+        append;
+      close OUTPUTS.orci;
+
 
 /*data Sciandra_imputed;*/
 /*set NBER.Mto_jama_imputed_20160111;*/
@@ -155,17 +180,5 @@ RUN;
 /*RUN;*/
 
 
-  use ORs;
-      read all var {Effect _Imputation_ OddsRatioEst LowerCL UpperCL};
-      close ORs;
-      effrow = loc(compbl(Effect)='ra_grp_exp'
-                       & _Imputation_=.);
-      OddsRatioEst = OddsRatioEst[effrow];
-      LowerCL = LowerCL[effrow];
-      UpperCL = UpperCL[effrow];
-      formula_head = substr(formula, 1, 255);
-      formula_tail = substr(formula, 256);
-      edit OUTPUTS.orci;
-        append;
-      close OUTPUTS.orci;
+
 
