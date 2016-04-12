@@ -4,30 +4,6 @@
 * Demonstrate that the mean and covariance matrix for these samples match     ;
 * closely the desired values.   ;
 
-proc iml;
-  title1 "Sampling from joint posterior of PTSD model coefficients";
-  title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
-  load their_beta their_cov CovarNames;
-  call randseed(2016);
-  betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
-  * Simply overwrite the first sample with the original beta vector ;
-  betas_posterior_samples[1,] = their_beta;
-  sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
-  print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient vectors"
-   colname=CovarNames rowname=sample_labels];
-  create OUTPUTS.betas_samples from betas_posterior_samples[colname=CovarNames];
-  append from betas_posterior_samples;
-  close OUTPUTS.betas_samples;
-  SampleMean = mean(betas_posterior_samples);
-  SampleCov = cov(betas_posterior_samples);
-  compare_means = SampleMean // their_beta;
-  print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
-  print SampleCov[colname=CovarNames rowname=CovarNames];
-  cov_diff = SampleCov - their_cov;
-  print cov_diff[colname=CovarNames rowname=CovarNames];
-  store betas_posterior_samples;
-  quit;
-
 * Define the %mtoptsd macro needed by impdata20x.sas, which is    ;
 * %included by the bootstrap loop below.                          ;
 * --------------------------------------------------------------- ;
@@ -60,40 +36,57 @@ proc iml;
   %codeimp(20);
  %MEND;
 
+
+proc iml;
+  title1 "Sampling from joint posterior of PTSD model coefficients";
+  title2 "(with illustrative sample printouts and checks on sample mean and covariance)";
+  load their_beta their_cov CovarNames;
+  call randseed(2016);
+  betas_posterior_samples = RandNormal(100000, their_beta, their_cov);
+  * Simply overwrite the first sample with the original beta vector ;
+  betas_posterior_samples[1,] = their_beta;
+  sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
+  print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient vectors"
+   colname=CovarNames rowname=sample_labels];
+  create OUTPUTS.betas_samples from betas_posterior_samples[colname=CovarNames];
+  append from betas_posterior_samples;
+  close OUTPUTS.betas_samples;
+  SampleMean = mean(betas_posterior_samples);
+  SampleCov = cov(betas_posterior_samples);
+  compare_means = SampleMean // their_beta;
+  print compare_means[colname=CovarNames rowname={"Sample Mean" "Their Betas"}];
+  print SampleCov[colname=CovarNames rowname=CovarNames];
+  cov_diff = SampleCov - their_cov;
+  print cov_diff[colname=CovarNames rowname=CovarNames];
+  store betas_posterior_samples;
+
 * Iterate over the betas_posterior_samples, constructing a model    ;
 * formula for each one and passing it to the impdata20x.sas script. ;
 * Cache each imputed data set so generated, to be analyzed below.   ;
 
-proc iml;
-  start CacheMI(imod0, imod1, seed0, seed1);
+  start CacheMI(imod, seed);
   load betas_posterior_samples CovarNames;
   CovarNames[loc(CovarNames='Intercept')] = "1";
-  do imod = imod0 to imod1;
-    coefs = betas_posterior_samples[imod,];
-    coefs = round(coefs, 0.0001); * to constrain formula length ;
-    * convert coefs to explicitly (+/-) signed strings ;
-    signs = repeat(" ",1,ncol(coefs));
-    signs[loc(coefs>=0)] = "+";
-    coefs = catx("", signs, coefs);
-    * generate formula terms, then concatenate them ;
-    terms = catx("*",coefs,CovarNames`);
-    formula = rowcatc(terms);
-    do seed = seed0 to seed1;
-      submit formula seed imod;
-        %let formula=&formula; * sets a &formula macro for impdata20x.sas;
-        %let mi_seed=&seed;
-        %let imod=&imod;
-        %include "&reanalysis/impdata20x.sas";
-      endsubmit;
-    end; * mi_seed loop ;
-  end; * imod loop ;
+  coefs = betas_posterior_samples[imod,];
+  coefs = round(coefs, 0.0001); * to constrain formula length ;
+  * convert coefs to explicitly (+/-) signed strings ;
+  signs = repeat(" ",1,ncol(coefs));
+  signs[loc(coefs>=0)] = "+";
+  coefs = catx("", signs, coefs);
+  * generate formula terms, then concatenate them ;
+  terms = catx("*",coefs,CovarNames`);
+  formula = rowcatc(terms);
+  submit formula seed imod;
+    %let formula=&formula; * sets a &formula macro for impdata20x.sas;
+    %let mi_seed=&seed;
+    %let imod=&imod;
+    %include "&reanalysis/impdata20x.sas";
+  endsubmit;
   finish CacheMI;
   store module=CacheMI;
-  quit;
 
 * Run the models on the cached imputed data sets, filling ORCI table ;
-proc iml;
-  start FillORCI(imod0, imod1, seed0, seed1);
+  start FillORCI(imod, seed);
   *title1 "Constructing PTSD imputation model formulas";
   *title2 "(to be passed one-by-one as 'formula' to Ptsd_MTO_youth.sas)";
   load betas_posterior_samples CovarNames;
@@ -104,7 +97,6 @@ proc iml;
      PT50 PT50_1 PT51 PT55 PT209 PT211 PT212 PT213 PT214 PT233 PT237};
     close OUTPUTS.orci;
   end;
-  do imod = imod0 to imod1;
     coefs = betas_posterior_samples[imod,];
     coefs = round(coefs, 0.0001); * to constrain formula length ;
     Intercept = coefs[1];
@@ -141,7 +133,6 @@ proc iml;
     *title1 "Passing this formula to Ptsd_MTO_youth.sas script";
     *print formula;
     *title1;
-    do seed = seed0 to seed1;
       submit imod seed ;
       %let imod = &imod;
       %let miseed = &seed;
@@ -197,10 +188,7 @@ proc iml;
       edit OUTPUTS.orci;
         append;
       close OUTPUTS.orci;
-    end; * mi_seed loop ;
 
-	* Write ORCI to tab-delimited text file ;
-  end; * imod loop ;
   submit;
   proc export data=OUTPUTS.orci
     outfile="&outputs/orci.tab"
@@ -210,15 +198,19 @@ proc iml;
   endsubmit;
   finish FillORCI;
   store module=FillORCI;
-  quit;
 
 * A first test of full 2x2 bootstrap loop ;
-proc iml;
-  load module=CacheMI;
-  run CacheMI(3,3,523230,523230);
-  quit;
-
+  *run CacheMI(1, 524231);
+  resume;
+  run CacheMI(2, 524231);
+  run CacheMI(1, 524232);
+/*
 proc iml;
   load module=FillORCI;
-  run FillORCI(3,3,523230,523230);
+  do imod = 1 to 2;
+    do seed = 524231 to 524232;
+      run FillORCI(imod, seed);
+    end;
+  end;
   quit;
+*/
