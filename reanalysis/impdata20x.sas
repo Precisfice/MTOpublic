@@ -34,7 +34,7 @@ libname OUTPUTS "&outputs";
    in the reanalysis, this script is usually *given* a formula by the
    code that invokes it.  If desired, however, we can default to exactly
    that formula used in the JAMA paper.
- ************************************************************************/
+ ************************************************************************
  *                                            add/remove forward slash --^ ;
  *                                            to fix/parametrize formula   ;
 
@@ -155,40 +155,6 @@ run;
  */
 %LET imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
-dm 'clear log'; 
+*dm 'clear log'; 
 * Otherwise, log may fill up, and user is prompted to empty it ;
 
-%let data = impdata_jrrm;
-PROC SURVEYLOGISTIC DATA = &imputed(WHERE=(x_f_ch_male=1)); 
-   STRATA ra_site; CLUSTER f_svy_bl_tract_masked_id;
-   DOMAIN _imputation_;
-   MODEL &dep (EVENT='1') = &controls / COVB; 
-   WEIGHT f_wt_totcore98 ;
-   OUTPUT OUT=preddata PREDICTED=pp;
-   ODS OUTPUT parameterestimates=parmest  
-              OddsRatios = or   
-              covb=covm  ;
-RUN;
-
-DATA parmest; SET parmest (WHERE=(CMISS(domain)=0)); %codeallimp;
-DATA or; SET or (WHERE=(CMISS(domain)=0)); %codeallimp; 
-DATA covm; SET covm (WHERE=(CMISS(domain)=0)); %codeallimp;
-RUN;
-
-/*
-Get OR and chisquare tests through Mianalyze
-*/
-
-PROC MIANALYZE PARMS = parmest  XPXI=covm;
-   MODELEFFECTS intercept &controls ;
-   ODS OUTPUT ParameterEstimates = outres;
-RUN;
-
-DATA outres1 (KEEP=parm or lowor upor chivalue p) ; 
- SET outres; 
- IF parm ^="intercept";
- or = EXP(estimate);
- lowor = EXP(lclmean);
- upor = EXP(uclmean);
- parm=UPCASE(parm);
-RUN;
