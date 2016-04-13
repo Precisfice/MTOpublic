@@ -68,9 +68,8 @@ STEPS:
 ** Set directories, libraries, and datasets;
 /* !!!! USER MUST UPDATE DIRECTORY LOCATION FOR FORMATS/OUTPUT FILE AND DATA LOCATION. !!!! */
 * Location of formats programs and output location for log/results;
-%let pgmdir = C:/Users/Anolinx/MTO/outputs;
+%let pgmdir = &outputs;
 * Data file location;
-libname mto "E:/NSCR_Replication_study";
 /* For purposes of reanalysis, macro vars 'preimp' and 'imputed' are now set in 'impdata20x.sas'
 * Input data file: pre-imputation dataset (one observation for each youth);
 %let preimp = mto.mto_jama_preimp_20160111;
@@ -163,7 +162,7 @@ DATA mto2 (WHERE=(&grp=1));
       HHSIZE_3PLUS HHSIZE_4PLUS HHSIZE_5PLUS 
       X_F_SITE_BALT X_F_SITE_BOS X_F_SITE_CHI X_F_SITE_LA  ymh_cov_ad_single_mother f_c9010t_perpov_bl
       &adage &edvars &demos &pers &c2vars &chage &schvars &hhvars &hoodvars &housvars 
-      &incvars &sitevars &ptsdvars &dxvars &convars; 
+      &incvars &sitevars &ptsdvars &dxvars &convars f_svy_final_disp /*AW retained*/; 
 RUN;
 
 *get number of missing for each variable*;
@@ -569,7 +568,7 @@ PROC SORT DATA=impdata;
 RUN;
  
 DATA impdata2;
-	MERGE impdata (in=imp) &preimp. (keep = ppid ra_group f_svy_age_bl_imp 
+	MERGE impdata (in=imp) &preimp. (keep = ppid ra_group f_svy_age_bl_imp f_svy_final_disp
 f_svy_age_iw 
 x_f_ch_male
 );

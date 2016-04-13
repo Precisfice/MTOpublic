@@ -1,6 +1,6 @@
-PROC PRINTTO NEW
-  LOG="&outputs/RS1.log";
-RUN;
+/*PROC PRINTTO NEW*/
+/*  LOG="&outputs/RS1.log";*/
+/*RUN;*/
 
 * I-1: Generate formatted unrestricted and restricted data sets ;
 * ---------------------------------------------------------------- ;

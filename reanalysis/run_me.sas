@@ -67,7 +67,7 @@ libname OUTPUTS "&outputs";
 /*PROC PRINTTO NEW*/
 /*  LOG="&outputs/RS6.log";*/
 /*RUN;*/
-%include "&reanalysis/RS6_bootstrap_ORs.sas";
+*%include "&reanalysis/RS6_bootstrap_ORs.sas";
 /*PROC PRINTTO;*/
 /*RUN;*/
 /* --- References ---
