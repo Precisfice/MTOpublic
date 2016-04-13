@@ -70,6 +70,7 @@ STEPS:
 * Location of formats programs and output location for log/results;
 %let pgmdir = &outputs;
 * Data file location;
+*libname mto "E:/NSCR_Replication_study";
 /* For purposes of reanalysis, macro vars 'preimp' and 'imputed' are now set in 'impdata20x.sas'
 * Input data file: pre-imputation dataset (one observation for each youth);
 %let preimp = mto.mto_jama_preimp_20160111;

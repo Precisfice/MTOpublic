@@ -2,49 +2,10 @@
  ************************************************************/
 PROC PRINTTO;
 RUN;
-%MACRO receive_mi_seed_imod_w_defaults;
-	%GLOBAL mi_seed;
-	%GLOBAL imod;
-	%IF (&mi_seed=) %THEN %LET mi_seed = 524232; * Default to the seed used in JAMA paper ;
-	%IF (&imod=) %THEN %LET imod = SATHCF; * For standalone tests with hard-coded formula ;
-%MEND receive_mi_seed_imod_w_defaults;
-
-%receive_mi_seed_imod_w_defaults;
-%PUT MI_SEED = &mi_seed;
-
-* repeat defs + reinclude to enable standalone testing ;
-%let folder = C:/Users/Anolinx/MTO;
-%let reanalysis = &folder/reanalysis;
-%include "&reanalysis/mtoptsd_macro.sas";
-
-* Input data file: pre-imputation dataset (one observation for each youth);
-
-%LET NBER = E:/NSCR_Replication_study/NBER;
-%LET ncsr = E:/NSCR_Replication_study;
-Libname NBER "&NBER";
-LIBNAME NCSR "&ncsr";
-%LET outputs = &folder/outputs;
-libname OUTPUTS "&outputs";
 
 %let preimp = NBER.Mto_jama_preimp_fixed;
 %mtoptsd(&preimp,Y,preimp_xwalk ); * Crosswalk MTO-->NCSR PTSD varnames ;
 
-/* This stretch of code allows this script to run in a 'standalone' mode
-   for testing and refactoring purposes.  In its intended application
-   in the reanalysis, this script is usually *given* a formula by the
-   code that invokes it.  If desired, however, we can default to exactly
-   that formula used in the JAMA paper.
- ************************************************************************
- *                                            add/remove forward slash --^ ;
- *                                            to fix/parametrize formula   ;
-
-%LET formula = 1*(-1.515)+AGE*(0.0263)+SEXF*(0.1105)+
-			RHISP*(-0.0819)+RBLK*(-0.5597)+ROTH*(-0.9751)+PT41*(-0.5603)+
-			PT42*(0.0504)+PT43*(-0.3877)+PT44*(0.1148)+PT45*(-0.1614)+
-			PT46*(0.5993)+PT48*(0.078)+PT50*(0.4687)+PT50_1*(0.4591)+
-			PT51*(0.1683)+PT55*(-0.2237)+PT209*(0.3664)+PT211*(-0.0581)+
-			PT212*(0.2516)+PT213*(0.1159)+PT214*(0.64)+PT233*(0.8654)+PT237*(0.1323);
-*/
 %PUT Formula: &formula;
 
 data vars;
@@ -52,8 +13,8 @@ set NCSR.Mental_health_yt_20150612;
 format _Numeric_;
 ptsd_random=ranuni(1234567);
 keep PPID ptsd_random
-f_svy_ethnic /*f_svy_ethnic - Ethnicity (1=Hispanic, 2=Not Hispanic) from Revised Demog File*/
-f_svy_race /*f_svy_race - Race (1=AfrAm/2=Wht/3=AmInd/4=AsPacIsl/5=Oth) from Revised Demog File*/;
+f_svy_ethnic
+f_svy_race;
 run;
 
 proc sort data = vars;
@@ -71,7 +32,6 @@ set preimp_xwalk2;
 f_mh_pts_y_yt_orig=f_mh_pts_y_yt;
 Age = f_svy_age_iw;
 SEXF = 1-x_f_ch_male;
- /* Race */
    rhisp = 0;
    rwh = 0;
    rblk = 0;
@@ -154,6 +114,7 @@ run;
  * in which the MI seed has been parametrized for sensitivity analysis.
  */
 %LET imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
+%put Imputed dataset: &imputed;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 *dm 'clear log'; 
 * Otherwise, log may fill up, and user is prompted to empty it ;

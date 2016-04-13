@@ -1,7 +1,3 @@
-/*PROC PRINTTO NEW*/
-/*  LOG="&outputs/RS1.log";*/
-/*RUN;*/
-
 * I-1: Generate formatted unrestricted and restricted data sets ;
 * ---------------------------------------------------------------- ;
 options fmtsearch = ( NCSR ); * We put formats into NCSR library ;
@@ -15,6 +11,10 @@ proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
 %IF &workstation = SLC %THEN %DO;
 proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=F; run;
 proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=F; run;
+%END;
+%IF &workstation = SLCUE %THEN %DO;
+proc cimport infile="&ncsr/20240-0002-Data.stc" lib=WORK isfileutf8=T; run;
+proc cimport infile="&ncsr/20240-0005-Data-REST.stc" lib=WORK isfileutf8=T; run;
 %END;
 %mend;
 
