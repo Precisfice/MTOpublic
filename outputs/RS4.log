@@ -3,29 +3,19 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-13863      %include "&reanalysis/RS4_prep_MTO_data.sas";
-NOTE: Data file NBER.MTO_JAMA_PREIMP_20160111.DATA is in a format that is native to another host, or the file encoding does not 
-      match the session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and 
-      might reduce performance.
+13810  %include "&reanalysis/RS4_prep_MTO_data.sas";
+NOTE: Data file NBER.MTO_JAMA_PREIMP_20160111.DATA is in a format that is native to another host, 
+      or the file encoding does not match the session encoding. Cross Environment Data Access 
+      will be used, which might require additional CPU resources and might reduce performance.
 
 NOTE: There were 3689 observations read from the data set NBER.MTO_JAMA_PREIMP_20160111.
 NOTE: The data set NBER.MTO_JAMA_PREIMP_SORTED has 3689 observations and 492 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.21 seconds
-      cpu time            0.15 seconds
+      real time           0.10 seconds
+      cpu time            0.17 seconds
       
 
-MPRINT(DATAFIX2):   ****************************************************************************************** * For onset/recency 
-ages less than 4 reset to 4 * ******************************************************************************************;
-MPRINT(DATAFIX2):   array onsetrec YDE6a_D22a YDE6d_D22c YDE13a_D37a YDE13b_D37b1 YDE14b_D38c YMA2a_M3a YMA2d_M3c YMA6a_M6a 
-YMA6d_M6c YMA10a_M18a YMA10b_M18b1 YMA13_M19d YPD5a_PD9a YPD5b_PD9b1 YPD7c_PD10d YGA11a_G26a YGA11b_G26b1 YGA12c_G27c YIE8a_IED18a 
-YIE8b_IED18b1 YIE9a_IED22a YCV14b_PT64a YCV14c YOD3a_OD3a YOD3b_OD3b1 YOD4a_OD4a;
-MPRINT(DATAFIX2):   do over onsetrec;
-MPRINT(DATAFIX2):   if 0 <= onsetrec < 4 then onsetrec = 4;
-MPRINT(DATAFIX2):   end;
 MPRINT(AGEFIX1):   if YDE13a_D37a IN(.,.D,.R) then do;
-144                                                        The SAS System                        Tuesday, April 12, 2016 04:27:56 PM
-
 MPRINT(AGEFIX1):   if YDE13c_D37b2 = 1 then YDE13a_D37a = 4;
 MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 1 then YDE13a_D37a = 12;
 MPRINT(AGEFIX1):   else if YDE13d_D37b3 = 5 then YDE13a_D37a = 13;
@@ -84,20 +74,13 @@ MPRINT(AGEFIX1):   if YOD3b_OD3b1 IN(.,.D,.R) then do;
 MPRINT(AGEFIX1):   if YOD3c_OD3b2 = 1 then YOD3b_OD3b1 = 4;
 MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 1 then YOD3b_OD3b1 = 12;
 MPRINT(AGEFIX1):   else if YOD3d_OD3b3 = 5 then YOD3b_OD3b1 = 13;
-145                                                        The SAS System                        Tuesday, April 12, 2016 04:27:56 PM
-
 MPRINT(AGEFIX1):   end;
 
 NOTE: There were 3689 observations read from the data set NBER.MTO_JAMA_PREIMP_SORTED.
 NOTE: The data set NBER.MTO_JAMA_PREIMP_FIXED has 3689 observations and 492 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.13 seconds
-      cpu time            0.07 seconds
+      real time           0.01 seconds
+      cpu time            0.01 seconds
       
 
-13951      
-13952      /*  STEP V -- Compare MTO vs NCS-R age distributions
-13953       */
-13954      PROC PRINTTO NEW LOG="&outputs/RS5.log";
-13955      RUN;
 

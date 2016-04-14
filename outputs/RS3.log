@@ -3,63 +3,58 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-13730      %include "&reanalysis/RS3_compare_coefficients.sas";
+13684  %include "&reanalysis/RS3_compare_coefficients.sas";
 
-NOTE: The infile "/folders/myfolders/MTO/outputs/slopes.txt" is:
-      Filename=/folders/myfolders/MTO/outputs/slopes.txt,
-      Owner Name=root,Group Name=vboxsf,
-      Access Permission=-rwxrwx---,
-      Last Modified=12Apr2016:14:31:05,
-      File Size (bytes)=10397
+NOTE: The infile "C:/Users/Anolinx/MTO/outputs/slopes.txt" is:
+      Filename=C:\Users\Anolinx\MTO\outputs\slopes.txt,
+      RECFM=V,LRECL=32767,File Size (bytes)=10397,
+      Last Modified=02Feb2016:12:54:07,
+      Create Time=02Feb2016:12:54:07
 
 NOTE: DATA STEP stopped due to looping.
-NOTE: 24 records were read from the infile "/folders/myfolders/MTO/outputs/slopes.txt".
+NOTE: 24 records were read from the infile "C:/Users/Anolinx/MTO/outputs/slopes.txt".
       The minimum record length was 70.
       The maximum record length was 70.
 NOTE: The data set WORK.COEF_REP has 24 observations and 2 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.00 seconds
+      real time           0.01 seconds
       cpu time            0.00 seconds
       
 
 
-NOTE: Unable to open parameter catalog: SASUSER.PARMS.PARMS.SLIST in update mode. Temporary parameter values will be saved to 
-WORK.PARMS.PARMS.SLIST.
-13750       /**********************************************************************
-13751       *   PRODUCT:   SAS
-13752       *   VERSION:   9.4
-13753       *   CREATOR:   External File Interface
-13754       *   DATE:      12APR16
-13755       *   DESC:      Generated SAS Datastep Code
-13756       *   TEMPLATE SOURCE:  (None Specified.)
-13757       ***********************************************************************/
-13758          data WORK.COEF_ORI    ;
-13759          %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
-13760          infile '/folders/myfolders/MTO/PTSD_slopes_from_NCSR.csv' delimiter = ',' MISSOVER DSD lrecl=32767 firstobs=2 ;
-13761             informat Independent_variable $9. ;
-13762             informat Beta best32. ;
-13763             informat Label $64. ;
-13764             format Independent_variable $9. ;
-13765             format Beta best12. ;
-13766             format Label $64. ;
-13767          input
-13768                      Independent_variable $
-13769                      Beta
-13770                      Label $
-13771          ;
-13772          if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
-13773          run;
+13704   /**********************************************************************
+13705   *   PRODUCT:   SAS
+13706   *   VERSION:   9.4
+13707   *   CREATOR:   External File Interface
+13708   *   DATE:      14APR16
+13709   *   DESC:      Generated SAS Datastep Code
+13710   *   TEMPLATE SOURCE:  (None Specified.)
+13711   ***********************************************************************/
+13712      data WORK.COEF_ORI    ;
+13713      %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+13714      infile 'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv' delimiter = ',' MISSOVER DSD
+13714! lrecl=32767 firstobs=2 ;
+13715         informat Independent_variable $9. ;
+13716         informat Beta best32. ;
+13717         informat Label $64. ;
+13718         format Independent_variable $9. ;
+13719         format Beta best12. ;
+13720         format Label $64. ;
+13721      input
+13722                  Independent_variable $
+13723                  Beta
+13724                  Label $
+13725      ;
+13726      if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+13727      run;
 
-NOTE: The infile '/folders/myfolders/MTO/PTSD_slopes_from_NCSR.csv' is:
-142                                                        The SAS System                        Tuesday, April 12, 2016 04:27:55 PM
+NOTE: The infile 'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv' is:
+      Filename=C:\Users\Anolinx\MTO\PTSD_slopes_from_NCSR.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1276,
+      Last Modified=02Feb2016:12:54:07,
+      Create Time=02Feb2016:12:54:07
 
-      Filename=/folders/myfolders/MTO/PTSD_slopes_from_NCSR.csv,
-      Owner Name=root,Group Name=vboxsf,
-      Access Permission=-rwxrwx---,
-      Last Modified=12Apr2016:14:31:04,
-      File Size (bytes)=1276
-
-NOTE: 24 records were read from the infile '/folders/myfolders/MTO/PTSD_slopes_from_NCSR.csv'.
+NOTE: 24 records were read from the infile 'C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv'.
       The minimum record length was 14.
       The maximum record length was 78.
 NOTE: The data set WORK.COEF_ORI has 24 observations and 3 variables.
@@ -68,80 +63,81 @@ NOTE: DATA statement used (Total process time):
       cpu time            0.00 seconds
       
 
-24 rows created in WORK.COEF_ORI from /folders/myfolders/MTO/PTSD_slopes_from_NCSR.csv.
+24 rows created in WORK.COEF_ORI from C:/Users/Anolinx/MTO/PTSD_slopes_from_NCSR.csv.
   
   
   
 NOTE: WORK.COEF_ORI data set was successfully created.
 NOTE: The data set WORK.COEF_ORI has 24 observations and 3 variables.
 NOTE: PROCEDURE IMPORT used (Total process time):
-      real time           0.14 seconds
-      cpu time            0.04 seconds
+      real time           0.24 seconds
+      cpu time            0.14 seconds
       
 
-NOTE: Data file WC000001.YOUTH_COVMATRIX.DATA is in a format that is native to another host, or the file encoding does not match 
-      the session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might 
-      reduce performance.
+NOTE: Data file WC000001.YOUTH_COVMATRIX.DATA is in a format that is native to another host, or 
+      the file encoding does not match the session encoding. Cross Environment Data Access will 
+      be used, which might require additional CPU resources and might reduce performance.
 
-NOTE: There were 97 observations read from the data set /folders/myfolders/MTO/youth_covmatrix.sas7bdat.
+NOTE: There were 97 observations read from the data set 
+      C:/Users/Anolinx/MTO/youth_covmatrix.sas7bdat.
 NOTE: The data set WORK.COVAR_THEIRS has 97 observations and 33 variables.
-NOTE: DATA statement used (Total process time):
-      real time           0.00 seconds
-      cpu time            0.00 seconds
-      
-
-
-NOTE: The infile "/folders/myfolders/MTO/outputs/covmat01.dbs" is:
-      Filename=/folders/myfolders/MTO/outputs/covmat01.dbs,
-      Owner Name=root,Group Name=vboxsf,
-      Access Permission=-rwxrwx---,
-      Last Modified=12Apr2016:14:31:04,
-      File Size (bytes)=35114
-
-NOTE: 97 records were read from the infile "/folders/myfolders/MTO/outputs/covmat01.dbs".
-      The minimum record length was 360.
-      The maximum record length was 360.
-NOTE: The data set WORK.COVAR_OURS has 97 observations and 33 variables.
 NOTE: DATA statement used (Total process time):
       real time           0.00 seconds
       cpu time            0.01 seconds
       
 
-NOTE: IML Ready
-NOTE: Opening storage library WORK.IMLSTOR
-NOTE: Module MAIN is undefined in IML; cannot be RUN.
-NOTE: Exiting IML.
-143                                                        The SAS System                        Tuesday, April 12, 2016 04:27:56 PM
 
-NOTE: Storage library WORK.IMLSTOR closed.
-NOTE: PROCEDURE IML used (Total process time):
-      real time           0.33 seconds
-      cpu time            0.32 seconds
+NOTE: The infile "C:/Users/Anolinx/MTO/outputs/covmat01.dbs" is:
+      Filename=C:\Users\Anolinx\MTO\outputs\covmat01.dbs,
+      RECFM=V,LRECL=32767,File Size (bytes)=35114,
+      Last Modified=02Feb2016:12:54:07,
+      Create Time=02Feb2016:12:54:07
+
+NOTE: 97 records were read from the infile "C:/Users/Anolinx/MTO/outputs/covmat01.dbs".
+      The minimum record length was 360.
+      The maximum record length was 360.
+NOTE: The data set WORK.COVAR_OURS has 97 observations and 33 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
       
 
 NOTE: IML Ready
 NOTE: Opening storage library WORK.IMLSTOR
 NOTE: Module MAIN is undefined in IML; cannot be RUN.
-NOTE: Writing ODS PDF output to DISK destination "/folders/myfolders/MTO/outputs/RS3-Betas_Compared.pdf", printer "PDF".
+NOTE: Exiting IML.
+NOTE: Storage library WORK.IMLSTOR closed.
+NOTE: PROCEDURE IML used (Total process time):
+      real time           0.21 seconds
+      cpu time            0.06 seconds
+      
+
+NOTE: IML Ready
+NOTE: Opening storage library WORK.IMLSTOR
+NOTE: Module MAIN is undefined in IML; cannot be RUN.
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\RS3-Betas_Compared.pdf", printer "PDF".
 NOTE: Exiting IML.
 NOTE: The data set WORK.BETAS has 24 observations and 6 variables.
 NOTE: Storage library WORK.IMLSTOR closed.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           0.04 seconds
-      cpu time            0.03 seconds
+      real time           0.14 seconds
+      cpu time            0.12 seconds
       
 
 
 NOTE: There were 24 observations read from the data set WORK.BETAS.
 NOTE: PROCEDURE PRINT used (Total process time):
-      real time           0.05 seconds
-      cpu time            0.05 seconds
+      real time           0.23 seconds
+      cpu time            0.01 seconds
       
 
-NOTE: ODS PDF printed 1 page to /folders/myfolders/MTO/outputs/RS3-Betas_Compared.pdf.
-13858      
-13859      /*  STEP IV -- Prepare the MTO data
-13860       */
-13861      PROC PRINTTO NEW LOG="&outputs/RS4.log";
-13862      RUN;
+NOTE: ODS PDF printed 1 page to C:\Users\Anolinx\MTO\outputs\RS3-Betas_Compared.pdf.
+13812  
+13813  /*  STEP IV -- Prepare the MTO data
+13814   */
+13815  *PROC PRINTTO NEW LOG="&outputs/RS4.log";
+13816  *RUN;
+13817  PROC PRINTTO;
+13818  RUN;
 

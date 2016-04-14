@@ -1,39 +1,73 @@
 NOTE: PROCEDURE PRINTTO used (Total process time):
       real time           0.00 seconds
-      cpu time            0.00 seconds
+      cpu time            0.01 seconds
       
 
-13956      %include "&reanalysis/RS5_contrast_age_dists.sas";
-NOTE: Writing ODS PDF output to DISK destination "/folders/myfolders/MTO/outputs/RS5-Age_MTO_vs_NCSR.pdf", printer "PDF".
+14207  %include "&reanalysis/RS5_contrast_age_dists.sas";
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf", printer "PDF".
 
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 NOTE: The data set NCSR.NCSR has 9282 observations and 4213 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           2.41 seconds
-      cpu time            1.19 seconds
+      real time           0.35 seconds
+      cpu time            0.42 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 NOTE: PROCEDURE MEANS used (Total process time):
-      real time           1.18 seconds
-      cpu time            0.55 seconds
+      real time           0.18 seconds
+      cpu time            0.15 seconds
       
 
-NOTE: ODS PDF printed 1 page to /folders/myfolders/MTO/outputs/RS5-Age_MTO_vs_NCSR.pdf.
-14001      
-14002      /*  STEP VI -- Bootstrap the voucher effects
-14003       */
-14004      *PROC PRINTTO NEW LOG="&outputs/RS6.log";
-14005      *RUN;
-14006      *%include "&reanalysis/RS6_bootstrap_ORs.sas";
-14007      
-14008      /* --- References ---
-14009      1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
-14010         for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during Adolescence.
-14011         JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
-14012      
-14013          */
-14014      
-14015      
-14016      OPTIONS NONOTES NOSTIMER NOSOURCE NOSYNTAXCHECK;
+MPRINT(PLOT_AGE_DENS):   proc sgplot data=NCSR.ncsr;
+MPRINT(PLOT_AGE_DENS):   histogram age/ nbins=75 name='est';
+MPRINT(PLOT_AGE_DENS):   density age;
+MPRINT(PLOT_AGE_DENS):   xaxis display=(nolabel) min=15 max=90;
+MPRINT(PLOT_AGE_DENS):   yaxis grid;
+MPRINT(PLOT_AGE_DENS):   keylegend 'est' / location=inside across=1 position=topright;
+MPRINT(PLOT_AGE_DENS):   by pts_smpl;
+MPRINT(PLOT_AGE_DENS):   run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           1.28 seconds
+      cpu time            0.35 seconds
+      
+NOTE: There were 9282 observations read from the data set NCSR.NCSR.
+
+NOTE: ODS PDF printed 3 pages to C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf.
+14252  
+14253  /*  STEP VI -- Bootstrap the voucher effects
+14254   */
+14255  *PROC PRINTTO NEW LOG="&outputs/RS6.log";
+14256  *RUN;
+14257  *%include "&reanalysis/RS6_bootstrap_ORs.sas";
+14258  
+14259  /* --- References ---
+14260  1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility
+14260! Interventions
+14261     for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during
+14261! Adolescence.
+14262     JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
+14263  
+14264      */
+
+14265  proc freq data=MTO.imod_derived_ptsd_outcome;
+14266    tables f_mh_pts_y_yt*f_mh_pts_y_yt_orig;
+14267  run;
+
+NOTE: There were 3689 observations read from the data set MTO.IMOD_DERIVED_PTSD_OUTCOME.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.00 seconds
+      
+
+14268  /* Top-level script for reanalysis of reported PTSD findings of Kessler et al [1] */
+14269  
+14270  /*  STEP 0 -- Define folders to match your directory setup
+14271   **********************************************************/
+14272  
+14273  PROC PRINTTO;
+14274  RUN;
+
