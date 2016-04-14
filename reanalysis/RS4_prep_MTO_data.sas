@@ -22,3 +22,11 @@ run;
                PT212*(0.2516)+PT213*(0.1159)+PT214*(0.64)+PT233*(0.8654)+PT237*(0.1323);
 %include "&reanalysis/impdata20x.sas";
 
+/* TODO:
+  1. 'Assert' that we obtained (to 5 decimal places) the following results:
+                  OR      LOWOR    UPOR
+    RA_GRP_EXP  3.44025  1.60147  7.39026
+    RA_GRP_S8   2.67817  1.23268  5.81873
+
+  2. Rename this file to reflect the fact it achieves a REPRODUCTION
+ */
