@@ -84,7 +84,7 @@ quit;
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
-  set MTO.orci_:; * Read numerous named outputs outres1_<imod>_<seed> ;
+  set MTO.orci_:; * Read numerous named outputs orci_<imod>_<seed> ;
   log_or = log(or);
   log_lowor = log(lowor);
   log_upor = log(upor);
