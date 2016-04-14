@@ -28,7 +28,7 @@ ods pdf file = "&outputs/RS2-Eight_Models.pdf";
   %let race_terms=%str( );
   %end;
 %if &max_age=%str() %then %let max_age=99;
-%let suffix=A&incl_age.R&incl_race.S&max_age;
+%let spec=A&incl_age.R&incl_race.S&max_age;
 * On the Seattle workstation where this code was prototyped, ;
 * SAS-callable SUDAAN is unavailable.  Consequently, we use  ;
 * PROC SURVEYLOGISTIC instead of PROC RLOGIST as used by the ;
@@ -55,8 +55,8 @@ proc surveylogistic
                   PT209 PT211 PT212 PT213 PT214 PT233 PT237
         / covb;
   weight ncsrwtlg;
-  ods output CovB=covs&suffix
-    ParameterEstimates=betas&suffix(keep=Variable Estimate); 
+  ods output CovB=covs&spec
+    ParameterEstimates=betas&spec(keep=Variable Estimate); 
 run;
 %mend est_ptsd_imput_model;
 

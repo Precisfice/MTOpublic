@@ -156,7 +156,8 @@ DATA MTO.orci_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ;
   lowor = EXP(lclmean);
   upor = EXP(uclmean);
   parm=UPCASE(parm);
-  imod=&imod;
+  imod="&imod";
   seed=&mi_seed;
 RUN;
 
+%PUT &imod;
