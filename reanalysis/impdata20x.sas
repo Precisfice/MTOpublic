@@ -91,11 +91,6 @@ end;
 if f_svy_age_iw IN(.D,.R,.)
 then f_mh_pts_y_yt = .;
 
-* Save fnlpred_ptsd_youth to enable check that pred_prob is 'imod-sensitive' ;
-data MTO.fnlpred_ptsd_youth_&imod._&mi_seed;
-  set fnlpred_ptsd_youth;
-run;
-
 /* Invoke a slightly modified version of Matt Sciandra's imputation code
  * in which the MI seed has been parametrized for sensitivity analysis.
  */
@@ -154,7 +149,7 @@ PROC MIANALYZE PARMS = parmest  XPXI=covm;
      ODS OUTPUT ParameterEstimates = outres;
 RUN;
 
-DATA outres1_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ; 
+DATA MTO.orci_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ; 
   SET outres; 
   IF parm ^="intercept";
   or = EXP(estimate);
