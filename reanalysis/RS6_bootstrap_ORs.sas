@@ -80,11 +80,14 @@ quit;
 %bootstrap_loop(imodL=1, imodR=4, seedL=524230, seedR=524231);
 %bootstrap_loop(imodL=1, imodR=4, seedL=524234, seedR=524239);
 %bootstrap_loop(imodL=5, imodR=8, seedL=524230, seedR=524239);
+%bootstrap_loop(imodL=9, imodR=10, seedL=524230, seedR=524239);
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
   set MTO.orci_:; * Read numerous named outputs outres1_<imod>_<seed> ;
-  * TODO: Restrict to experimental voucher ;
+  log_or = log(or);
+  log_lowor = log(lowor);
+  log_upor = log(upor);
 run;
 
 data betas_samples_with_imod;
@@ -93,7 +96,7 @@ data betas_samples_with_imod;
 run;
 
 proc sort data=orci;
-  by parm;
+  by parm imod seed;
 run;
 
 data OUTPUTS.orci;
@@ -107,5 +110,23 @@ proc export data=OUTPUTS.orci
   outfile="&outputs/orci.tab"
   dbms=tab
   REPLACE;
+run;
+
+* Calculate a single, bootstrapped estimate of CI, OR ;
+proc means data=orci;
+  class parm;
+  var log_or log_lowor log_upor;
+  *title3 "Bootstrapped voucher-on-PTSD effect estimate";
+  output out=boot_effects;
+run;
+
+* TODO: De-log these results ;
+data boot_effects;
+  set boot_effects(where=(_TYPE_=1 & _STAT_='MEAN'));
+  or = exp(log_or);
+  lowor = exp(log_lowor);
+  upor = exp(log_upor);
+  keep parm or lowor upor;
+  attribute parm label="Voucher Type";
 run;
 
