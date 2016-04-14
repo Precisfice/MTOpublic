@@ -88,6 +88,8 @@ data orci;
   log_or = log(or);
   log_lowor = log(lowor);
   log_upor = log(upor);
+  attribute parm label="Voucher Type";
+  rename parm=voucher;
 run;
 
 data betas_samples_with_imod;
@@ -96,17 +98,21 @@ data betas_samples_with_imod;
 run;
 
 proc sort data=orci;
-  by parm imod seed;
+  by imod seed;
 run;
 
-data OUTPUTS.orci;
+data orci;
   merge orci (in=oink) betas_samples_with_imod;
   by imod;
   if oink;
 run;
 
+proc sort data=orci;
+  by voucher imod seed; * sort by voucher type to ease visual inspection;
+run;
+
 * Export ORCI to tab-delimited file friendly to 'git diff' et al. ; 
-proc export data=OUTPUTS.orci
+proc export data=orci
   outfile="&outputs/orci.tab"
   dbms=tab
   REPLACE;
@@ -114,7 +120,7 @@ run;
 
 * Calculate a single, bootstrapped estimate of CI, OR ;
 proc means data=orci;
-  class parm;
+  class voucher;
   var log_or log_lowor log_upor;
   *title3 "Bootstrapped voucher-on-PTSD effect estimate";
   output out=boot_effects;
@@ -126,7 +132,7 @@ data boot_effects;
   or = exp(log_or);
   lowor = exp(log_lowor);
   upor = exp(log_upor);
-  keep parm or lowor upor;
-  attribute parm label="Voucher Type";
+  keep voucher or lowor upor;
+  *attribute parm label="Voucher Type";
 run;
 
