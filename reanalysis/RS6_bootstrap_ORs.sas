@@ -15,9 +15,9 @@ proc iml;
   sample_labels = {"Original" "Sample 1" "Sample 2" "Sample 3" "Sample 4"};
   print(betas_posterior_samples[1:5,])[Label="Original and first 4 sampled coefficient vectors"
    colname=CovarNames rowname=sample_labels];
-  create OUTPUTS.betas_samples from betas_posterior_samples[colname=CovarNames];
+  create betas_samples from betas_posterior_samples[colname=CovarNames];
   append from betas_posterior_samples;
-  close OUTPUTS.betas_samples;
+  close betas_samples;
   SampleMean = mean(betas_posterior_samples);
   SampleCov = cov(betas_posterior_samples);
   compare_means = SampleMean // their_beta;
@@ -40,7 +40,7 @@ quit;
  %DO mi_seed= &seedL %TO &seedR;
 
     data _null_;
-      set OUTPUTS.betas_samples;
+      set betas_samples;
       if _N_ = &imod; * TODO: In general, &imod ;
       form = trim('1'||'*('||trim(left(put(Intercept,10.4)))||')+'||
         'AGE'||'*('||trim(left(put(AGE,10.4)))||')+'||
@@ -93,7 +93,7 @@ data orci;
 run;
 
 data betas_samples_with_imod;
-  set OUTPUTS.betas_samples;
+  set betas_samples;
   imod = _N_;
 run;
 
