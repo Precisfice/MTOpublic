@@ -154,7 +154,7 @@ PROC MIANALYZE PARMS = parmest  XPXI=covm;
      ODS OUTPUT ParameterEstimates = outres;
 RUN;
 
-DATA outres1_repro (KEEP=parm or lowor upor imod seed) ; 
+DATA outres1_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ; 
   SET outres; 
   IF parm ^="intercept";
   or = EXP(estimate);
