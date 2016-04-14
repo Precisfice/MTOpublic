@@ -75,15 +75,17 @@ RUN;
 
 /*  STEP IV -- Prepare the MTO data
  */
-PROC PRINTTO NEW LOG="&outputs/RS4.log";
+*PROC PRINTTO NEW LOG="&outputs/RS4.log";
+*RUN;
+PROC PRINTTO;
 RUN;
 %include "&reanalysis/RS4_prep_MTO_data.sas";
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
  */
-PROC PRINTTO NEW LOG="&outputs/RS5.log";
-RUN;
-%include "&reanalysis/RS5_contrast_age_dists.sas";
+*PROC PRINTTO NEW LOG="&outputs/RS5.log";
+*RUN;
+*%include "&reanalysis/RS5_contrast_age_dists.sas";
 
 /*  STEP VI -- Bootstrap the voucher effects
  */
