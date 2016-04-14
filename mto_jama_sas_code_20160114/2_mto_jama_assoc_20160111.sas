@@ -28,6 +28,7 @@ Steps:
 *===============================================;
 
 
+
 %LET NBER = E:/NSCR_Replication_study/NBER;
 Libname NBER "&NBER";
 
@@ -38,7 +39,7 @@ Libname NBER "&NBER";
 OPTIONS NOFMTERR MPRINT LINESIZE=80;
 
 /* !!!! USER MUST UPDATE DIRECTORY LOCATION FOR FORMATS/OUTPUT FILE AND DATA LOCATION. !!!! */
-%let outdata = C:/Users/Anolinx/MTO/outputs;
+%let outdata = E:\NSCR_Replication_study\outputs;
 libname outdata "&outdata."; 
 
 %let impdata = Nber.mto_jama_imputed_20160111; 
