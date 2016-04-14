@@ -76,18 +76,24 @@ quit;
 
 %MEND bootstrap_loop;
 
-%bootstrap_loop(imodL=2, imodR=3, seedL=524232, seedR=524232);
-*%bootstrap_loop(imodL=3, imodR=5, seedL=524777, seedR=524777);
+%bootstrap_loop(imodL=3, imodR=4, seedL=524232, seedR=524233);
+%bootstrap_loop(imodL=1, imodR=4, seedL=524230, seedR=524231);
+%bootstrap_loop(imodL=1, imodR=4, seedL=524234, seedR=524239);
+%bootstrap_loop(imodL=5, imodR=8, seedL=524230, seedR=524239);
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
-Data ORCI;
-  Set outres1:; * Read numerous named outputs outres1_<imod>_<seed> ;
+data orci;
+  set MTO.orci_:; * Read numerous named outputs outres1_<imod>_<seed> ;
   * TODO: Restrict to experimental voucher ;
 run;
 
 data betas_samples_with_imod;
   set OUTPUTS.betas_samples;
   imod = _N_;
+run;
+
+proc sort data=orci;
+  by parm;
 run;
 
 data OUTPUTS.orci;
