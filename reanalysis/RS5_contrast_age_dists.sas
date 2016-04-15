@@ -42,3 +42,22 @@ ods pdf close;
 * TODO: Plot a similar histogram demonstrating the negligible overlap ;
 *       of the age distributions of MTO and NCS-R.                    ;
 
+/*Plotting Age histogram demonstrating the negligible overlap
+      of the age distributions of MTO and NCS-R in R*/
+
+Data NCSR_AGES;
+SET NCSR.NCSR;
+Survey ="(1) NCSR";
+keep Age survey;
+run;
+
+DATA MTO_AGES;
+Set MTO.Mto_jama_preimp_fixed;
+Age =  f_svy_age_iw;
+Survey="(2) MTO ";
+ keep Age survey;
+ run;
+
+data Ages;
+Set NCSR_AGES MTO_AGES;
+run;
