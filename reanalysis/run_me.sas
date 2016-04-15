@@ -86,15 +86,15 @@ RUN;
 
 /*  STEP VI -- Bootstrap the voucher effects
  */
-*PROC PRINTTO NEW LOG="&outputs/RS6.log";
-*RUN;
-*%include "&reanalysis/RS6_bootstrap_ORs.sas";
+PROC PRINTTO NEW LOG="&outputs/RS6.log";
+RUN;
+%include "&reanalysis/RS6_bootstrap_ORs.sas";
 
 /*  STEP VII -- Bootstrap with alternative model specifications
  */
-*PROC PRINTTO NEW LOG="&outputs/RS7.log";
-*RUN;
-*%include "&reanalysis/RS7_model_spec.sas";
+PROC PRINTTO NEW LOG="&outputs/RS7.log";
+RUN;
+%include "&reanalysis/RS7_model_spec.sas";
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions

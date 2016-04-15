@@ -90,9 +90,10 @@ quit;
 %mend write_ptsd_imputation_formula;
 
 * For each of the 8 models, replicate JAMA ORs & CIs ;
-%macro generate_alt_results(pr_seed, mi_seed);
+%macro generate_alt_results(pr_seed, mi_seedL, mi_seedR);
   %global imod;
   %global formula;
+  %do mi_seed = &mi_seedL %to &mi_seedR;
   %do a=0 %to 1;
     %do r=0 %to 1;
 	  %do s=40 %to 99 %by 59;
@@ -102,15 +103,16 @@ quit;
 	  %end; * s loop ;
 	%end; * r loop ;
   %end; * a loop ;
+  %end; * mi_seed loop ;
 %mend generate_alt_results;
 
 /* Completed
-%generate_alt_results(1234567, 524232);
-%generate_alt_results(123456 , 524232);
-%generate_alt_results(12345  , 524232);
-%generate_alt_results(1234   , 524232);
-%generate_alt_results(123    , 524232);
 */
+%generate_alt_results(pr_seed=1234567, mi_seedL=524230, mi_seedR=524239);
+%generate_alt_results(pr_seed=123456 , mi_seedL=524230, mi_seedR=524239);
+%generate_alt_results(pr_seed=12345  , mi_seedL=524230, mi_seedR=524239);
+%generate_alt_results(pr_seed=1234   , mi_seedL=524230, mi_seedR=524239);
+%generate_alt_results(pr_seed=123    , mi_seedL=524230, mi_seedR=524239);
 
 * The 'alt_orci' table collects estimates from 8 alternate specifications ;
 data alt_orci;
