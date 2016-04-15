@@ -82,14 +82,12 @@ quit;
  */
 
 /* Completed
-%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
-%bootstrap_loop(pr_seed=123456 , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 */
-/* Pending
 %bootstrap_loop(pr_seed=123    , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 %bootstrap_loop(pr_seed=1234   , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
-*/
 %bootstrap_loop(pr_seed=12345  , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=123456 , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
