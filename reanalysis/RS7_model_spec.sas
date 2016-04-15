@@ -106,11 +106,11 @@ quit;
 
 /* Completed
 %generate_alt_results(1234567, 524232);
-*/
 %generate_alt_results(123456 , 524232);
 %generate_alt_results(12345  , 524232);
 %generate_alt_results(1234   , 524232);
 %generate_alt_results(123    , 524232);
+*/
 
 * The 'alt_orci' table collects estimates from 8 alternate specifications ;
 data alt_orci;
