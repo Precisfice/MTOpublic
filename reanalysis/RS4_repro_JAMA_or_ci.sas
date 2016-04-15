@@ -23,11 +23,26 @@ run;
                PT212*(0.2516)+PT213*(0.1159)+PT214*(0.64)+PT233*(0.8654)+PT237*(0.1323);
 %include "&reanalysis/impdata20x.sas";
 
-/* TODO:
-  1. 'Assert' that we obtained (to 5 decimal places) the following results:
+
+/* Employ ABORT ABEND hard-fail in order to 'assert' that
+   we obtained (to 5 decimal places) the following results:
                   OR      LOWOR    UPOR
     RA_GRP_EXP  3.44025  1.60147  7.39026
     RA_GRP_S8   2.67817  1.23268  5.81873
-
-  2. Rename this file to reflect the fact it achieves a REPRODUCTION
  */
+%let eps = 0.00001;
+data _null_;
+  set MTO.orci_1_1234567_524232(keep=parm or lowor upor);
+  if parm = 'RA_GRP_EXP' then do; * experimental voucher ;
+	if (abs(   or - 3.44025) > &eps OR
+        abs(lowor - 1.60147) > &eps OR
+		abs( upor - 7.39026) > &eps) then ABORT ABEND;
+    else put "REPRODUCED RA_GRP_ESP PTSD EFFECT";
+  end;
+  if parm = 'RA_GRP_S8' then do; * section 8 voucher ;
+	if (abs(   or - 2.67817) > &eps OR
+        abs(lowor - 1.23268) > &eps OR
+		abs( upor - 5.81873) > &eps) then ABORT ABEND;
+    else put "REPRODUCED RA_GRP_S8 PTSD EFFECT";
+  end;
+run;
