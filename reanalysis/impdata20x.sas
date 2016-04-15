@@ -158,6 +158,7 @@ DATA MTO.orci_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ;
   parm=UPCASE(parm);
   imod="&imod";
   seed=&mi_seed;
+  attrib imod length=$7;
 RUN;
 
 %PUT &imod;

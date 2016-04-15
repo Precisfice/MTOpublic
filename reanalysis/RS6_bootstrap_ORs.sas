@@ -81,24 +81,30 @@ quit;
 %bootstrap_loop(imodL=1, imodR=4, seedL=524234, seedR=524239);
 %bootstrap_loop(imodL=5, imodR=8, seedL=524230, seedR=524239);
 %bootstrap_loop(imodL=9, imodR=10, seedL=524230, seedR=524239);
+%bootstrap_loop(imodL=1, imodR=1, seedL=524232, seedR=524232); * a re-run to test char imod does not break impdata20x ;
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
-  set MTO.orci_:; * Read numerous named outputs orci_<imod>_<seed> ;
+  attrib imod length=$7;
+  set MTO.orci_:; * NB: colon as 'wildcard' ;
   log_or = log(or);
   log_lowor = log(lowor);
   log_upor = log(upor);
-  attribute parm label="Voucher Type";
+  attrib parm label="Voucher Type";
   rename parm=voucher;
 run;
 
 data betas_samples_with_imod;
   set betas_samples;
-  imod = _N_;
+  imod = right(put(_N_,7.)));
 run;
 
 proc sort data=orci;
   by imod seed;
+run;
+
+proc sort data=betas_samples_with_imod;
+  by imod;
 run;
 
 data orci;
@@ -122,7 +128,6 @@ run;
 proc means data=orci;
   class voucher;
   var log_or log_lowor log_upor;
-  *title3 "Bootstrapped voucher-on-PTSD effect estimate";
   output out=boot_effects;
 run;
 
