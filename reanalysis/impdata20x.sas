@@ -10,7 +10,7 @@ RUN;
 data vars (keep = ppid ptsd_random f_svy_race f_svy_ethnic f_svy_gender);
   set NCSR.Mental_health_yt_20150612;
   format _Numeric_;
-  ptsd_random=ranuni(1234567);
+  ptsd_random=ranuni(&pr_seed);
 run;
 
 proc sort data = vars;
@@ -109,7 +109,7 @@ run;
 %let preimp = imod_derived_ptsd_outcome;
 *%let preimp = NBER.Mto_jama_preimp_20160111;
 *%let preimp = NBER.Mto_jama_preimp_fixed;
-%let imputed = MTO.cached_&imod._&mi_seed._imputed; * Cache MI work by (imod,mi_seed) ;
+%let imputed = MTO.cached_&imod._&pr_seed._&mi_seed; * Cache MI work by (imod,mi_seed) ;
 %include "&folder/mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas";
 
 dm 'clear log'; * Otherwise, log may fill up, and user is prompted to empty it ;
@@ -149,7 +149,7 @@ PROC MIANALYZE PARMS = parmest  XPXI=covm;
      ODS OUTPUT ParameterEstimates = outres;
 RUN;
 
-DATA MTO.orci_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ; 
+DATA MTO.orci_&imod._&pr_seed._&mi_seed (KEEP=parm or lowor upor imod pr_seed mi_seed) ;
   SET outres; 
   IF parm ^="intercept";
   or = EXP(estimate);
@@ -157,7 +157,8 @@ DATA MTO.orci_&imod._&mi_seed (KEEP=parm or lowor upor imod seed) ;
   upor = EXP(uclmean);
   parm=UPCASE(parm);
   imod="&imod";
-  seed=&mi_seed;
+  pr_seed=&pr_seed;
+  mi_seed=&mi_seed;
   attrib imod length=$7;
 RUN;
 

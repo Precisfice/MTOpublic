@@ -90,24 +90,27 @@ quit;
 %mend write_ptsd_imputation_formula;
 
 * For each of the 8 models, replicate JAMA ORs & CIs ;
-%macro generate_alt_results;
-  %global mi_seed;
+%macro generate_alt_results(pr_seed, mi_seed);
   %global imod;
   %global formula;
-  %let mi_seed = 524232;
   %do a=0 %to 1;
     %do r=0 %to 1;
 	  %do s=40 %to 99 %by 59;
         %let imod = A&a.R&r.S&s.;
         %write_ptsd_imputation_formula(betas_samples_&imod, 1);
-		%put SPEC: &imod;
-		%put FORMULA: &formula;
         %include "&reanalysis/impdata20x.sas";
 	  %end; * s loop ;
 	%end; * r loop ;
   %end; * a loop ;
 %mend generate_alt_results;
-%generate_alt_results;
+
+/* Completed
+%generate_alt_results(1234567, 524232);
+*/
+%generate_alt_results(123456 , 524232);
+%generate_alt_results(12345  , 524232);
+%generate_alt_results(1234   , 524232);
+%generate_alt_results(123    , 524232);
 
 * The 'alt_orci' table collects estimates from 8 alternate specifications ;
 data alt_orci;
@@ -119,48 +122,13 @@ data alt_orci;
   rename parm=voucher;
 run;
 
-data betas_samples_with_imod;
-  set betas_samples;
-  imod = _N_;
-run;
-
-proc sort data=orci;
-  by imod seed;
-run;
-
-data orci;
-  merge orci (in=oink) betas_samples_with_imod;
-  by imod;
-  if oink;
-run;
-
-proc sort data=orci;
-  by voucher imod seed; * sort by voucher type to ease visual inspection;
+proc sort data=alt_orci;
+  by voucher imod pr_seed mi_seed; * sort by voucher type to ease visual inspection;
 run;
 
 * Export ORCI to tab-delimited file friendly to 'git diff' et al. ; 
-proc export data=orci
-  outfile="&outputs/orci.tab"
+proc export data=alt_orci
+  outfile="&outputs/alt_orci.tab"
   dbms=tab
   REPLACE;
 run;
-
-* Calculate a single, bootstrapped estimate of CI, OR ;
-proc means data=orci;
-  class voucher;
-  var log_or log_lowor log_upor;
-  *title3 "Bootstrapped voucher-on-PTSD effect estimate";
-  output out=boot_effects;
-run;
-
-* TODO: De-log these results ;
-data boot_effects;
-  set boot_effects(where=(_TYPE_=1 & _STAT_='MEAN'));
-  or = exp(log_or);
-  lowor = exp(log_lowor);
-  upor = exp(log_upor);
-  keep voucher or lowor upor;
-  *attribute parm label="Voucher Type";
-run;
-
-* TODO: Bootstrap each estimate for a small number of reps ;

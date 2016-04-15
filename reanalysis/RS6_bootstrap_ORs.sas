@@ -34,10 +34,10 @@ quit;
  * imputation of missing covariates and uninterviewed subjects.
  */
 
-%MACRO bootstrap_loop(imodL, imodR, seedL, seedR);
+%MACRO bootstrap_loop(pr_seed, imodL, imodR, mi_seedL, mi_seedR);
 
 %DO imod = &imodL %TO &imodR; 
- %DO mi_seed= &seedL %TO &seedR;
+  %DO mi_seed = &mi_seedL %TO &mi_seedR;
 
     data _null_;
       set betas_samples;
@@ -71,17 +71,26 @@ quit;
 
     %include "&reanalysis/impdata20x.sas";
 
-  %END; * imod loop ;
-%END; * seed loop ;
+  %END; * mi_seed loop ;
+%END; * imod loop ;
 
 %MEND bootstrap_loop;
 
-%bootstrap_loop(imodL=3, imodR=4, seedL=524232, seedR=524233);
-%bootstrap_loop(imodL=1, imodR=4, seedL=524230, seedR=524231);
-%bootstrap_loop(imodL=1, imodR=4, seedL=524234, seedR=524239);
-%bootstrap_loop(imodL=5, imodR=8, seedL=524230, seedR=524239);
-%bootstrap_loop(imodL=9, imodR=10, seedL=524230, seedR=524239);
-%bootstrap_loop(imodL=1, imodR=1, seedL=524232, seedR=524232); * a re-run to test char imod does not break impdata20x ;
+/* We split the bootstrap grid into blocks of 100,
+ * each of which can be filled (at ~4 mins per cell)
+ * in a reasonable ~7 hour overnight run.
+ */
+
+/* Completed
+%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+*/
+/* Pending
+%bootstrap_loop(pr_seed=123456 , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=12345  , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=1234   , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+*/
+*%bootstrap_loop(pr_seed=123    , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=1, mi_seedL=524232, mi_seedR=524232);
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
@@ -100,7 +109,7 @@ data betas_samples_with_imod;
 run;
 
 proc sort data=orci;
-  by imod seed;
+  by imod pr_seed mi_seed;
 run;
 
 proc sort data=betas_samples_with_imod;
@@ -114,7 +123,7 @@ data orci;
 run;
 
 proc sort data=orci;
-  by voucher imod seed; * sort by voucher type to ease visual inspection;
+  by voucher imod pr_seed mi_seed; * sort by voucher type to ease visual inspection;
 run;
 
 * Export ORCI to tab-delimited file friendly to 'git diff' et al. ; 

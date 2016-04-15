@@ -13,6 +13,7 @@ run;
 * We now extend this to accomplish a reproduction of JAMA ORs & CI ;
 
 %let imod = 0;
+%let pr_seed = 1234567;
 %let mi_seed = 524232;
 %let formula = 1*(-1.515)+AGE*(0.0263)+SEXF*(0.1105)+
                RHISP*(-0.0819)+RBLK*(-0.5597)+ROTH*(-0.9751)+PT41*(-0.5603)+
