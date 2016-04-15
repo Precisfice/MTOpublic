@@ -53,7 +53,6 @@ RUN;
 LIBNAME NCSR "&ncsr";
 libname mto "&mto";
 Libname NBER "&NBER";
-libname OUTPUTS "&outputs";
 
 /*  STEP I -- Prepare NCSR data (merge public + restricted files, misc var adjustments)
  */ 
