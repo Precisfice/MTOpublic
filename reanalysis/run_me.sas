@@ -74,23 +74,27 @@ RUN;
 
 /*  STEP IV -- Prepare the MTO data
  */
-*PROC PRINTTO NEW LOG="&outputs/RS4.log";
-*RUN;
-PROC PRINTTO;
+PROC PRINTTO NEW LOG="&outputs/RS4.log";
 RUN;
-%include "&reanalysis/RS4_prep_MTO_data.sas";
+%include "&reanalysis/RS4_repro_JAMA_or_ci.sas";
 
 /*  STEP V -- Compare MTO vs NCS-R age distributions
  */
-*PROC PRINTTO NEW LOG="&outputs/RS5.log";
-*RUN;
-*%include "&reanalysis/RS5_contrast_age_dists.sas";
+PROC PRINTTO NEW LOG="&outputs/RS5.log";
+RUN;
+%include "&reanalysis/RS5_contrast_age_dists.sas";
 
 /*  STEP VI -- Bootstrap the voucher effects
  */
 *PROC PRINTTO NEW LOG="&outputs/RS6.log";
 *RUN;
 *%include "&reanalysis/RS6_bootstrap_ORs.sas";
+
+/*  STEP VII -- Bootstrap with alternative model specifications
+ */
+*PROC PRINTTO NEW LOG="&outputs/RS7.log";
+*RUN;
+*%include "&reanalysis/RS7_model_spec.sas";
 
 /* --- References ---
 1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility Interventions
