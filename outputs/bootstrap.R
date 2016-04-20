@@ -13,11 +13,12 @@ orci <- subset(orci, imod %in% as.character(1:10) & voucher=='RA_GRP_EXP')
 orci <- upData(orci,
                pr_seed = factor(pr_seed),
                mi_seed = factor(mi_seed),
-               imod = as.integer(as.character(imod)))
+               imod = as.integer(as.character(imod)),
+               jama = pr_seed==1234567 & mi_seed==524232 & imod==1)
 
 ## 2. Plot imod-bootstrapped OR, CI by pr_seed, mi_seed
-p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, data=orci,
-            layout=c(10,2), ylim=log(c(0.8,10)),
+p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group=jama,
+            data=orci, layout=c(10,2), ylim=log(c(0.8,10)),
             ylab="Estimated Experimental Voucher Effect (OR [95% CI])",
             xlab="PTSD Imputation Model Resample No.",
             scales=list(
