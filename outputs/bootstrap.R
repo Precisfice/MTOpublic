@@ -22,6 +22,9 @@ p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group
             ylab="Estimated Experimental Voucher Effect (OR [95% CI])",
             xlab="PTSD Imputation Model Resample No.",
             scales=list(
+                x=list(
+                    at=c(1,3,5,7,9)
+                ),
                 y=list(
                     at=log(1:9),
                     labels=as.character(1:9)
