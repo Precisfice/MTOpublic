@@ -1,9 +1,9 @@
 NOTE: PROCEDURE PRINTTO used (Total process time):
-      real time           0.00 seconds
-      cpu time            0.00 seconds
+      real time           0.01 seconds
+      cpu time            0.01 seconds
       
 
-62   %include "&reanalysis/RS1_prep_NCSR_data.sas";
+123  %include "&reanalysis/RS1_prep_NCSR_data.sas";
 
 WARNING: The transport file is from an earlier SAS release.  If this transport file contains 
          non-English data, there might be problems importing national characters. If problems do 
@@ -16,8 +16,8 @@ NOTE: Data set contains 3714 variables and 9282 observations.
       Logical record length is 29712
 
 NOTE: PROCEDURE CIMPORT used (Total process time):
-      real time           1.29 seconds
-      cpu time            1.21 seconds
+      real time           1.24 seconds
+      cpu time            1.28 seconds
       
 
 
@@ -491,8 +491,8 @@ NOTE: Entry VERSION.FORMAT has been imported.
 NOTE: Total number of entries processed in catalog WORK.FORMATS: 456
 
 NOTE: PROCEDURE CIMPORT used (Total process time):
-      real time           1.23 seconds
-      cpu time            0.36 seconds
+      real time           2.85 seconds
+      cpu time            0.34 seconds
       
 
 NOTE: Format CHILDREN has been output.
@@ -3336,15 +3336,15 @@ NOTE: Format VERSION is already on the library WORK.FORMATS.
 NOTE: Format VERSION has been output.
 
 NOTE: PROCEDURE FORMAT used (Total process time):
-      real time           4.59 seconds
-      cpu time            0.76 seconds
+      real time           5.70 seconds
+      cpu time            0.82 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set WORK.DA20240P2.
 NOTE: The data set WORK.S20240P2 has 9282 observations and 3714 variables.
 NOTE: DATA statement used (Total process time):
-      real time           2.04 seconds
+      real time           2.06 seconds
       cpu time            2.04 seconds
       
 
@@ -4262,32 +4262,32 @@ NOTE: Format IWMONTH is already on the library WORK.FORMATS.
 NOTE: Format IWMONTH has been output.
 
 NOTE: PROCEDURE FORMAT used (Total process time):
-      real time           0.42 seconds
-      cpu time            0.04 seconds
+      real time           0.07 seconds
+      cpu time            0.07 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set WORK.DA20240P5.
 NOTE: The data set WORK.DA20240P5_FORMAT has 9282 observations and 457 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.31 seconds
-      cpu time            0.31 seconds
+      real time           0.29 seconds
+      cpu time            0.29 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set WORK.S20240P2.
 NOTE: The data set WORK.S20240P2 has 9282 observations and 3714 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.32 seconds
-      cpu time            0.32 seconds
+      real time           0.34 seconds
+      cpu time            0.35 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set WORK.DA20240P5_FORMAT.
 NOTE: The data set WORK.S20240P5 has 9282 observations and 457 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.17 seconds
-      cpu time            0.17 seconds
+      real time           0.18 seconds
+      cpu time            0.18 seconds
       
 
 
@@ -4295,7 +4295,7 @@ NOTE: There were 9282 observations read from the data set WORK.S20240P5.
 NOTE: The data set WORK.S20240P5 has 9282 observations and 457 variables.
 NOTE: PROCEDURE SORT used (Total process time):
       real time           0.04 seconds
-      cpu time            0.03 seconds
+      cpu time            0.04 seconds
       
 
 
@@ -4303,8 +4303,8 @@ NOTE: There were 9282 observations read from the data set WORK.S20240P2.
 NOTE: There were 9282 observations read from the data set WORK.S20240P5.
 NOTE: The data set NCSR.NCSR has 9282 observations and 4111 variables.
 NOTE: DATA statement used (Total process time):
-      real time           1.34 seconds
-      cpu time            1.34 seconds
+      real time           1.68 seconds
+      cpu time            1.45 seconds
       
 
 
@@ -4329,8 +4329,8 @@ NOTE: Missing values were generated as a result of performing an operation on mi
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 NOTE: The data set NCSR.NCSR has 9282 observations and 4213 variables.
 NOTE: DATA statement used (Total process time):
-      real time           1.40 seconds
-      cpu time            1.39 seconds
+      real time           1.50 seconds
+      cpu time            1.48 seconds
       
 
 NOTE: Writing ODS PDF output to DISK destination 
@@ -4338,14 +4338,14 @@ NOTE: Writing ODS PDF output to DISK destination
 NOTE: Writing HTML Body file: sashtml.htm
 
 NOTE: PROCEDURE CONTENTS used (Total process time):
-      real time           2.00 seconds
-      cpu time            1.43 seconds
+      real time           2.09 seconds
+      cpu time            1.45 seconds
       
 
 NOTE: ODS PDF printed 122 pages to C:\Users\Anolinx\MTO\outputs\RS1-NCSR_Contents.pdf.
-13589  
-13590  /*  STEP II -- Estimate PTSD imputation models
-13591   */
-13592  PROC PRINTTO NEW LOG="&outputs/RS2.log";
-13593  RUN;
+13650  
+13651  /*  STEP II -- Estimate PTSD imputation models
+13652   */
+13653  PROC PRINTTO NEW LOG="&outputs/RS2.log";
+13654  RUN;
 

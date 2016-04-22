@@ -1,24 +1,24 @@
 NOTE: PROCEDURE PRINTTO used (Total process time):
       real time           0.00 seconds
-      cpu time            0.01 seconds
+      cpu time            0.00 seconds
       
 
-14207  %include "&reanalysis/RS5_contrast_age_dists.sas";
+14864  %include "&reanalysis/RS5_contrast_age_dists.sas";
 NOTE: Writing ODS PDF output to DISK destination 
       "C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf", printer "PDF".
 
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 NOTE: The data set NCSR.NCSR has 9282 observations and 4213 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.35 seconds
-      cpu time            0.42 seconds
+      real time           0.34 seconds
+      cpu time            0.34 seconds
       
 
 
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 NOTE: PROCEDURE MEANS used (Total process time):
-      real time           0.18 seconds
-      cpu time            0.15 seconds
+      real time           0.35 seconds
+      cpu time            0.14 seconds
       
 
 MPRINT(PLOT_AGE_DENS):   proc sgplot data=NCSR.ncsr;
@@ -26,48 +26,121 @@ MPRINT(PLOT_AGE_DENS):   histogram age/ nbins=75 name='est';
 MPRINT(PLOT_AGE_DENS):   density age;
 MPRINT(PLOT_AGE_DENS):   xaxis display=(nolabel) min=15 max=90;
 MPRINT(PLOT_AGE_DENS):   yaxis grid;
-MPRINT(PLOT_AGE_DENS):   keylegend 'est' / location=inside across=1 position=topright;
+MPRINT(PLOT_AGE_DENS):   keylegend 'est' / location=inside across=1 
+position=topright;
 MPRINT(PLOT_AGE_DENS):   by pts_smpl;
 MPRINT(PLOT_AGE_DENS):   run;
 
 NOTE: PROCEDURE SGPLOT used (Total process time):
-      real time           1.28 seconds
-      cpu time            0.35 seconds
+      real time           1.40 seconds
+      cpu time            0.36 seconds
       
 NOTE: There were 9282 observations read from the data set NCSR.NCSR.
 
-NOTE: ODS PDF printed 3 pages to C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf.
-14252  
-14253  /*  STEP VI -- Bootstrap the voucher effects
-14254   */
-14255  *PROC PRINTTO NEW LOG="&outputs/RS6.log";
-14256  *RUN;
-14257  *%include "&reanalysis/RS6_bootstrap_ORs.sas";
-14258  
-14259  /* --- References ---
-14260  1. Kessler RC, Duncan GJ, Gennetian LA, et al. Associations of Housing Mobility
-14260! Interventions
-14261     for Children in High-Poverty Neighborhoods with Subsequent Mental Disorders during
-14261! Adolescence.
-14262     JAMA 311, no. 9 (March 5, 2014): 937-48. doi:10.1001/jama.2014.607.
-14263  
-14264      */
+NOTE: ODS PDF printed 3 pages to 
+      C:\Users\Anolinx\MTO\outputs\RS5-Age_MTO_vs_NCSR.pdf.
 
-14265  proc freq data=MTO.imod_derived_ptsd_outcome;
-14266    tables f_mh_pts_y_yt*f_mh_pts_y_yt_orig;
-14267  run;
+NOTE: There were 9282 observations read from the data set NCSR.NCSR.
+NOTE: The data set WORK.NCSR_AGES has 9282 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           1.39 seconds
+      cpu time            1.39 seconds
+      
 
-NOTE: There were 3689 observations read from the data set MTO.IMOD_DERIVED_PTSD_OUTCOME.
-NOTE: PROCEDURE FREQ used (Total process time):
-      real time           0.07 seconds
+
+NOTE: There were 3689 observations read from the data set 
+      NBER.MTO_JAMA_PREIMP_FIXED.
+NOTE: The data set WORK.MTO_AGES has 3689 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+
+NOTE: There were 9282 observations read from the data set WORK.NCSR_AGES.
+      WHERE not MISSING(Age);
+NOTE: There were 2875 observations read from the data set WORK.MTO_AGES.
+      WHERE not MISSING(Age);
+NOTE: The data set WORK.AGES has 12157 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
       cpu time            0.00 seconds
       
 
-14268  /* Top-level script for reanalysis of reported PTSD findings of Kessler et al [1] */
-14269  
-14270  /*  STEP 0 -- Define folders to match your directory setup
-14271   **********************************************************/
-14272  
-14273  PROC PRINTTO;
-14274  RUN;
+
+NOTE: There were 12157 observations read from the data set WORK.AGES.
+NOTE: The data set WORK.AGES has 12157 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+
+14941   /**********************************************************************
+14942   *   PRODUCT:   SAS
+14943   *   VERSION:   9.4
+14944   *   CREATOR:   External File Interface
+14945   *   DATE:      18APR16
+14946   *   DESC:      Generated SAS Datastep Code
+14947   *   TEMPLATE SOURCE:  (None Specified.)
+14948   ***********************************************************************/
+14949      data _null_;
+14950      %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+14951      %let _EFIREC_ = 0;     /* clear export record count macro variable */
+14952      file 'C:/Users/Anolinx/MTO/outputs/Ages_by_survey.csv' delimiter=','
+14952! DSD DROPOVER lrecl=32767;
+14953      if _n_ = 1 then        /* write column names or labels */
+14954       do;
+14955         put
+14956            "AGE"
+14957         ','
+14958            "Survey"
+14959         ;
+14960       end;
+14961     set  AGES   end=EFIEOD;
+14962         format AGE 3. ;
+14963         format Survey $8. ;
+14964       do;
+14965         EFIOUT + 1;
+14966         put AGE @;
+14967         put Survey $ ;
+14968         ;
+14969       end;
+14970      if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection
+14970! macro variable */
+14971      if EFIEOD then call symputx('_EFIREC_',EFIOUT);
+14972      run;
+
+NOTE: The file 'C:/Users/Anolinx/MTO/outputs/Ages_by_survey.csv' is:
+      Filename=C:\Users\Anolinx\MTO\outputs\Ages_by_survey.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=0,
+      Last Modified=18Apr2016:09:55:57,
+      Create Time=15Apr2016:14:05:46
+
+NOTE: 12158 records were written to the file 
+      'C:/Users/Anolinx/MTO/outputs/Ages_by_survey.csv'.
+      The minimum record length was 10.
+      The maximum record length was 11.
+NOTE: There were 12157 observations read from the data set WORK.AGES.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+12157 records created in C:/Users/Anolinx/MTO/outputs/Ages_by_survey.csv from 
+AGES.
+  
+  
+NOTE: "C:/Users/Anolinx/MTO/outputs/Ages_by_survey.csv" file was successfully 
+      created.
+NOTE: PROCEDURE EXPORT used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.06 seconds
+      
+
+14973  
+14974  /*  STEP VI -- Bootstrap the voucher effects
+14975   */
+14976  PROC PRINTTO NEW LOG="&outputs/RS6.log";
+14977  RUN;
 
