@@ -3,160 +3,57 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       cpu time            0.00 seconds
       
 
-14986  %include "&reanalysis/RS6_bootstrap_ORs.sas";
-NOTE: Libref OUTPUTS was successfully assigned as follows: 
-      Engine:        V9 
-      Physical Name: C:\Users\Anolinx\MTO\outputs
+14978  %include "&reanalysis/RS6_bootstrap_ORs.sas";
 NOTE: IML Ready
 NOTE: Opening storage library WORK.IMLSTOR
 NOTE: Module RANDNORMAL loaded from the storage SASHELP.IMLMLIB.
 NOTE: Module ROWVEC loaded from the storage SASHELP.IMLMLIB.
-NOTE: The data set OUTPUTS.BETAS_SAMPLES has 100000 observations and 24 
-      variables.
+NOTE: The data set WORK.BETAS_SAMPLES has 100000 observations and 24 variables.
 NOTE: Exiting IML.
 NOTE: Storage library WORK.IMLSTOR closed.
 NOTE: PROCEDURE IML used (Total process time):
-      real time           0.34 seconds
-      cpu time            0.34 seconds
+      real time           0.53 seconds
+      cpu time            0.31 seconds
       
 
-NOTE: IML Ready
-NOTE: Opening storage library WORK.IMLSTOR
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: The data set WORK.A1 has 1 observations and 153 variables.
-NOTE: Writing ODS PDF output to DISK destination 
-      "C:\Users\Anolinx\MTO\outputs\contents_mto_jama_imputed.pdf", 
-      printer "PDF".
-NOTE: ODS PDF printed no output. 
-      (This sometimes results from failing to place a RUN statement before the 
-      ODS PDF CLOSE statement.)
-NOTE: The data set WORK.ORS has 42 observations and 6 variables.
-NOTE: The data set WORK.PARMEST has 63 observations and 8 variables.
-NOTE: Exiting IML.
-NOTE: Storage library WORK.IMLSTOR closed.
-NOTE: PROCEDURE IML used (Total process time):
-      real time           10:28.75
-      cpu time            8:47.17
+MPRINT(BOOTSTRAP_LOOP):   data _null_;
+MPRINT(BOOTSTRAP_LOOP):   set betas_samples;
+MPRINT(BOOTSTRAP_LOOP):   if _N_ = 1;
+MPRINT(BOOTSTRAP_LOOP):   * TODO: In general, &imod ;
+MPRINT(BOOTSTRAP_LOOP):   form = 
+trim('1'||'*('||trim(left(put(Intercept,10.4)))||')+'|| 
+'AGE'||'*('||trim(left(put(AGE,10.4)))||')+'|| 
+'SEXF'||'*('||trim(left(put(SEXF,10.4)))||')+'|| 
+'RHISP'||'*('||trim(left(put(RHISP,10.4)))||')+'|| 
+'RBLK'||'*('||trim(left(put(RBLK,10.4)))||')+'|| 
+'ROTH'||'*('||trim(left(put(ROTH,10.4)))||')+'|| 
+'PT41'||'*('||trim(left(put(PT41,10.4)))||')+'|| 
+'PT42'||'*('||trim(left(put(PT42,10.4)))||')+'|| 
+'PT43'||'*('||trim(left(put(PT43,10.4)))||')+'|| 
+'PT44'||'*('||trim(left(put(PT44,10.4)))||')+'|| 
+'PT45'||'*('||trim(left(put(PT45,10.4)))||')+'|| 
+'PT46'||'*('||trim(left(put(PT46,10.4)))||')+'|| 
+'PT48'||'*('||trim(left(put(PT48,10.4)))||')+'|| 
+'PT50'||'*('||trim(left(put(PT50,10.4)))||')+'|| 
+'PT50_1'||'*('||trim(left(put(PT50_1,10.4)))||')+'|| 
+'PT51'||'*('||trim(left(put(PT51,10.4)))||')+'|| 
+'PT55'||'*('||trim(left(put(PT55,10.4)))||')+'|| 
+'PT209'||'*('||trim(left(put(PT209,10.4)))||')+'|| 
+'PT211'||'*('||trim(left(put(PT211,10.4)))||')+'|| 
+'PT212'||'*('||trim(left(put(PT212,10.4)))||')+'|| 
+'PT213'||'*('||trim(left(put(PT213,10.4)))||')+'|| 
+'PT214'||'*('||trim(left(put(PT214,10.4)))||')+'|| 
+'PT233'||'*('||trim(left(put(PT233,10.4)))||')+'|| 
+'PT237'||'*('||trim(left(put(PT237,10.4))))||')';
+MPRINT(BOOTSTRAP_LOOP):   call symput('formula',form);
+MPRINT(BOOTSTRAP_LOOP):   run;
+
+NOTE: There were 100000 observations read from the data set WORK.BETAS_SAMPLES.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.03 seconds
       
 
-15212  PROC PRINTTO;
-15213  RUN;
+MPRINT(BOOTSTRAP_LOOP):   PROC PRINTTO;
+MPRINT(BOOTSTRAP_LOOP):   RUN;
 

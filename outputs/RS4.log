@@ -1,9 +1,9 @@
 NOTE: PROCEDURE PRINTTO used (Total process time):
-      real time           0.00 seconds
+      real time           0.01 seconds
       cpu time            0.00 seconds
       
 
-13810  %include "&reanalysis/RS4_prep_MTO_data.sas";
+13868  %include "&reanalysis/RS4_repro_JAMA_or_ci.sas";
 NOTE: Data file NBER.MTO_JAMA_PREIMP_20160111.DATA is in a format that is native to another host, 
       or the file encoding does not match the session encoding. Cross Environment Data Access 
       will be used, which might require additional CPU resources and might reduce performance.
@@ -11,8 +11,8 @@ NOTE: Data file NBER.MTO_JAMA_PREIMP_20160111.DATA is in a format that is native
 NOTE: There were 3689 observations read from the data set NBER.MTO_JAMA_PREIMP_20160111.
 NOTE: The data set NBER.MTO_JAMA_PREIMP_SORTED has 3689 observations and 492 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.10 seconds
-      cpu time            0.17 seconds
+      real time           0.18 seconds
+      cpu time            0.10 seconds
       
 
 MPRINT(AGEFIX1):   if YDE13a_D37a IN(.,.D,.R) then do;
@@ -79,8 +79,8 @@ MPRINT(AGEFIX1):   end;
 NOTE: There were 3689 observations read from the data set NBER.MTO_JAMA_PREIMP_SORTED.
 NOTE: The data set NBER.MTO_JAMA_PREIMP_FIXED has 3689 observations and 492 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.01 seconds
-      cpu time            0.01 seconds
+      real time           0.04 seconds
+      cpu time            0.03 seconds
       
 
 
