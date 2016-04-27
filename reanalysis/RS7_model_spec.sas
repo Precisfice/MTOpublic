@@ -116,6 +116,7 @@ quit;
 
 * The 'alt_orci' table collects estimates from 8 alternate specifications ;
 data alt_orci;
+attrib imod length=$7;
   set MTO.orci_a:; * Read numerous named outputs orci_<imod>_<seed> ;
   log_or = log(or);
   log_lowor = log(lowor);

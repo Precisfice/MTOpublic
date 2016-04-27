@@ -82,12 +82,12 @@ quit;
  */
 
 /* Completed
-*/
+
 %bootstrap_loop(pr_seed=123    , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 %bootstrap_loop(pr_seed=1234   , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 %bootstrap_loop(pr_seed=12345  , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 %bootstrap_loop(pr_seed=123456 , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
-%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
+%bootstrap_loop(pr_seed=1234567, imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);*/
 
 * The 'ORCI' table collects our bootstrap results for analysis ;
 data orci;
@@ -119,6 +119,12 @@ data orci;
   if oink;
 run;
 
+data orci;
+set orci;
+where imod in("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+run;
+
+
 proc sort data=orci;
   by voucher imod pr_seed mi_seed; * sort by voucher type to ease visual inspection;
 run;
@@ -135,6 +141,7 @@ proc means data=orci;
   class voucher;
   var log_or log_lowor log_upor;
   output out=boot_effects;
+  where imod in("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
 run;
 
 * TODO: De-log these results ;
@@ -147,3 +154,8 @@ data boot_effects;
   *attribute parm label="Voucher Type";
 run;
 
+proc export data=boot_effects
+  outfile="&outputs/boot_effects.tab"
+  dbms=tab
+  REPLACE;
+run;

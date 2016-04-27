@@ -151,6 +151,7 @@ RUN;
 
 DATA MTO.orci_&imod._&pr_seed._&mi_seed (KEEP=parm or lowor upor imod pr_seed mi_seed) ;
   SET outres; 
+  attrib imod length=$7;
   IF parm ^="intercept";
   or = EXP(estimate);
   lowor = EXP(lclmean);
@@ -159,7 +160,7 @@ DATA MTO.orci_&imod._&pr_seed._&mi_seed (KEEP=parm or lowor upor imod pr_seed mi
   imod="&imod";
   pr_seed=&pr_seed;
   mi_seed=&mi_seed;
-  attrib imod length=$7;
 RUN;
+
 
 %PUT &imod;
