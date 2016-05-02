@@ -81,7 +81,7 @@ quit;
  * in a reasonable ~7 hour overnight run.
  */
 
-/* Completed
+/* Completed 1000 grid
 
 %bootstrap_loop(pr_seed=123    , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
 %bootstrap_loop(pr_seed=1234   , imodL=1, imodR=10, mi_seedL=524230, mi_seedR=524239);
@@ -99,14 +99,19 @@ data orci;
   attrib parm label="Voucher Type";
   rename parm=voucher;
 run;
+data orci;
+set orci;
+where imod in("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+run;
 
 data betas_samples_with_imod;
   set betas_samples;
-  imod = right(put(_N_,7.)));
+ imod = strip(put(_N_,7.));
+ format imod $7.;
 run;
 
 proc sort data=orci;
-  by imod pr_seed mi_seed;
+  by imod;
 run;
 
 proc sort data=betas_samples_with_imod;
@@ -114,16 +119,10 @@ proc sort data=betas_samples_with_imod;
 run;
 
 data orci;
-  merge orci (in=oink) betas_samples_with_imod;
+  merge orci(in=a)  betas_samples_with_imod;
   by imod;
-  if oink;
+  if a;
 run;
-
-data orci;
-set orci;
-where imod in("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
-run;
-
 
 proc sort data=orci;
   by voucher imod pr_seed mi_seed; * sort by voucher type to ease visual inspection;
