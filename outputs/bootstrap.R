@@ -29,14 +29,16 @@ p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group
             xlab="PTSD Imputation Model Resample No.",
             scales=list(
                 x=list(
+                    cex=0.7,
                     at=c(1,3,5,7,9)
                 ),
                 y=list(
+                    cex=0.7,
                     at=log(1:9),
                     labels=c("1","2","","4","","","","8","")
                 )
             ),
-            par.strip.text=list(cex=0.6),
+            par.strip.text=list(cex=0.5),
             panel=function(...){
                 panel.refline(h=0.0)
                 panel.xYplot(...)
@@ -64,11 +66,12 @@ q <- dotplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, grou
              scales=list(
                  x=list(cex=0.35, rot=60),
                  y=list(
+                     cex=0.7,
                      at=log(1:9),
                      labels=c("1","2","","4","","","","8","")
                  )
              ),
-             par.strip.text=list(cex=0.6),
+             par.strip.text=list(cex=0.5),
              panel=function(...){
                  panel.refline(h=0.0)
                  panel.xYplot(...)
