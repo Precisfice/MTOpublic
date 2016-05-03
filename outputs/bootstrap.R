@@ -24,7 +24,7 @@ orci <- upData(orci
 
 ## 2. Plot imod-bootstrapped OR, CI by pr_seed, mi_seed
 p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group=jama,
-            data=orci, layout=c(10,5), aspect=2.0, ylim=log(c(0.8,10)),
+            data=orci, layout=c(10,5), aspect=0.8, ylim=log(c(0.8,10)),
             ylab="Estimated Experimental Voucher Effect (OR [95% CI])",
             xlab="PTSD Imputation Model Resample No.",
             scales=list(
@@ -33,7 +33,7 @@ p <- xYplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group
                 ),
                 y=list(
                     at=log(1:9),
-                    labels=as.character(1:9)
+                    labels=c("1","2","","4","","","","8","")
                 )
             ),
             par.strip.text=list(cex=0.6),
@@ -47,6 +47,7 @@ print(p)
 dev.off()
 
 alt.orci <- read.delim("alt_orci.tab")
+alt.orci <- subset(alt.orci, voucher=='RA_GRP_EXP')
 alt.orci <- upData(alt.orci
                  , pr_seed = factor(pr_seed)
                  , mi_seed = factor(mi_seed)
@@ -56,15 +57,15 @@ alt.orci <- upData(alt.orci
 q <- dotplot(Cbind(log_or, log_lowor, log_upor) ~ imod | mi_seed * pr_seed, group=jama,
              data=alt.orci,
              layout=c(10,5),
-             ##aspect=2.0,
+             aspect=0.8,
              ylim=log(c(0.8,10)),
              ylab="Estimated Experimental Voucher Effect (OR [95% CI])",
              xlab="PTSD Imputation Model Specification",
              scales=list(
-                 x=list(rot=60),
+                 x=list(cex=0.35, rot=60),
                  y=list(
                      at=log(1:9),
-                     labels=as.character(1:9)
+                     labels=c("1","2","","4","","","","8","")
                  )
              ),
              par.strip.text=list(cex=0.6),
