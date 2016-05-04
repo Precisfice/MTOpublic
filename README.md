@@ -1,6 +1,7 @@
 #MTO
-===
-Reproduction and reanalysis of MTO Final Youth Survey analysis
+
+##Reproduction and reanalysis of MTO Final Youth Survey analysis
+---
 
 This public repository contains all of the code and results supporting a reproduction and
 reanalysis of the MTO PTSD results reported in by Kessler et al in their 2014 JAMA paper,
@@ -18,7 +19,7 @@ generalize it for bootstrapping purposes.  Because we checked in each such file 
 
 `git diff e91deac -- mto_jama_sas_code_20160114/1_mto_jama_impute_data_20160111.sas`
 
-(Here, e91deac is the git ref for the initial commmit of this NBER-provided file, as might
+(Here, `e91deac` references the initial commmit of this NBER-provided file, as might
 be discovered by a command like `git log --oneline <filepath> | tail -n 1`.)
 
 ## Directory Overview
@@ -32,10 +33,12 @@ on behalf of Dr. Ronald Kessler, in a 11/13/2014 email to David Norris
 additional communications from Nancy A. Sampson.  As noted above, some of these have been
 modified slightly to support our reanalysis.
 
-`admin/`: TODO
+`admin/`: License applications for the NCS-R and MTO data files used in this reanalysis.
+These may be of interest to any 3rd party wishing to reproduce our reanalysis.  They also
+provide early documentation of our analytic intent.
 
-`doc/`: Contains various documents relating to the re-analysis, mainly from external
-sources
+`doc/final_mental_health.pdf`: The footnote on p. 38 of this document first brought the PTSD
+outcomes imputation of the 2014 JAMA paper to the attention of David Norris
 
 `mto_jama_sas_code_20160114/`: Code and documentation provided in Jan 2016 by NBER's Matt Sciandra
 
