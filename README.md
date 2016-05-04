@@ -16,23 +16,6 @@ any committed file should be available through the command:
 
  `git log -1 --pretty=%s <filename>`
 
-## Status of Reproduction &amp; Reanalysis
-
-- [x] Obtain NCSR and MTO data
-- [x] Reproduce PTSD imputation of N=328 cases
-- [x] Reproduce analysis cohort counts: 1407 boys, 1465 girls
-- [x] Obtain original SAS code for estimating PTSD imputation model (on NCSR)
-- [ ] Reproduce logistic regression coefficients of PTSD imputation model
-- [x] Obtain original SAS code for voucher effects on PTSD
-- [ ] Reproduce PTSD effect estimates of [Kessler et al. 2014 JAMA](#Kessler-2014-JAMA) Table 5
-- [ ] Implement `inner_loop.sas` to abstract away arbitrariness of RNG seed
-- [ ] Compare CIs from `inner_loop.sas` against the CIs reported in Table 5; these should be close
-- [ ] Implement `outer_loop.sas` to 'bootstrap away' arbitrariness from overfitting imputation model
-- [ ] Compare the wider CIs from `outer_loop.sas` against those of `inner_loop.sas` and Table 5
-- [ ] Examine the further effect of several alternate specifications of the imputation model
-- [ ] Ensure all code runs 'out of the box' for any 3rd party that clones our repo (and
-  independently gets the data)
-
 ## Directory Overview
 
 `MTO_for_DNorris.zip`:
